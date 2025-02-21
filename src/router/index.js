@@ -12,6 +12,11 @@ const routes = [
     name: 'About',
     // Lazy loading the about page
     component: () => import('../views/About.vue')
+  },
+  {
+    path: '/entrance-exam',
+    name: 'EntranceExam',
+    component: () => import('../views/entrance-exam/EntranceExam.vue')
   }
 ]
 
