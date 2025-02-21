@@ -1,0 +1,8 @@
+// Theme colors
+$primary-color: #0066cc; // Blue
+$background-color: #ffffff; // White
+
+// Additional theme variables
+$text-color: #333333;
+$secondary-color: lighten($primary-color, 40%);
+$border-color: lighten($primary-color, 30%);
