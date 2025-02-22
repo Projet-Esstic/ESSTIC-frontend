@@ -1,128 +1,160 @@
-<template><div class="space-y-6">
+<template>
+  <div class="space-y-6">
     <div class="flex justify-between items-center">
       <h2 class="text-2xl font-semibold">Candidate Management</h2>
-      <button 
-        @click="showGenerateModal = true"
-        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center gap-2"
-      >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        Generate Candidate List
-      </button>
-      
-      <!-- Search and Filter Section -->
-      <div class="flex space-x-4">
-        <div class="relative">
-          <input 
-            type="text" 
-            v-model="searchQuery"
-            placeholder="Search by name..."
-            class="pl-10 pr-4 py-2 border rounded-md"
-          />
-          <span class="absolute left-3 top-2.5 text-gray-400">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </span>
-        </div>
-
-        <select 
-          v-model="selectedField"
-          class="px-4 py-2 border rounded-md"
+      <div class="flex gap-4">
+        <button 
+          @click="registerNewCandidate"
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
         >
-          <option value="">All Fields</option>
-          <option 
-            v-for="field in fields" 
-            :key="field.id" 
-            :value="field.id"
-          >
-            {{ field.name }}
-          </option>
-        </select>
-
-        <select 
-          v-model="statusFilter"
-          class="px-4 py-2 border rounded-md"
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+          </svg>
+          Register New Candidate
+        </button>
+        <button 
+          @click="showGenerateModal = true"
+          class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center gap-2"
         >
-          <option value="">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="validated">Validated</option>
-          <option value="rejected">Rejected</option>
-        </select>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Generate Candidate List
+        </button>
       </div>
     </div>
 
-    <!-- Candidates Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Name
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Field of Study
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Registration Date
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="candidate in filteredCandidates" :key="candidate.id">
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ candidate.name }}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ getFieldName(candidate.fieldId) }}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span :class="[
-                'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                {
-                  'bg-yellow-100 text-yellow-800': candidate.status === 'pending',
-                  'bg-green-100 text-green-800': candidate.status === 'validated',
-                  'bg-red-100 text-red-800': candidate.status === 'rejected'
-                }
-              ]">
-                {{ candidate.status }}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ formatDate(candidate.registrationDate) }}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
-              <button 
-                @click="editCandidate(candidate)"
-                class="text-indigo-600 hover:text-indigo-900 mr-3"
-              >
-                Edit
-              </button>
-              <template v-if="candidate.status === 'pending'">
-                <button 
-                  @click="validateCandidate(candidate)"
-                  class="text-green-600 hover:text-green-900 mr-3"
-                >
-                  Validate
-                </button>
-                <button 
-                  @click="rejectCandidate(candidate)"
-                  class="text-red-600 hover:text-red-900"
-                >
-                  Reject
-                </button>
-              </template>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="flex gap-6">
+      <!-- Left Sidebar - Filters -->
+      <div class="w-1/4 bg-white rounded-lg shadow-lg p-4">
+        <h2 class="text-lg font-semibold mb-4">Filters</h2>
+        
+        <!-- Search Filter -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">Search by name...</label>
+          <input 
+            type="text" 
+            v-model="searchQuery"
+            placeholder="Search candidates..."
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          >
+        </div>
+
+        <!-- Status Filter -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">Status</label>
+          <select 
+            v-model="statusFilter"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          >
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="validated">Validated</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+
+        <!-- Field Filter -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">Field of Study</label>
+          <select 
+            v-model="selectedField"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          >
+            <option value="">All Fields</option>
+            <option 
+              v-for="field in fields" 
+              :key="field.id" 
+              :value="field.id"
+            >
+              {{ field.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Clear Filters Button -->
+        <button 
+          @click="clearFilters"
+          class="w-full px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+        >
+          Clear Filters
+        </button>
+      </div>
+
+      <!-- Main Content -->
+      <div class="flex-1">
+        <!-- Candidates Table -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Name
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Field of Study
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Registration Date
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-for="candidate in filteredCandidates" :key="candidate.id">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ candidate.name }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ getFieldName(candidate.fieldId) }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span :class="[
+                    'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
+                    {
+                      'bg-yellow-100 text-yellow-800': candidate.status === 'pending',
+                      'bg-green-100 text-green-800': candidate.status === 'validated',
+                      'bg-red-100 text-red-800': candidate.status === 'rejected'
+                    }
+                  ]">
+                    {{ candidate.status }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ formatDate(candidate.registrationDate) }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                  <button 
+                    @click="editCandidate(candidate)"
+                    class="text-indigo-600 hover:text-indigo-900 mr-3"
+                  >
+                    Edit
+                  </button>
+                  <template v-if="candidate.status === 'pending'">
+                    <button 
+                      @click="validateCandidate(candidate)"
+                      class="text-green-600 hover:text-green-900 mr-3"
+                    >
+                      Validate
+                    </button>
+                    <button 
+                      @click="rejectCandidate(candidate)"
+                      class="text-red-600 hover:text-red-900"
+                    >
+                      Reject
+                    </button>
+                  </template>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- Edit Candidate Modal -->
@@ -294,6 +326,7 @@
 <script>
 import { ref, computed } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
@@ -306,7 +339,8 @@ export default {
     }
   },
   setup(props) {
-    const store = useStore();
+    const store = useStore()
+    const router = useRouter();
     const searchQuery = ref('');
     const selectedField = ref('');
     const statusFilter = ref('');
@@ -518,7 +552,6 @@ export default {
       doc.save('entrance-exam-candidates.pdf');
     };
 
-
     const editCandidate = (candidate) => {
       editingCandidate.value = { ...candidate };
       showEditModal.value = true;
@@ -543,6 +576,16 @@ export default {
       });
     };
 
+    const registerNewCandidate = () => {
+      router.push('/candidate-registration?source=admin');
+    };
+
+    const clearFilters = () => {
+      searchQuery.value = '';
+      selectedField.value = '';
+      statusFilter.value = '';
+    };
+
     return {
       searchQuery,
       selectedField,
@@ -559,7 +602,9 @@ export default {
       saveCandidate,
       validateCandidate,
       rejectCandidate,
-      generateValidatedPDF
+      generateValidatedPDF,
+      registerNewCandidate,
+      clearFilters
     };
   }
 };

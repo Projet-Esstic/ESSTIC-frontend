@@ -23,6 +23,9 @@
 
     <!-- Tab Panels -->
     <div class="mt-6">
+      <EntranceExamManagement 
+        v-if="currentTab === 'exams'" 
+      />
       <CourseManagement 
         v-if="currentTab === 'courses'" 
         :fields="fields"
@@ -35,6 +38,14 @@
         v-if="currentTab === 'candidates'"
         :fields="fields"
       />
+      <MarksManagement
+        v-if="currentTab === 'marks'"
+        :fields="fields"
+      />
+      <Deliberation
+        v-if="currentTab === 'deliberation'"
+        :fields="fields"
+      />
     </div>
   </div>
 </template>
@@ -44,22 +55,31 @@ import { ref } from 'vue';
 import CourseManagement from './CourseManagement.vue';
 import FieldsOfStudy from './FieldsOfStudy.vue';
 import CandidateManagement from './CandidateManagement.vue';
+import EntranceExamManagement from './EntranceExamManagement.vue';
+import MarksManagement from './MarksManagement.vue';
+import Deliberation from './Deliberation.vue';
 
 export default {
   name: 'EntranceExam',
   components: {
     CourseManagement,
     FieldsOfStudy,
-    CandidateManagement
+    CandidateManagement,
+    EntranceExamManagement,
+    MarksManagement,
+    Deliberation
   },
   setup() {
     const tabs = [
+      { id: 'exams', name: 'Create Exam' },
       { id: 'courses', name: 'Course Management' },
       { id: 'fields', name: 'Fields of Study' },
-      { id: 'candidates', name: 'Candidate Management' }
+      { id: 'candidates', name: 'Candidate Management' },
+      { id: 'marks', name: 'Marks Management' },
+      { id: 'deliberation', name: 'Deliberation' }
     ];
 
-    const currentTab = ref('courses');
+    const currentTab = ref('exams');
     
     // Default fields of study
     const fields = ref([
@@ -75,4 +95,5 @@ export default {
       fields
     };
   }
-};</script>
+};
+</script>
