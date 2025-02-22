@@ -1,11 +1,19 @@
 import { createStore } from 'vuex'
 import { Theme } from '../utils/Theme'
+import entranceExam from './modules/entrance-exam'
+import candidates from './modules/candidates'
 import candidateRegistration from './modules/candidate-registration'
 
 export default createStore({
   state: {
     theme: localStorage.getItem('theme') || Theme.THEMES.LIGHT,
-    themeClasses: Theme.getThemeClasses(false)
+    themeClasses: Theme.getThemeClasses(false),
+    candidateRegistration: {
+      currentStep: 1,
+      totalSteps: 6,
+      completedSteps: [],
+      formData: {}
+    }
   },
   getters: {
     isDarkMode: state => state.theme === Theme.THEMES.DARK,
@@ -41,6 +49,36 @@ export default createStore({
       
       // Update theme classes
       state.themeClasses = Theme.getThemeClasses(theme === Theme.THEMES.DARK)
+    },
+    setCurrentStep(state, step) {
+      console.log('Setting current step:', step)
+      state.candidateRegistration.currentStep = step
+    },
+    completeStep(state, stepNumber) {
+      console.log('Completing step:', stepNumber)
+      // Initialize if undefined
+      if (!state.candidateRegistration.completedSteps) {
+        state.candidateRegistration.completedSteps = []
+      }
+      
+      // Add step to completed steps if not already there
+      if (!state.candidateRegistration.completedSteps.includes(stepNumber)) {
+        state.candidateRegistration.completedSteps.push(stepNumber)
+        state.candidateRegistration.completedSteps.sort((a, b) => a - b)
+        console.log('Updated completed steps:', state.candidateRegistration.completedSteps)
+      }
+    },
+    uncompleteStep(state, stepNumber) {
+      console.log('Uncompleting step:', stepNumber)
+      if (!state.candidateRegistration.completedSteps) {
+        state.candidateRegistration.completedSteps = []
+        return
+      }
+      state.candidateRegistration.completedSteps = state.candidateRegistration.completedSteps.filter(step => step !== stepNumber)
+      console.log('Updated completed steps:', state.candidateRegistration.completedSteps)
+    },
+    resetStepCompletion(state) {
+      state.candidateRegistration.completedSteps = []
     }
   },
   actions: {
@@ -48,9 +86,10 @@ export default createStore({
       // Set initial theme on app load
       commit('setTheme', state.theme)
     }
-  }
-  ,
-  modules: {
-    candidateRegistration
   },
+  modules: {
+    entranceExam,
+    candidates,
+    candidateRegistration
+  }
 })

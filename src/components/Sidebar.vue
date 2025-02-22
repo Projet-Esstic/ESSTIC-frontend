@@ -70,8 +70,7 @@ export default {
     const currentRoute = computed(() => route);
     
     const menuItems = [
-      { path: '/entrance-exam', name: 'EntranceExam', meta: { title: 'Examens', icon: 'school' } },
-      { path: '/candidate-registration', name: 'CandidateRegistration', meta: { title: 'Candidats', icon: 'person_add' } }
+      { path: '/entrance-exam', name: 'EntranceExam', meta: { title: 'Entrance Exam', icon: 'school' } }
     ];
 
     const toggleTheme = () => {

@@ -83,12 +83,7 @@
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { Theme } from '@/utils/Theme'
-import SwitchField from '@/components/SwitchField.vue'
-
 export default {
-  components: {
-    SwitchField
-  },
   setup() {
     const store = useStore()
     const formSteps = computed(() => store.state.candidateRegistration.formSteps)
