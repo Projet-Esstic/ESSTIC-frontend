@@ -11,7 +11,19 @@
           <button class="lg:hidden mr-4" @click="toggleMobileMenu">
             <span class="material-icons">menu</span>
           </button>
-          <h2 class="text-xl font-semibold text-white">{{ currentPageTitle }}</h2>
+          <router-link 
+            v-for="route in menuItems"
+            :key="route.path"
+            :to="route.path"
+            :class="[
+              'px-4 py-2 rounded transition-colors',
+              route.name === currentRoute.name
+                ? `bg-primary-${isDark ? 'dark' : 'light'} text-white`
+                : 'text-gray-300 hover:text-white'
+            ]"
+          >
+            {{ route.meta.title }}
+          </router-link>
         </div>
       </nav>
       
@@ -38,36 +50,29 @@ export default {
     const store = useStore();
     const route = useRoute();
     
-    const isDarkMode = computed(() => store.getters.isDarkMode);
+    const isDark = computed(() => store.getters.isDarkMode);
     const themeClasses = computed(() => store.getters.getThemeClasses);
     const getTextStyle = (style) => store.getters.getTextStyle(style);
     const getSpacing = (size) => store.getters.getSpacing(size);
+    const currentRoute = computed(() => route);
     
-    const currentPageTitle = computed(() => {
-      switch(route.name) {
-        case 'Home':
-          return 'Dashboard';
-        case 'EntranceExam':
-          return 'Course Management';
-        case 'FieldsOfStudy':
-          return 'Fields of Study';
-        case 'CoefficientsMatrix':
-          return 'Coefficients Matrix';
-        default:
-          return route.name || 'Dashboard';
-      }
-    });
+    const menuItems = [
+      { path: '/', name: 'Home', meta: { title: 'Dashboard' } },
+      { path: '/entrance-exam', name: 'EntranceExam', meta: { title: 'Examens' } },
+      { path: '/candidate-registration', name: 'CandidateRegistration', meta: { title: 'Candidats' } }
+    ];
 
     const toggleMobileMenu = () => {
       // You can implement mobile menu toggle logic here
     };
     
     return {
-      isDarkMode,
+      isDark,
       themeClasses,
       getTextStyle,
       getSpacing,
-      currentPageTitle,
+      menuItems,
+      currentRoute,
       toggleMobileMenu
     };
   }

@@ -21,12 +21,14 @@
         <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase">Modules</div>
         <div class="space-y-1 px-2">
           <router-link 
-            to="/entrance-exam"
+            v-for="route in menuItems"
+            :key="route.path"
+            :to="route.path"
             class="flex items-center py-2 px-4 rounded-lg transition-colors text-sm"
-            :class="[isEntranceExamRoute ? 'bg-blue-600' : 'hover:bg-gray-700']"
+            :class="[route.name === currentRoute.name ? 'bg-blue-600' : 'hover:bg-gray-700']"
           >
-            <span class="material-icons mr-3 text-lg">school</span>
-            <span>Entrance Exam</span>
+            <span class="material-icons mr-3 text-lg">{{ route.meta.icon || 'school' }}</span>
+            <span>{{ route.meta.title }}</span>
           </router-link>
         </div>
       </div>
@@ -37,8 +39,8 @@
           @click="toggleTheme" 
           class="flex items-center py-2 px-4 rounded-lg hover:bg-gray-700 w-full transition-colors"
         >
-          <span class="material-icons mr-3">{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</span>
-          <span>{{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}</span>
+          <span class="material-icons mr-3">{{ isDark ? 'light_mode' : 'dark_mode' }}</span>
+          <span>{{ isDark ? 'Light Mode' : 'Dark Mode' }}</span>
         </button>
       </div>
     </nav>
@@ -64,18 +66,24 @@ export default {
     const route = useRoute();
     const isMobileMenuOpen = ref(false);
 
-    const isDarkMode = computed(() => store.getters.isDarkMode);
-    const isEntranceExamRoute = computed(() => route.path.startsWith('/entrance-exam'));
+    const isDark = computed(() => store.getters.isDarkMode);
+    const currentRoute = computed(() => route);
+    
+    const menuItems = [
+      { path: '/entrance-exam', name: 'EntranceExam', meta: { title: 'Examens', icon: 'school' } },
+      { path: '/candidate-registration', name: 'CandidateRegistration', meta: { title: 'Candidats', icon: 'person_add' } }
+    ];
 
     const toggleTheme = () => {
       store.commit('toggleTheme');
     };
 
     return {
-      isDarkMode,
+      isDark,
       toggleTheme,
       isMobileMenuOpen,
-      isEntranceExamRoute
+      menuItems,
+      currentRoute
     };
   }
 };

@@ -17,9 +17,16 @@ const routes = [
     path: '/entrance-exam',
     name: 'EntranceExam',
     component: () => import('../views/entrance-exam/EntranceExam.vue')
+  },
+  {
+    path: '/candidate-registration',
+    name: 'CandidateRegistration',
+    component: () => import('../views/registration/CandidateRegistration.vue'),
+    meta: {
+      title: 'Enregistrement Candidat'
+    }
   }
 ]
-
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
