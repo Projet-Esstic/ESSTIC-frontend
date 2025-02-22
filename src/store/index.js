@@ -1,10 +1,12 @@
 import { createStore } from 'vuex'
 import { Theme } from '../utils/Theme'
 import entranceExam from './modules/entrance-exam'
+import candidates from './modules/candidates'
 
 export default createStore({
   modules: {
-    entranceExam
+    entranceExam,
+    candidates
   },
   state: {
     theme: localStorage.getItem('theme') || Theme.THEMES.LIGHT,

@@ -31,6 +31,10 @@
         v-if="currentTab === 'fields'" 
         v-model:fields="fields"
       />
+      <CandidateManagement
+        v-if="currentTab === 'candidates'"
+        :fields="fields"
+      />
     </div>
   </div>
 </template>
@@ -39,17 +43,20 @@
 import { ref } from 'vue';
 import CourseManagement from './CourseManagement.vue';
 import FieldsOfStudy from './FieldsOfStudy.vue';
+import CandidateManagement from './CandidateManagement.vue';
 
 export default {
   name: 'EntranceExam',
   components: {
     CourseManagement,
-    FieldsOfStudy
+    FieldsOfStudy,
+    CandidateManagement
   },
   setup() {
     const tabs = [
       { id: 'courses', name: 'Course Management' },
-      { id: 'fields', name: 'Fields of Study' }
+      { id: 'fields', name: 'Fields of Study' },
+      { id: 'candidates', name: 'Candidate Management' }
     ];
 
     const currentTab = ref('courses');
