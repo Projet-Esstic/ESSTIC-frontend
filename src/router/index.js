@@ -25,6 +25,14 @@ const routes = [
     meta: {
       title: 'Enregistrement Candidat'
     }
+  },
+  {
+    path: '/all-routes',
+    name: 'AllRoutes',
+    component: () => import('../views/AllRoute.vue'),
+    meta: {
+      title: 'Navigation'
+    }
   }
 ]
 const router = createRouter({
