@@ -3,6 +3,7 @@ import { Theme } from '../utils/Theme'
 import entranceExam from './modules/entrance-exam'
 import candidates from './modules/candidates'
 import candidateRegistration from './modules/candidate-registration'
+import courses from './modules/courses'
 
 export default createStore({
   state: {
@@ -90,6 +91,7 @@ export default createStore({
   modules: {
     entranceExam,
     candidates,
-    candidateRegistration
+    candidateRegistration,
+    courses
   }
 })

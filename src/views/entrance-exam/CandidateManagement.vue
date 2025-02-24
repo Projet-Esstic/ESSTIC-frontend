@@ -324,7 +324,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import jsPDF from 'jspdf';
@@ -350,7 +350,12 @@ export default {
     const selectedReportField = ref('');
 
     // Get candidates from store
-    const candidates = computed(() => store.getters['candidates/getCandidates']);
+    const candidates = computed(() => store.getters['candidates/getAllCandidates']);
+
+    // Fetch candidates when component mounts
+    onMounted(async () => {
+      await store.dispatch('candidates/fetchCandidates');
+    });
 
     const getStatistics = computed(() => {
       const filteredCands = selectedReportField.value
