@@ -7,8 +7,31 @@
       </div>
     </div>
 
+    <!-- Loading State -->
+    <div v-if="loading" class="flex justify-center items-center p-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      <span class="ml-2 text-gray-600 dark:text-gray-400">Loading...</span>
+    </div>
+
+    <!-- Error State -->
+    <div v-else-if="error" class="bg-red-50 dark:bg-red-900 rounded-lg p-4 mb-4">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Error loading data</h3>
+          <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+            {{ error }}
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Filters -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+    <div v-else class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Field of Study</label>
@@ -28,8 +51,9 @@
             v-model="selectedSubject"
             class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           >
+            <option value="">Select a subject</option>
             <option v-for="subject in subjects" :key="subject.id" :value="subject">
-              {{ subject.name }} (Coefficient: {{ subject.coefficient }})
+              {{ subject.name }} ({{ getCoefficientsDisplay(subject) }})
             </option>
           </select>
         </div>
@@ -52,9 +76,11 @@
           <h3 class="text-lg font-medium text-blue-900 dark:text-blue-100">
             {{ selectedSubject.name }}
           </h3>
-          <p class="text-blue-700 dark:text-blue-300">
-            Coefficient: {{ selectedSubject.coefficient }}
-          </p>
+          <div class="mt-2 space-y-1">
+            <p class="text-sm text-blue-700 dark:text-blue-300" v-for="field in fields" :key="field.id">
+              {{ field.name }}: Coefficient {{ selectedSubject.coefficients[field.id] || 0 }}
+            </p>
+          </div>
         </div>
         <div class="text-right space-y-2">
           <p class="text-sm text-blue-700 dark:text-blue-300">
@@ -127,7 +153,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
@@ -147,92 +173,137 @@ export default {
     const selectedSubject = ref(null)
     const unsavedMarks = ref({}) // Store unsaved changes
 
-    // Load marks data
-    store.dispatch('entranceExam/fetchMarks')
+    // Load initial data
+    onMounted(async () => {
+      await Promise.all([
+        store.dispatch('courses/fetchCourses'),
+        store.dispatch('entranceExam/fetchMarks')
+      ])
+    })
 
     // Get data from store
-    const subjects = computed(() => store.getters['entranceExam/getSubjects'])
+    const subjects = computed(() => store.getters['courses/getAllCourses'])
     const allCandidates = computed(() => store.getters['entranceExam/getCandidates'])
+    const loading = computed(() => 
+      store.getters['courses/isLoading'] || 
+      store.getters['entranceExam/isLoading']
+    )
+    const error = computed(() => 
+      store.getters['courses/getError'] || 
+      store.getters['entranceExam/getError']
+    )
 
     const hasUnsavedChanges = computed(() => {
       return Object.keys(unsavedMarks.value).length > 0
     })
 
     const filteredCandidates = computed(() => {
-      return allCandidates.value.filter(candidate => {
-        const matchesField = !selectedField.value || candidate.fieldId === selectedField.value
-        const matchesSearch = !searchQuery.value || 
-          candidate.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-          candidate.registrationNumber.toLowerCase().includes(searchQuery.value.toLowerCase())
-        return matchesField && matchesSearch
-      })
-    })
+      let filtered = allCandidates.value
 
-    const classAverage = computed(() => {
-      if (!selectedSubject.value || filteredCandidates.value.length === 0) return 0
-      return store.getters['entranceExam/getClassAverageBySubject'](
-        selectedSubject.value.id,
-        filteredCandidates.value
-      )
-    })
+      // Filter by field if selected
+      if (selectedField.value) {
+        filtered = filtered.filter(c => c.fieldId === selectedField.value)
+      }
 
-    const weightedAverage = computed(() => {
-      if (!selectedSubject.value || filteredCandidates.value.length === 0) return 0
-      return store.getters['entranceExam/getWeightedAverageBySubject'](
-        selectedSubject.value.id,
-        filteredCandidates.value
-      )
-    })
+      // Filter by search query
+      if (searchQuery.value.trim()) {
+        const query = searchQuery.value.toLowerCase()
+        filtered = filtered.filter(c => 
+          c.name.toLowerCase().includes(query) ||
+          c.registrationNumber.toLowerCase().includes(query)
+        )
+      }
 
-    const getFieldName = (fieldId) => {
-      const field = props.fields.find(f => f.id === fieldId)
-      return field ? field.name : ''
-    }
+      return filtered
+    })
 
     const getCandidateMark = (candidate) => {
-      // Return unsaved mark if it exists, otherwise get from store
-      if (unsavedMarks.value[candidate.id] !== undefined) {
-        return unsavedMarks.value[candidate.id]
+      if (!selectedSubject.value) return 0
+      
+      // Check unsaved marks first
+      const unsavedKey = `${candidate.id}-${selectedSubject.value.id}`
+      if (unsavedKey in unsavedMarks.value) {
+        return unsavedMarks.value[unsavedKey]
       }
-      return store.getters['entranceExam/getMarksByCandidateAndSubject'](
-        candidate.id,
-        selectedSubject.value?.id
-      )
+
+      // Then check saved marks
+      const mark = store.getters['entranceExam/getCandidateMarkForSubject']({
+        candidateId: candidate.id,
+        subjectId: selectedSubject.value.id
+      })
+      return mark || 0
     }
 
     const calculateWeightedMark = (candidate) => {
       if (!selectedSubject.value) return 0
       const mark = getCandidateMark(candidate)
-      return mark * selectedSubject.value.coefficient
+      const coefficient = selectedSubject.value.coefficients[candidate.fieldId] || 0
+      return mark * coefficient
     }
+
+    const classAverage = computed(() => {
+      if (!selectedSubject.value || !filteredCandidates.value.length) return 0
+      const totalMarks = filteredCandidates.value.reduce((sum, candidate) => {
+        return sum + getCandidateMark(candidate)
+      }, 0)
+      return totalMarks / filteredCandidates.value.length
+    })
+
+    const weightedAverage = computed(() => {
+      if (!selectedSubject.value || !filteredCandidates.value.length) return 0
+      const totalWeightedMarks = filteredCandidates.value.reduce((sum, candidate) => {
+        return sum + calculateWeightedMark(candidate)
+      }, 0)
+      return totalWeightedMarks / filteredCandidates.value.length
+    })
 
     const updateMarkLocally = (candidate, mark) => {
       if (!selectedSubject.value) return
       
-      // Ensure mark is between 0 and 20
-      mark = Math.min(Math.max(mark, 0), 20)
-      
-      // Store the mark locally
-      unsavedMarks.value[candidate.id] = mark
+      // Validate mark
+      if (isNaN(mark) || mark < 0) mark = 0
+      if (mark > 20) mark = 20
+
+      const key = `${candidate.id}-${selectedSubject.value.id}`
+      unsavedMarks.value[key] = mark
     }
 
     const saveAllMarks = async () => {
-      if (!selectedSubject.value || !hasUnsavedChanges.value) return
+      if (!selectedSubject.value) return
 
       try {
         // Save all unsaved marks
-        for (const [candidateId, mark] of Object.entries(unsavedMarks.value)) {
-          await store.dispatch('entranceExam/saveMarks', {
-            candidateId: parseInt(candidateId),
-            subjectId: selectedSubject.value.id,
+        for (const [key, mark] of Object.entries(unsavedMarks.value)) {
+          const [candidateId, subjectId] = key.split('-').map(Number)
+          await store.dispatch('entranceExam/updateMark', {
+            candidateId,
+            subjectId,
             mark
           })
         }
-        // Clear unsaved marks after successful save
+        
+        // Clear unsaved marks
         unsavedMarks.value = {}
       } catch (error) {
-        console.error('Error saving marks:', error)
+        console.error('Failed to save marks:', error)
       }
+    }
+
+    const getFieldName = (fieldId) => {
+      const field = props.fields.find(f => f.id === fieldId)
+      return field ? field.name : 'Unknown'
+    }
+
+    const getCoefficientsDisplay = (subject) => {
+      if (!subject.coefficients) return 'No coefficients'
+      const selectedFieldCoeff = selectedField.value ? subject.coefficients[selectedField.value] : null
+      if (selectedFieldCoeff !== null) {
+        return `Coefficient: ${selectedFieldCoeff}`
+      }
+      const coeffs = Object.values(subject.coefficients)
+      const min = Math.min(...coeffs)
+      const max = Math.max(...coeffs)
+      return min === max ? `Coefficient: ${min}` : `Coefficients: ${min}-${max}`
     }
 
     return {
@@ -244,11 +315,14 @@ export default {
       classAverage,
       weightedAverage,
       hasUnsavedChanges,
+      loading,
+      error,
       getFieldName,
       getCandidateMark,
       calculateWeightedMark,
       updateMarkLocally,
-      saveAllMarks
+      saveAllMarks,
+      getCoefficientsDisplay
     }
   }
 }

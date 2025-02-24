@@ -10,8 +10,31 @@
       </button>
     </div>
 
+    <!-- Loading State -->
+    <div v-if="loading" class="flex justify-center items-center p-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      <span class="ml-2 text-gray-600 dark:text-gray-400">Loading courses...</span>
+    </div>
+
+    <!-- Error State -->
+    <div v-else-if="error" class="bg-red-50 dark:bg-red-900 rounded-lg p-4 mb-4">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Error loading courses</h3>
+          <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+            {{ error }}
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Courses List -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div v-else class="bg-white rounded-lg shadow overflow-hidden">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
@@ -130,18 +153,19 @@
           </div>
           <div class="space-y-4">
             <label class="block text-lg font-medium text-gray-700">Fields of Study Coefficients</label>
-            <div v-for="field in fields" :key="field.id" class="bg-gray-50 p-4 rounded-md">
-              <div class="flex items-center justify-between">
-                <label class="text-sm font-medium text-gray-700">{{ field.name }}</label>
-                <input 
-                  type="number" 
-                  v-model.number="courseForm.coefficients[field.id]"
-                  min="0"
-                  max="5"
-                  class="w-20 px-2 py-1 border rounded-md"
-                  required
-                />
-              </div>
+            <div v-for="field in fields" :key="field.id" class="flex items-center space-x-4">
+              <label class="text-sm font-medium text-gray-700 dark:text-gray-300 flex-grow">
+                {{ field.name }} Coefficient
+              </label>
+              <input 
+                type="number" 
+                v-model.number="courseForm.coefficients[field.id]"
+                min="0"
+                max="10"
+                step="0.5"
+                class="w-24 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                @input="validateCoefficient($event, field.id)"
+              >
             </div>
           </div>
           <div class="flex justify-end space-x-3 mt-6">
@@ -166,7 +190,7 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useStore } from 'vuex';
 
 export default {
@@ -179,7 +203,6 @@ export default {
   },
   setup(props) {
     const store = useStore();
-    const courses = ref([]);
     const showAddModal = ref(false);
     const editingCourse = ref(null);
     const courseForm = ref({
@@ -189,6 +212,11 @@ export default {
       totalMarks: 20,
       coefficients: {}
     });
+
+    // Get courses from store
+    const courses = computed(() => store.getters['courses/getAllCourses']);
+    const loading = computed(() => store.getters['courses/isLoading']);
+    const error = computed(() => store.getters['courses/getError']);
 
     // Initialize coefficients for all fields
     props.fields.forEach(field => {
@@ -222,45 +250,67 @@ export default {
       showAddModal.value = true;
     };
 
-    const saveCourse = () => {
-      const field = props.fields.find(f => f.id === courseForm.value.fieldId);
-      const course = {
-        id: editingCourse.value?.id || Date.now(),
-        ...courseForm.value,
-        field
-      };
+    const saveCourse = async () => {
+      try {
+        const courseData = {
+          ...courseForm.value,
+          fields: props.fields.map(field => ({
+            id: field.id,
+            coefficient: courseForm.value.coefficients[field.id]
+          }))
+        };
 
-      if (editingCourse.value) {
-        const index = courses.value.findIndex(c => c.id === course.id);
-        courses.value[index] = course;
-      } else {
-        courses.value.push(course);
+        if (editingCourse.value) {
+          await store.dispatch('courses/updateCourse', {
+            id: editingCourse.value.id,
+            courseData
+          });
+        } else {
+          await store.dispatch('courses/createCourse', courseData);
+        }
+
+        showAddModal.value = false;
+        resetForm();
+      } catch (err) {
+        console.error('Error saving course:', err);
       }
-
-      store.commit('entranceExam/updateCourses', courses.value);
-      showAddModal.value = false;
-      resetForm();
     };
 
-    const deleteCourse = (course) => {
+    const deleteCourse = async (course) => {
       if (confirm('Are you sure you want to delete this course?')) {
-        courses.value = courses.value.filter(c => c.id !== course.id);
-        store.commit('entranceExam/updateCourses', courses.value);
+        try {
+          await store.dispatch('courses/deleteCourse', course.id);
+        } catch (err) {
+          console.error('Error deleting course:', err);
+        }
       }
     };
 
-    // Load initial courses from store
-    const storeCourses = store.state?.entranceExam?.courses || [];
-    courses.value = [...storeCourses];
+    const validateCoefficient = (event, fieldId) => {
+      const value = parseFloat(event.target.value)
+      if (isNaN(value) || value < 0) {
+        courseForm.value.coefficients[fieldId] = 0
+      } else if (value > 10) {
+        courseForm.value.coefficients[fieldId] = 10
+      }
+    }
+
+    // Load initial courses
+    onMounted(async () => {
+      await store.dispatch('courses/fetchCourses');
+    });
 
     return {
       courses,
       showAddModal,
       editingCourse,
       courseForm,
+      loading,
+      error,
       editCourse,
       saveCourse,
-      deleteCourse
+      deleteCourse,
+      validateCoefficient
     };
   }
 };</script>
