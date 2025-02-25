@@ -1,9 +1,25 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
-
+import LandingPage from '../views/LandingPage.vue'
+import Connexion from '../views/Connexion.vue'
+import Apropos from '../views/About.vue'
 const routes = [
   {
     path: '/',
+    component: () => import('../layouts/HomePagesLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'LandingPage',
+        component: LandingPage,
+        alias: '/'
+      },
+      { name: 'Connexion', path: '/login', component: Connexion },
+      { name: 'A propos', path: '/a-propos',component: Apropos},
+      // { name: 'Contact', path: '/contact' }
+    ]
+  },  {
+    path: '/dashboard',
     component: () => import('../layouts/DefaultLayout.vue'),
     children: [
       {
@@ -15,18 +31,14 @@ const routes = [
         path: 'entrance-exam',
         name: 'EntranceExam',
         component: () => import('../views/entrance-exam/EntranceExam.vue')
-      },
-      {
-        path: 'all-routes',
-        name: 'AllRoutes',
-        component: () => import('../views/AllRoute.vue'),
-        meta: {
-          title: 'Navigation'
-        }
       }
     ]
   },
   // Public routes
+  {
+    path: '/all-routes',
+    component: () => import('../views/AllRoute.vue'),
+    },
   {
     path: '/candidate-registration',
     component: () => import('../layouts/PublicLayout.vue'),
@@ -55,3 +67,5 @@ const router = createRouter({
 })
 
 export default router
+
+
