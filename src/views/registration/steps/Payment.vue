@@ -158,96 +158,96 @@
 </template>
 
 <script>
-import { ref } from 'vue'
-import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
-import { Theme } from '@/utils/Theme'
+import { ref } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { Theme } from '@/utils/Theme';
 
 export default {
   setup() {
-    const store = useStore()
-    const router = useRouter()
-    const loading = ref(false)
-    const errors = ref({})
+    const store = useStore();
+    const router = useRouter();
+    const loading = ref(false);
+    const errors = ref({});
     const form = ref({
       paymentMethod: '',
       receiptFile: null,
       transactionId: '',
       amount: '',
       paymentDate: '',
-      phoneNumber: ''
-    })
+      phoneNumber: '',
+    });
 
     const handleSubmit = async () => {
-      if (validateForm()) {
-        loading.value = true
-        try {
-          // Update store with form data
-          await store.dispatch('candidateRegistration/updateStepData', {
-            step: 'payment',
-            data: {
-              ...form.value,
-              documents: {
-                receipt: form.value.receiptFile
-              }
-            }
-          })
-
-          // Submit the complete application
-          await store.dispatch('candidateRegistration/submitApplication')
-          
-          // Move to success page or dashboard
-          router.push('/dashboard')
-        } catch (error) {
-          console.error('Error submitting payment:', error)
-          errors.value = { submit: 'Une erreur est survenue lors de la soumission du paiement' }
-        } finally {
-          loading.value = false
-        }
+      if (!validateForm()) {
+        return; // Stop if validation fails
       }
-    }
+
+      loading.value = true;
+      try {
+        // Step 1: Update store with payment data
+        await store.dispatch('candidateRegistration/updateStepData', {
+          step: 'payment',
+          data: {
+            ...form.value,
+            documents: {
+              receipt: form.value.receiptFile,
+            },
+          },
+        });
+
+        // Step 2: Submit the application
+        await store.dispatch('candidateRegistration/submitApplication');
+
+        // Step 3: Navigate to dashboard on success
+        router.push('/dashboard');
+      } catch (error) {
+        console.error('Submission error:', error);
+        errors.value.submit = 'Une erreur est survenue lors de la soumission. Veuillez réessayer.';
+      } finally {
+        loading.value = false; // Reset loading state
+      }
+    };
 
     const validateForm = () => {
-      const newErrors = {}
+      const newErrors = {};
 
-      // Required fields validation
       if (!form.value.paymentMethod) {
-        newErrors.paymentMethod = 'Le mode de paiement est requis'
+        newErrors.paymentMethod = 'Le mode de paiement est requis';
       }
       if (!form.value.amount) {
-        newErrors.amount = 'Le montant est requis'
+        newErrors.amount = 'Le montant est requis';
       }
       if (!form.value.paymentDate) {
-        newErrors.paymentDate = 'La date de paiement est requise'
+        newErrors.paymentDate = 'La date de paiement est requise';
       }
       if (!form.value.receiptFile) {
-        newErrors.receiptFile = 'Le reçu de paiement est requis'
+        newErrors.receiptFile = 'Le reçu de paiement est requis';
       }
 
-      // Mobile money specific validation
       if (form.value.paymentMethod === 'mobile') {
         if (!form.value.phoneNumber) {
-          newErrors.phoneNumber = 'Le numéro de téléphone est requis pour le paiement mobile'
+          newErrors.phoneNumber = 'Le numéro de téléphone est requis pour le paiement mobile';
         }
         if (!form.value.transactionId) {
-          newErrors.transactionId = 'Le numéro de transaction est requis'
+          newErrors.transactionId = 'Le numéro de transaction est requis';
         }
       }
 
-      errors.value = newErrors
-      return Object.keys(newErrors).length === 0
-    }
+      errors.value = newErrors;
+      return Object.keys(newErrors).length === 0;
+    };
 
     const previousStep = () => {
-      store.dispatch('candidateRegistration/previousStep')
-    }
+      store.dispatch('candidateRegistration/previousStep');
+    };
 
     const handleFileUpload = (event) => {
-      const file = event.target.files[0]
+      const file = event.target.files[0];
       if (file) {
-        form.value.receiptFile = file
+        form.value.receiptFile = file;
       }
-    }
+    };
 
     return {
       Theme,
@@ -256,8 +256,8 @@ export default {
       loading,
       handleSubmit,
       previousStep,
-      handleFileUpload
-    }
-  }
-}
+      handleFileUpload,
+    };
+  },
+};
 </script>
