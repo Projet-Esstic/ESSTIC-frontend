@@ -119,6 +119,7 @@ import Professional from './steps/Professional.vue'
 import ExtraActivities from './steps/ExtraActivities.vue'
 import DiversInfo from './steps/DiversInfo.vue'
 import Review from './steps/Review.vue'
+import Payment from './steps/Payment.vue'
 
 export default {
   components: {
@@ -127,7 +128,8 @@ export default {
     Professional,
     ExtraActivities,
     DiversInfo,
-    Review
+    Review,
+    Payment
   },
   setup() {
     const store = useStore()
@@ -176,7 +178,8 @@ export default {
       { label: '3', component: 'Professional' },
       { label: '4', component: 'ExtraActivities' },
       { label: '5', component: 'DiversInfo' },
-      { label: '6', component: 'Review' }
+      { label: '6', component: 'Review' },
+      { label: '7', component: 'Payment' }
     ]
 
     const currentStepComponent = computed(() => {

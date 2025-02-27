@@ -1,20 +1,63 @@
-import { candidateService, fieldService, fileService } from '@/api/services'
+import { candidateService, fieldService } from '@/api/services'
 
 export default {
   namespaced: true,
   state: {
     formSteps: {
       civilStatus: {
-        profileImage: null  // Store the profile image URL
+        profilePicture: null,
+        selectedEntranceExam: null,
+        email: '',
+        firstName: '',
+        lastName: '',
+        dateOfBirth: '',
+        lieuDeNaissance: '',
+        gender: '',
+        situationDeFamille: '',
+        phoneNumber: '',
+        address: {
+          street: '',
+          city: '',
+          state: '',
+          country: 'Cameroon'
+        },
+        examCenter: '',
+        boitePostale: '',
+        emergencyContact: {
+          name: '',
+          relationship: '',
+          phone: ''
+        },
+        fieldOfStudy: '',
+        documents: {
+          transcript: null,
+          diploma: null,
+          cv: null,
+          other: null
+        },
+        referencesFamilales: {
+          nom_pere: '',
+          nom_mere: ''
+        },
+        addressParents: ''
       },
       education: {},
       professional: {},
       extraActivities: {},
       diversInfo: {},
-      review: {}
+      review: {},
+      payment: {
+        paymentMethod: '',
+        amount: '',
+        paymentDate: '',
+        transactionId: '',
+        phoneNumber: '',
+        receiptFile: null,
+        status: 'pending'
+      }
     },
     currentStep: 1,
-    totalSteps: 6,
+    totalSteps: 7,
     candidates: [],
     fields: [],
     selectedCandidate: null,
@@ -34,7 +77,7 @@ export default {
     getLoading: state => state.loading,
     getError: state => state.error,
     getUploadProgress: state => state.uploadProgress,
-    getProfileImage: state => state.formSteps.civilStatus.profileImage,
+    getProfileImage: state => state.formSteps.civilStatus.profilePicture,
     isStepComplete: state => step => {
       const stepData = state.formSteps[step]
       return stepData && Object.keys(stepData).length > 0
@@ -42,6 +85,9 @@ export default {
   },
 
   mutations: {
+    UPDATE_EXAM_ID(state, examId) {
+      state.formSteps.civilStatus.selectedEntranceExam = examId
+    },
     SET_FORM_DATA(state, { step, data }) {
       state.formSteps[step] = { ...state.formSteps[step], ...data }
     },
@@ -57,12 +103,6 @@ export default {
     SET_FIELDS(state, fields) {
       state.fields = fields
     },
-    SET_PROFILE_IMAGE(state, imageUrl) {
-      state.formSteps.civilStatus = {
-        ...state.formSteps.civilStatus,
-        profileImage: imageUrl
-      }
-    },
     SET_LOADING(state, loading) {
       state.loading = loading
     },
@@ -75,16 +115,70 @@ export default {
     RESET_FORM(state) {
       state.formSteps = {
         civilStatus: {
-          profileImage: null
+          profilePicture: null,
+          selectedEntranceExam: null,
+          email: '',
+          firstName: '',
+          lastName: '',
+          dateOfBirth: '',
+          lieuDeNaissance: '',
+          gender: '',
+          situationDeFamille: '',
+          phoneNumber: '',
+          address: {
+            street: '',
+            city: '',
+            state: '',
+            country: 'Cameroon'
+          },
+          examCenter: '',
+          boitePostale: '',
+          emergencyContact: {
+            name: '',
+            relationship: '',
+            phone: ''
+          },
+          fieldOfStudy: '',
+          documents: {
+            transcript: null,
+            diploma: null,
+            cv: null,
+            other: null
+          },
+          referencesFamilales: {
+            nom_pere: '',
+            nom_mere: ''
+          },
+          addressParents: ''
         },
         education: {},
         professional: {},
         extraActivities: {},
         diversInfo: {},
-        review: {}
+        review: {},
+        payment: {
+          paymentMethod: '',
+          amount: '',
+          paymentDate: '',
+          transactionId: '',
+          phoneNumber: '',
+          receiptFile: null,
+          status: 'pending'
+        }
       }
       state.currentStep = 1
       state.uploadProgress = 0
+    },
+    RESET_PAYMENT(state) {
+      state.formSteps.payment = {
+        paymentMethod: '',
+        amount: '',
+        paymentDate: '',
+        transactionId: '',
+        phoneNumber: '',
+        receiptFile: null,
+        status: 'pending'
+      }
     }
   },
 
@@ -106,76 +200,9 @@ export default {
       }
     },
 
-    async uploadProfileImage({ commit }, file) {
-      try {
-        commit('SET_LOADING', true)
-        commit('SET_ERROR', null)
-        
-        // Upload progress simulation
-        const progressInterval = setInterval(() => {
-          const currentProgress = Math.min(95, Math.random() * 100)
-          commit('SET_UPLOAD_PROGRESS', currentProgress)
-        }, 200)
-        
-        // Upload file
-        const imageUrl = await fileService.uploadFile(file)
-        
-        // Clear progress interval
-        clearInterval(progressInterval)
-        commit('SET_UPLOAD_PROGRESS', 100)
-        
-        // Set the profile image
-        commit('SET_PROFILE_IMAGE', imageUrl)
-        
-        // Reset states after a delay
-        setTimeout(() => {
-          commit('SET_UPLOAD_PROGRESS', 0)
-          commit('SET_LOADING', false)
-        }, 500)
-        
-        return imageUrl
-      } catch (error) {
-        commit('SET_ERROR', error.message)
-        commit('SET_LOADING', false)
-        commit('SET_UPLOAD_PROGRESS', 0)
-        throw error
-      }
-    },
-
-    async deleteProfileImage({ commit, state }) {
-      try {
-        commit('SET_LOADING', true)
-        commit('SET_ERROR', null)
-        
-        const currentImage = state.formSteps.civilStatus.profileImage
-        if (currentImage) {
-          await fileService.deleteFile(currentImage)
-        }
-        
-        commit('SET_PROFILE_IMAGE', null)
-        commit('SET_LOADING', false)
-      } catch (error) {
-        commit('SET_ERROR', error.message)
-        commit('SET_LOADING', false)
-        throw error
-      }
-    },
-
-    async saveStepData({ commit }, { step, data }) {
-      try {
-        commit('SET_LOADING', true)
-        commit('SET_ERROR', null)
-        
-        // Save step data
-        commit('SET_FORM_DATA', { step, data })
-        
-        return true
-      } catch (error) {
-        commit('SET_ERROR', error.message)
-        throw error
-      } finally {
-        commit('SET_LOADING', false)
-      }
+    // Update the action name to match what's being called
+    updateStepData({ commit }, { step, data }) {
+      commit('SET_FORM_DATA', { step, data })
     },
 
     nextStep({ commit, state }) {
@@ -190,17 +217,11 @@ export default {
       }
     },
 
-    async selectCandidate({ commit, state }, candidate) {
+    async selectCandidate({ commit }, candidate) {
       commit('SET_LOADING', true)
       try {
         const fullCandidate = await candidateService.getCandidateById(candidate.id)
         commit('SET_SELECTED_CANDIDATE', fullCandidate)
-        // Pre-fill form with candidate data
-        Object.entries(fullCandidate).forEach(([key, value]) => {
-          if (Object.keys(state.formSteps).includes(key)) {
-            commit('SET_FORM_DATA', { step: key, data: value })
-          }
-        })
         commit('SET_ERROR', null)
       } catch (error) {
         commit('SET_ERROR', error.message)
@@ -209,35 +230,43 @@ export default {
       }
     },
 
-    async submitForm({ commit, state }) {
+    async submitApplication({ commit}, formData) {
       commit('SET_LOADING', true)
+      commit('SET_ERROR', null)
+      
       try {
-        // Combine all form steps data
-        const formData = {
-          civilStatus: state.formSteps.civilStatus,
-          education: state.formSteps.education,
-          professional: state.formSteps.professional,
-          extraActivities: state.formSteps.extraActivities,
-          diversInfo: state.formSteps.diversInfo
+        // Get all form data
+        const candidateData = JSON.parse(formData.get('candidateData'))
+
+        // Create FormData for backend
+        const backendFormData = new FormData()
+
+        // Add all files
+        if (formData.has('profilePicture')) {
+          backendFormData.append('profilePicture', formData.get('profilePicture'))
         }
-        
-        let result
-        if (state.selectedCandidate) {
-          // Update existing candidate
-          result = await candidateService.updateCandidate(state.selectedCandidate.id, formData)
-        } else {
-          // Create new candidate
-          result = await candidateService.createCandidate(formData)
+        if (formData.has('bankReceipt')) {
+          backendFormData.append('bankReceipt', formData.get('bankReceipt'))
         }
+
+        // Add all candidate data
+        backendFormData.append('candidateData', JSON.stringify({
+          personalInfo: candidateData.personalInfo,
+          education: candidateData.education,
+          professional: candidateData.professional,
+          extraActivities: candidateData.extraActivities,
+          diversInfo: candidateData.diversInfo,
+          payment: candidateData.payment
+        }))
+
+        // Create the candidate using the candidateService
+        const response = await candidateService.createCandidate(backendFormData)
         
-        // Reset the form
-        commit('RESET_FORM')
-        commit('SET_ERROR', null)
-        
-        return { success: true, data: result }
+        // Return the created candidate
+        return response
       } catch (error) {
         commit('SET_ERROR', error.message)
-        return { success: false, error }
+        throw error
       } finally {
         commit('SET_LOADING', false)
       }

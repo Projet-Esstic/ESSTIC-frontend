@@ -1,22 +1,9 @@
-import { 
-  candidates, 
-  marks, 
-  fields, 
-  academicYears,
-  examSessions,
-  examCenters,
-  courses 
-} from './dummy-data'
+/* eslint-disable no-unused-vars */
+import axios from 'axios'
+import { ENDPOINTS } from './config'
 
-// Simulate API delay
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
-
-// Helper function to simulate API errors
-const simulateError = (probability = 0.1) => {
-  if (Math.random() < probability) {
-    throw new Error('Simulated API error')
-  }
-}
+// Configure axios to send credentials
+axios.defaults.withCredentials = true
 
 // Helper function to validate course data
 const validateCourseData = (courseData) => {
@@ -45,302 +32,279 @@ const validateCourseData = (courseData) => {
   return errors
 }
 
-// Simulate file storage
-const fileStorage = new Map()
+// Helper function to transform frontend data to backend format
+const transformCandidateData = (formData) => {
+    console.log('Transforming data:', formData)
+    const transformedData = {
+        // User related data
+        user: {
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            dateOfBirth: formData.dateOfBirth,
+            gender: formData.gender,
+            phoneNumber: formData.phoneNumber,
+            profilePicture: formData.profilePicture,
+            address: formData.address,
+            emergencyContact: formData.emergencyContact
+        },
+
+        // Candidate specific data
+        selectedEntranceExam: formData.selectedEntranceExam,
+        fieldOfStudy: formData.fieldOfStudy,
+        examCenter: formData.examCenter,
+        documents: formData.documents,
+        
+        // Additional data
+        lieuDeNaissance: formData.lieuDeNaissance,
+        situationDeFamille: formData.situationDeFamille,
+        boitePostale: formData.boitePostale,
+        referencesFamilales: formData.referencesFamilales,
+        addressParents: formData.addressParents
+    }
+    
+    console.log('Transformed data:', transformedData)
+    return transformedData
+};
 
 export const courseService = {
   // Get all courses
   async getAllCourses() {
-    await delay(500)
-    try {
-      simulateError(0.1)
-      return courses
-    } catch (error) {
-      throw new Error('Failed to fetch courses: ' + error.message)
-    }
+    const response = await axios.get(ENDPOINTS.COURSES)
+    return response.data
   },
 
   // Get course by ID
   async getCourseById(id) {
-    await delay(300)
-    simulateError()
-    const course = courses.find(c => c.id === id)
-    if (!course) throw new Error('Course not found')
-    return course
+    const response = await axios.get(ENDPOINTS.COURSE_BY_ID(id))
+    return response.data
   },
 
   // Create new course
   async createCourse(courseData) {
-    await delay(800)
-    try {
-      const validationErrors = validateCourseData(courseData)
-      if (validationErrors.length > 0) {
-        throw new Error('Validation failed: ' + validationErrors.join(', '))
-      }
-
-      simulateError(0.1)
-      const newCourse = {
-        id: Date.now(),
-        ...courseData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-      courses.push(newCourse)
-      return newCourse
-    } catch (error) {
-      throw new Error('Failed to create course: ' + error.message)
+    const validationErrors = validateCourseData(courseData)
+    if (validationErrors.length > 0) {
+      throw new Error(`Validation failed: ${validationErrors.join(', ')}`)
     }
+
+    const response = await axios.post(ENDPOINTS.COURSES, courseData)
+    return response.data
   },
 
   // Update course
   async updateCourse(id, courseData) {
-    await delay(500)
-    try {
-      const validationErrors = validateCourseData(courseData)
-      if (validationErrors.length > 0) {
-        throw new Error('Validation failed: ' + validationErrors.join(', '))
-      }
-
-      simulateError(0.1)
-      const index = courses.findIndex(c => c.id === id)
-      if (index === -1) throw new Error('Course not found')
-      
-      const updatedCourse = {
-        ...courses[index],
-        ...courseData,
-        updatedAt: new Date().toISOString()
-      }
-      courses[index] = updatedCourse
-      return updatedCourse
-    } catch (error) {
-      throw new Error('Failed to update course: ' + error.message)
+    const validationErrors = validateCourseData(courseData)
+    if (validationErrors.length > 0) {
+      throw new Error(`Validation failed: ${validationErrors.join(', ')}`)
     }
+
+    const response = await axios.put(ENDPOINTS.COURSE_BY_ID(id), courseData)
+    return response.data
   },
 
   // Delete course
   async deleteCourse(id) {
-    await delay(500)
-    simulateError()
-    const index = courses.findIndex(c => c.id === id)
-    if (index === -1) throw new Error('Course not found')
-    courses.splice(index, 1)
-    return { success: true }
+    await axios.delete(ENDPOINTS.COURSE_BY_ID(id))
   }
 }
 
 export const candidateService = {
   // Get all candidates
   async getAllCandidates() {
-    await delay(500)
-    simulateError()
-    return candidates
+    const response = await axios.get(ENDPOINTS.CANDIDATES)
+    return response.data
   },
 
   // Get candidate by ID
   async getCandidateById(id) {
-    await delay(300)
-    simulateError()
-    const candidate = candidates.find(c => c.id === id)
-    if (!candidate) throw new Error('Candidate not found')
-    return candidate
+    const response = await axios.get(ENDPOINTS.CANDIDATE_BY_ID(id))
+    return response.data
   },
 
   // Get candidates by field
   async getCandidatesByField(fieldId) {
-    await delay(500)
-    simulateError()
-    return candidates.filter(c => c.fieldId === fieldId)
+    const response = await axios.get(ENDPOINTS.CANDIDATES_BY_FIELD(fieldId))
+    return response.data
   },
 
-  // Create new candidate
-  async createCandidate(candidateData) {
-    await delay(800)
-    simulateError()
-    const newCandidate = {
-      id: Date.now(),
-      ...candidateData,
-      status: 'active'
+  // Create new candidate with documents
+  async createCandidate(formData) {
+    try {
+        const transformedData = transformCandidateData(formData);
+        const data = new FormData();
+        
+        // Add transformed data as JSON
+        data.append('formData', JSON.stringify(transformedData));
+        
+        // Handle document uploads
+        if (formData.profileImageFile) {
+            data.append('profile', formData.profileImageFile);
+        }
+
+        // Handle other documents
+        const documentTypes = ['resume', 'transcript', 'recommendation', 'portfolio', 'other'];
+        documentTypes.forEach(type => {
+            if (formData.documents?.[type]) {
+                data.append(type, formData.documents[type]);
+            }
+        });
+
+        const response = await axios.post(ENDPOINTS.CANDIDATES, data, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            },
+            onUploadProgress: (progressEvent) => {
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                // You can emit this progress to your store if needed
+            }
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error creating candidate:', error);
+        throw error;
     }
-    candidates.push(newCandidate)
-    return newCandidate
   },
 
-  // Update candidate
-  async updateCandidate(id, candidateData) {
-    await delay(500)
-    simulateError()
-    const index = candidates.findIndex(c => c.id === id)
-    if (index === -1) throw new Error('Candidate not found')
-    candidates[index] = { ...candidates[index], ...candidateData }
-    return candidates[index]
+  // Update candidate with documents
+  async updateCandidate(id, formData) {
+    try {
+        const transformedData = transformCandidateData(formData);
+        const data = new FormData();
+        
+        data.append('formData', JSON.stringify(transformedData));
+        
+        // Handle document updates
+        if (formData.profileImageFile) {
+            data.append('profile', formData.profileImageFile);
+        }
+
+        const documentTypes = ['resume', 'transcript', 'recommendation', 'portfolio', 'other'];
+        documentTypes.forEach(type => {
+            if (formData.documents?.[type]) {
+                data.append(type, formData.documents[type]);
+            }
+        });
+
+        const response = await axios.put(ENDPOINTS.CANDIDATE_BY_ID(id), data, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error updating candidate:', error);
+        throw error;
+    }
   }
 }
 
 export const marksService = {
   // Get marks for a candidate
   async getCandidateMarks(candidateId) {
-    await delay(500)
-    simulateError()
-    return marks.filter(m => m.candidateId === candidateId)
+    const response = await axios.get(ENDPOINTS.MARKS_BY_CANDIDATE(candidateId))
+    return response.data
   },
 
   // Get marks for all candidates
   async getAllMarks() {
-    await delay(500)
-    simulateError()
-    return marks
+    const response = await axios.get(ENDPOINTS.MARKS)
+    return response.data
   },
 
   // Update marks for a candidate
   async updateCandidateMarks(candidateId, subjectId, mark) {
-    await delay(500)
-    simulateError()
-    const index = marks.findIndex(m => m.candidateId === candidateId && m.subjectId === subjectId)
-    if (index !== -1) {
-      marks[index].mark = mark
-    } else {
-      marks.push({ candidateId, subjectId, mark })
-    }
-    return { success: true }
+    const response = await axios.put(ENDPOINTS.MARKS_BY_CANDIDATE(candidateId), {
+      subjectId,
+      mark
+    })
+    return response.data
   },
 
   // Calculate average for a candidate
   async calculateAverage(candidateId) {
-    await delay(500)
-    simulateError()
-    const candidateMarks = marks.filter(m => m.candidateId === candidateId)
-    if (candidateMarks.length === 0) return 0
-
-    const total = candidateMarks.reduce((sum, mark) => {
-      const subject = courses.find(s => s.id === mark.subjectId)
-      if (!subject) return sum
-      const candidate = candidates.find(c => c.id === candidateId)
-      if (!candidate) return sum
-      const coefficient = subject.coefficients[candidate.fieldId] || 1
-      return sum + (mark.mark * coefficient)
-    }, 0)
-
-    const totalCoefficients = candidateMarks.reduce((sum, mark) => {
-      const subject = courses.find(s => s.id === mark.subjectId)
-      if (!subject) return sum
-      const candidate = candidates.find(c => c.id === candidateId)
-      if (!candidate) return sum
-      return sum + (subject.coefficients[candidate.fieldId] || 1)
-    }, 0)
-
-    return totalCoefficients > 0 ? total / totalCoefficients : 0
+    const response = await axios.get(`${ENDPOINTS.MARKS_BY_CANDIDATE(candidateId)}/average`)
+    return response.data
   }
 }
 
 export const subjectService = {
   // Get all subjects
   async getAllSubjects() {
-    await delay(300)
-    simulateError()
-    return courses
+    const response = await axios.get(ENDPOINTS.COURSES)
+    return response.data
   },
 
   // Get subject by ID
   async getSubjectById(id) {
-    await delay(200)
-    simulateError()
-    const course = courses.find(c => c.id === id)
-    if (!course) throw new Error('Subject not found')
-    return course
+    const response = await axios.get(ENDPOINTS.COURSE_BY_ID(id))
+    return response.data
   }
 }
 
 export const fieldService = {
   // Get all fields
   async getAllFields() {
-    await delay(500)
-    simulateError()
-    return fields
+    const response = await axios.get(ENDPOINTS.FIELDS)
+    return response.data
   },
 
   // Get field by ID
   async getFieldById(id) {
-    await delay(300)
-    simulateError()
-    const field = fields.find(f => f.id === id)
-    if (!field) throw new Error('Field not found')
-    return field
+    const response = await axios.get(ENDPOINTS.FIELD_BY_ID(id))
+    return response.data
   }
 }
 
 export const examService = {
   // Get all academic years
   async getAcademicYears() {
-    await delay(500)
-    simulateError()
-    return academicYears
+    const response = await axios.get(ENDPOINTS.ACADEMIC_YEARS)
+    return response.data
   },
 
   // Get current academic year
   async getCurrentAcademicYear() {
-    await delay(300)
-    simulateError()
-    return academicYears.find(year => year.isCurrent)
+    const response = await axios.get(ENDPOINTS.CURRENT_ACADEMIC_YEAR)
+    return response.data
   },
 
   // Get exam sessions
   async getExamSessions(academicYearId) {
-    await delay(500)
-    simulateError()
-    return examSessions.filter(session => session.academicYearId === academicYearId)
+    const response = await axios.get(ENDPOINTS.EXAM_SESSIONS(academicYearId))
+    return response.data
   },
 
   // Get exam centers
   async getExamCenters() {
-    await delay(500)
-    simulateError()
-    return examCenters
+    const response = await axios.get(ENDPOINTS.EXAM_CENTERS)
+    return response.data
   }
 }
 
 export const fileService = {
   // Upload file
-  uploadFile(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = async () => {
-        try {
-          await delay(1000)
-          simulateError()
-          const fileUrl = `file-${Date.now()}`
-          fileStorage.set(fileUrl, {
-            content: reader.result,
-            name: file.name,
-            type: file.type,
-            size: file.size
-          })
-          resolve({ fileUrl })
-        } catch (error) {
-          reject(error)
-        }
+  async uploadFile(file) {
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    const response = await axios.post(ENDPOINTS.FILE_UPLOAD, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
       }
-      reader.onerror = () => reject(new Error('File read error'))
-      reader.readAsDataURL(file)
     })
+    return response.data
   },
 
   // Get file info
-  async getFileInfo(fileUrl) {
-    await delay(300)
-    simulateError()
-    const fileInfo = fileStorage.get(fileUrl)
-    if (!fileInfo) throw new Error('File not found')
-    return fileInfo
+  async getFileInfo(fileId) {
+    const response = await axios.get(ENDPOINTS.FILE_INFO(fileId))
+    return response.data
   },
 
   // Delete file
-  async deleteFile(fileUrl) {
-    await delay(500)
-    simulateError()
-    if (!fileStorage.has(fileUrl)) {
-      throw new Error('File not found')
-    }
-    fileStorage.delete(fileUrl)
-    return { success: true }
+  async deleteFile(fileId) {
+    await axios.delete(ENDPOINTS.FILE_INFO(fileId))
   }
 }
