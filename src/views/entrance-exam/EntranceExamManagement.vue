@@ -1,5 +1,7 @@
 <template>
   <div class="space-y-6">
+   
+    
     <div class="flex justify-between items-center">
       <h2 class="text-2xl font-semibold">Create New Entrance Exam</h2>
       <button 
@@ -34,7 +36,8 @@
                 {
                   'bg-green-100 text-green-800': exam.status === 'active',
                   'bg-yellow-100 text-yellow-800': exam.status === 'upcoming',
-                  'bg-gray-100 text-gray-800': exam.status === 'completed'
+                  'bg-gray-100 text-gray-800': exam.status === 'completed',
+                  'bg-blue-100 text-blue-800': exam.status === 'in_progress'
                 }
               ]">
                 {{ exam.status }}
@@ -70,7 +73,7 @@
     </div>
 
     <!-- Create/Edit Modal -->
-    <Modal v-model="showModal" :title="isEditing ? 'Edit Entrance Exam' : 'Create New Entrance Exam'">
+    <Modal v-model="showModal" :title="examForm.id ? 'Edit Entrance Exam' : 'Create New Entrance Exam'">
       <form @submit.prevent="saveExam" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Academic Year</label>
@@ -123,6 +126,7 @@
             <option value="upcoming">Upcoming</option>
             <option value="active">Active</option>
             <option value="completed">Completed</option>
+            <option value="in_progress">In Progress</option>
           </select>
         </div>
 
@@ -148,7 +152,7 @@
             type="submit"
             class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            {{ isEditing ? 'Update' : 'Create' }}
+            {{ examForm.id ? 'Update' : 'Create' }}
           </button>
         </div>
       </form>
@@ -178,49 +182,73 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
-import { useStore } from 'vuex'
+import { ref, onMounted } from 'vue'
 import Modal from '@/components/Modal.vue'
+import { examService } from '@/api/services'
 
 export default {
   name: 'EntranceExamManagement',
-  
   components: {
     Modal
   },
-
   setup() {
-    const store = useStore()
-
-    // State
     const showModal = ref(false)
     const showDeleteModal = ref(false)
-    const isEditing = ref(false)
+    const loading = ref(false)
+    const error = ref(null)
+    const exams = ref([])
     const examToDelete = ref(null)
+
+    // Form state
     const examForm = ref({
       academicYear: '',
+      examDate: '',
       registrationStart: '',
       registrationEnd: '',
-      examDate: '',
       status: 'upcoming',
       description: ''
     })
 
-    // Computed
-    const exams = computed(() => store.state.entranceExam.exams)
-
     // Methods
+    const loadExams = async () => {
+      loading.value = true
+      error.value = null
+      try {
+        const academicYears = await examService.getAcademicYears()
+        exams.value = academicYears.map(year => ({
+          ...year,
+          status: determineStatus(year)
+        }))
+      } catch (err) {
+        error.value = err.message || 'Failed to load exams'
+        console.error('Failed to load exams:', err)
+      } finally {
+        loading.value = false
+      }
+    }
+
+    const determineStatus = (exam) => {
+      const now = new Date()
+      const registrationStart = new Date(exam.registrationStart)
+      const registrationEnd = new Date(exam.registrationEnd)
+      const examDate = new Date(exam.examDate)
+
+      if (now < registrationStart) return 'upcoming'
+      if (now >= registrationStart && now <= registrationEnd) return 'active'
+      if (now > examDate) return 'completed'
+      return 'in_progress'
+    }
+
     const formatDate = (date) => {
       return new Date(date).toLocaleDateString()
     }
 
     const openCreateModal = () => {
-      isEditing.value = false
       examForm.value = {
         academicYear: '',
+        examDate: '',
         registrationStart: '',
         registrationEnd: '',
-        examDate: '',
         status: 'upcoming',
         description: ''
       }
@@ -228,7 +256,6 @@ export default {
     }
 
     const editExam = (exam) => {
-      isEditing.value = true
       examForm.value = { ...exam }
       showModal.value = true
     }
@@ -238,28 +265,54 @@ export default {
       showDeleteModal.value = true
     }
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
       if (examToDelete.value) {
-        store.commit('entranceExam/deleteExam', examToDelete.value.id)
-        showDeleteModal.value = false
-        examToDelete.value = null
+        loading.value = true
+        error.value = null
+        try {
+          await examService.deleteAcademicYear(examToDelete.value.id)
+          await loadExams() // Reload the list
+          showDeleteModal.value = false
+          examToDelete.value = null
+        } catch (err) {
+          error.value = err.message || 'Failed to delete exam'
+          console.error('Failed to delete exam:', err)
+        } finally {
+          loading.value = false
+        }
       }
     }
 
-    const saveExam = () => {
-      if (isEditing.value) {
-        store.commit('entranceExam/updateExam', examForm.value)
-      } else {
-        store.commit('entranceExam/addExam', examForm.value)
+    const saveExam = async () => {
+      loading.value = true
+      error.value = null
+      try {
+        if (examForm.value.id) {
+          await examService.updateAcademicYear(examForm.value.id, examForm.value)
+        } else {
+          await examService.createAcademicYear(examForm.value)
+        }
+        await loadExams() // Reload the list
+        showModal.value = false
+      } catch (err) {
+        error.value = err.message || 'Failed to save exam'
+        console.error('Failed to save exam:', err)
+      } finally {
+        loading.value = false
       }
-      showModal.value = false
     }
+
+    // Load exams when component mounts
+    onMounted(() => {
+      loadExams()
+    })
 
     return {
       exams,
+      loading,
+      error,
       showModal,
       showDeleteModal,
-      isEditing,
       examForm,
       formatDate,
       openCreateModal,

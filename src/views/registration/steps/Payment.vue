@@ -62,7 +62,8 @@
               type="number"
               v-model="form.amount"
               :class="[Theme.applyTextStyle('bodyLarge'), 'w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-surface-dark']"
-              placeholder="10000"
+              placeholder="25000"
+              disabled
             />
             <span class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500">FCFA</span>
           </div>
@@ -70,7 +71,7 @@
         </div>
 
         <!-- Payment Date -->
-        <div>
+        <div v-if="form.paymentMethod === 'bank'">
           <label :class="[Theme.applyTextStyle('labelLarge'), 'block text-text-light dark:text-text-dark mb-2']">Date de paiement</label>
           <input
             type="date"
@@ -94,19 +95,22 @@
           </div>
 
           <div>
-            <label :class="[Theme.applyTextStyle('labelLarge'), 'block text-text-light dark:text-text-dark mb-2']">Numéro de transaction</label>
-            <input
-              type="text"
-              v-model="form.transactionId"
+            <label :class="[Theme.applyTextStyle('labelLarge'), 'block text-text-light dark:text-text-dark mb-2']">Fournisseur de Mobile Money</label>
+            <select
+              v-model="form.provider"
               :class="[Theme.applyTextStyle('bodyLarge'), 'w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-surface-dark']"
-              placeholder="ID de transaction"
-            />
-            <p v-if="errors.transactionId" class="text-error-600 text-sm mt-1">{{ errors.transactionId }}</p>
+            >
+              <option value="">Sélectionnez un fournisseur</option>
+              <option value="MTN">MTN</option>
+              <option value="Orange">Orange</option>
+              <option value="Autre">Autre</option>
+            </select>
+            <p v-if="errors.provider" class="text-error-600 text-sm mt-1">{{ errors.provider }}</p>
           </div>
         </template>
 
         <!-- Receipt Upload -->
-        <div>
+        <div v-if="form.paymentMethod === 'bank'">
           <label :class="[Theme.applyTextStyle('labelLarge'), 'block text-text-light dark:text-text-dark mb-2']">Reçu de paiement</label>
           <div class="flex items-center justify-center w-full">
             <label
@@ -162,6 +166,7 @@ import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { Theme } from '@/utils/Theme'
+import { paymentService } from '@/api/services'
 
 export default {
   setup() {
@@ -171,26 +176,31 @@ export default {
     const errors = ref({})
     const form = ref({
       paymentMethod: '',
-      receiptFile: null,
-      transactionId: '',
-      amount: '',
-      paymentDate: '',
-      phoneNumber: ''
+      amount: '25000', // Fixed amount for registration
+      paymentDate: new Date().toISOString().split('T')[0],
+      phoneNumber: '',
+      provider: '', // For mobile money provider
+      receiptFile: null
     })
 
     const handleSubmit = async () => {
       if (validateForm()) {
         loading.value = true
         try {
+          // For mobile money, we use current timestamp
+          const paymentData = {
+            ...form.value,
+            paymentDate: form.value.paymentMethod === 'mobile' ? 
+              new Date().toISOString() : form.value.paymentDate
+          }
+
+          // Submit payment to backend
+          await paymentService.submitPayment(paymentData)
+
           // Update store with form data
           await store.dispatch('candidateRegistration/updateStepData', {
             step: 'payment',
-            data: {
-              ...form.value,
-              documents: {
-                receipt: form.value.receiptFile
-              }
-            }
+            data: paymentData
           })
 
           // Submit the complete application
@@ -214,23 +224,24 @@ export default {
       if (!form.value.paymentMethod) {
         newErrors.paymentMethod = 'Le mode de paiement est requis'
       }
-      if (!form.value.amount) {
-        newErrors.amount = 'Le montant est requis'
-      }
-      if (!form.value.paymentDate) {
-        newErrors.paymentDate = 'La date de paiement est requise'
-      }
-      if (!form.value.receiptFile) {
-        newErrors.receiptFile = 'Le reçu de paiement est requis'
-      }
 
       // Mobile money specific validation
       if (form.value.paymentMethod === 'mobile') {
         if (!form.value.phoneNumber) {
           newErrors.phoneNumber = 'Le numéro de téléphone est requis pour le paiement mobile'
         }
-        if (!form.value.transactionId) {
-          newErrors.transactionId = 'Le numéro de transaction est requis'
+        if (!form.value.provider) {
+          newErrors.provider = 'Le fournisseur de Mobile Money est requis'
+        }
+      }
+
+      // Bank transfer specific validation
+      if (form.value.paymentMethod === 'bank') {
+        if (!form.value.paymentDate) {
+          newErrors.paymentDate = 'La date de paiement est requise'
+        }
+        if (!form.value.receiptFile) {
+          newErrors.receiptFile = 'Le reçu de paiement est requis'
         }
       }
 
