@@ -46,6 +46,10 @@
         v-if="currentTab === 'deliberation'"
         :fields="fields"
       />
+      <ExamResults
+        v-if="currentTab === 'results'"
+        :fields="fields"
+      />
     </div>
   </div>
 </template>
@@ -58,6 +62,7 @@ import CandidateManagement from './CandidateManagement.vue';
 import EntranceExamManagement from './EntranceExamManagement.vue';
 import MarksManagement from './MarksManagement.vue';
 import Deliberation from './Deliberation.vue';
+import ExamResults from './ExamResults.vue';
 
 export default {
   name: 'EntranceExam',
@@ -67,7 +72,8 @@ export default {
     CandidateManagement,
     EntranceExamManagement,
     MarksManagement,
-    Deliberation
+    Deliberation,
+    ExamResults
   },
   setup() {
     const tabs = [
@@ -76,7 +82,8 @@ export default {
       { id: 'fields', name: 'Fields of Study' },
       { id: 'candidates', name: 'Candidate Management' },
       { id: 'marks', name: 'Marks Management' },
-      { id: 'deliberation', name: 'Deliberation' }
+      { id: 'deliberation', name: 'Deliberation' },
+      { id: 'results', name: 'Results' }
     ];
 
     const currentTab = ref('exams');

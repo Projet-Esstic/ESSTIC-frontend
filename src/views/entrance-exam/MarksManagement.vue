@@ -52,8 +52,16 @@
             class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           >
             <option value="">Select a subject</option>
-            <option v-for="subject in subjects" :key="subject.id" :value="subject">
-              {{ subject.name }} ({{ getCoefficientsDisplay(subject) }})
+            <option 
+              v-for="subject in subjects" 
+              :key="subject._id" 
+              :value="subject"
+              :disabled="!subject.isActive || !subject.isEntranceExam"
+            >
+              {{ subject.courseCode }} - {{ subject.courseName }}
+              <template v-if="subject.department?.length">
+                ({{ getCoefficientsDisplay(subject) }})
+              </template>
             </option>
           </select>
         </div>
@@ -155,42 +163,53 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
+import { courseService } from '@/api/services'
 
 export default {
   name: 'MarksManagement',
 
-  props: {
-    fields: {
-      type: Array,
-      required: true
-    }
-  },
-
-  setup(props) {
+  setup() {
     const store = useStore()
     const selectedField = ref('')
     const searchQuery = ref('')
     const selectedSubject = ref(null)
-    const unsavedMarks = ref({}) // Store unsaved changes
+    const unsavedMarks = ref({})
+    const courses = ref([])
+    const coursesLoading = ref(false)
+    const coursesError = ref(null)
 
     // Load initial data
     onMounted(async () => {
       await Promise.all([
-        store.dispatch('courses/fetchCourses'),
-        store.dispatch('entranceExam/fetchMarks')
+        store.dispatch('candidates/fetchCandidates'),
+        fetchCourses()
       ])
     })
 
+    const fetchCourses = async () => {
+      coursesLoading.value = true
+      coursesError.value = null
+      try {
+        const response = await courseService.getAllCourses()
+        courses.value = response
+      } catch (err) {
+        coursesError.value = err.message || 'Failed to fetch courses'
+        console.error('Error fetching courses:', err)
+      } finally {
+        coursesLoading.value = false
+      }
+    }
+
     // Get data from store
-    const subjects = computed(() => store.getters['courses/getAllCourses'])
-    const allCandidates = computed(() => store.getters['entranceExam/getCandidates'])
+    const subjects = computed(() => courses.value || [])
+    const allCandidates = computed(() => store.getters['candidates/getAllCandidates'] || [])
     const loading = computed(() => 
-      store.getters['courses/isLoading'] || 
-      store.getters['entranceExam/isLoading']
+      store.getters['candidates/isLoading'] || 
+      coursesLoading.value
     )
     const error = computed(() => 
-      store.getters['courses/getError'] || 
-      store.getters['entranceExam/getError']
+      store.getters['candidates/getError'] || 
+      coursesError.value
     )
 
     const hasUnsavedChanges = computed(() => {
@@ -198,112 +217,126 @@ export default {
     })
 
     const filteredCandidates = computed(() => {
-      let filtered = allCandidates.value
+      if (!allCandidates.value) return []
+      
+      let filtered = allCandidates.value.filter(c => c?.applicationStatus === 'registered')
 
-      // Filter by field if selected
       if (selectedField.value) {
-        filtered = filtered.filter(c => c.fieldId === selectedField.value)
+        filtered = filtered.filter(c => c?.fieldOfStudy === selectedField.value)
       }
 
-      // Filter by search query
-      if (searchQuery.value.trim()) {
+      if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase()
-        filtered = filtered.filter(c => 
-          c.name.toLowerCase().includes(query) ||
-          c.registrationNumber.toLowerCase().includes(query)
-        )
+        filtered = filtered.filter(c => {
+          const userName = c?.user?.name || ''
+          const regNumber = c?.registrationNumber || ''
+          return userName.toLowerCase().includes(query) || 
+                 regNumber.toLowerCase().includes(query)
+        })
       }
 
-      return filtered
+      return filtered || []
     })
 
+    const getCoefficientsDisplay = (subject) => {
+      if (!subject?.department?.length) return 'No departments'
+      return subject.department
+        .map(dept => dept?.name || dept?.departmentName)
+        .filter(Boolean)
+        .join(', ')
+    }
+
+    const getDepartmentForCandidate = (candidate) => {
+      if (!selectedSubject.value?.department?.length || !candidate?.fieldOfStudy) return null
+      return selectedSubject.value.department.find(
+        dept => dept?._id?.toString() === candidate.fieldOfStudy?.toString()
+      )
+    }
+
     const getCandidateMark = (candidate) => {
-      if (!selectedSubject.value) return 0
-      
-      // Check unsaved marks first
-      const unsavedKey = `${candidate.id}-${selectedSubject.value.id}`
-      if (unsavedKey in unsavedMarks.value) {
-        return unsavedMarks.value[unsavedKey]
+      if (!candidate?._id || !selectedSubject.value?._id) return 0
+
+      // Check unsaved changes first
+      const key = `${candidate._id}-${selectedSubject.value._id}`
+      if (key in unsavedMarks.value) {
+        return unsavedMarks.value[key]
       }
 
-      // Then check saved marks
-      const mark = store.getters['entranceExam/getCandidateMarkForSubject']({
-        candidateId: candidate.id,
-        subjectId: selectedSubject.value.id
-      })
-      return mark || 0
+      // Then check existing marks
+      const mark = candidate.Marks?.find(m => 
+        m?.courseId?.toString() === selectedSubject.value._id?.toString()
+      )
+      return mark?.mark?.currentMark || 0
+    }
+
+    const updateMarkLocally = (candidate, newMark) => {
+      if (!candidate?._id || !selectedSubject.value?._id) return
+      if (isNaN(newMark) || newMark < 0 || newMark > 20) return
+      
+      const key = `${candidate._id}-${selectedSubject.value._id}`
+      unsavedMarks.value[key] = newMark
     }
 
     const calculateWeightedMark = (candidate) => {
-      if (!selectedSubject.value) return 0
+      if (!candidate) return 0
       const mark = getCandidateMark(candidate)
-      const coefficient = selectedSubject.value.coefficients[candidate.fieldId] || 0
+      const department = getDepartmentForCandidate(candidate)
+      const coefficient = department?.coefficient || 1
       return mark * coefficient
     }
 
     const classAverage = computed(() => {
-      if (!selectedSubject.value || !filteredCandidates.value.length) return 0
-      const totalMarks = filteredCandidates.value.reduce((sum, candidate) => {
-        return sum + getCandidateMark(candidate)
-      }, 0)
-      return totalMarks / filteredCandidates.value.length
+      if (!filteredCandidates.value?.length) return 0
+      const sum = filteredCandidates.value.reduce((acc, candidate) => 
+        acc + getCandidateMark(candidate), 0)
+      return sum / filteredCandidates.value.length
     })
 
     const weightedAverage = computed(() => {
-      if (!selectedSubject.value || !filteredCandidates.value.length) return 0
-      const totalWeightedMarks = filteredCandidates.value.reduce((sum, candidate) => {
-        return sum + calculateWeightedMark(candidate)
-      }, 0)
-      return totalWeightedMarks / filteredCandidates.value.length
+      if (!filteredCandidates.value?.length) return 0
+      const sum = filteredCandidates.value.reduce((acc, candidate) => 
+        acc + calculateWeightedMark(candidate), 0)
+      return sum / filteredCandidates.value.length
     })
 
-    const updateMarkLocally = (candidate, mark) => {
-      if (!selectedSubject.value) return
-      
-      // Validate mark
-      if (isNaN(mark) || mark < 0) mark = 0
-      if (mark > 20) mark = 20
-
-      const key = `${candidate.id}-${selectedSubject.value.id}`
-      unsavedMarks.value[key] = mark
-    }
-
     const saveAllMarks = async () => {
-      if (!selectedSubject.value) return
+      const currentUser = store.getters['auth/getCurrentUser']
+      if (!currentUser?._id) {
+        console.error('No current user found')
+        return
+      }
 
       try {
-        // Save all unsaved marks
-        for (const [key, mark] of Object.entries(unsavedMarks.value)) {
-          const [candidateId, subjectId] = key.split('-').map(Number)
-          await store.dispatch('entranceExam/updateMark', {
+        // Save each mark individually to maintain proper history
+        for (const [key, newMark] of Object.entries(unsavedMarks.value)) {
+          const [candidateId, courseId] = key.split('-')
+          if (!candidateId || !courseId) continue
+
+          await store.dispatch('candidates/updateCandidateMarks', {
             candidateId,
-            subjectId,
-            mark
+            courseId,
+            mark: {
+              currentMark: newMark,
+              modifiedBy: {
+                name: currentUser.name,
+                userId: currentUser._id
+              }
+            }
           })
         }
         
-        // Clear unsaved marks
-        unsavedMarks.value = {}
+        unsavedMarks.value = {} // Clear unsaved changes after successful save
       } catch (error) {
         console.error('Failed to save marks:', error)
       }
     }
 
     const getFieldName = (fieldId) => {
-      const field = props.fields.find(f => f.id === fieldId)
-      return field ? field.name : 'Unknown'
-    }
-
-    const getCoefficientsDisplay = (subject) => {
-      if (!subject.coefficients) return 'No coefficients'
-      const selectedFieldCoeff = selectedField.value ? subject.coefficients[selectedField.value] : null
-      if (selectedFieldCoeff !== null) {
-        return `Coefficient: ${selectedFieldCoeff}`
-      }
-      const coeffs = Object.values(subject.coefficients)
-      const min = Math.min(...coeffs)
-      const max = Math.max(...coeffs)
-      return min === max ? `Coefficient: ${min}` : `Coefficients: ${min}-${max}`
+      if (!selectedSubject.value?.department?.length || !fieldId) return 'Unknown Field'
+      const dept = selectedSubject.value.department.find(d => 
+        d?._id?.toString() === fieldId?.toString()
+      )
+      return dept?.name || dept?.departmentName || 'Unknown Field'
     }
 
     return {
@@ -312,17 +345,17 @@ export default {
       selectedSubject,
       subjects,
       filteredCandidates,
-      classAverage,
-      weightedAverage,
-      hasUnsavedChanges,
       loading,
       error,
-      getFieldName,
+      getCoefficientsDisplay,
       getCandidateMark,
-      calculateWeightedMark,
       updateMarkLocally,
+      calculateWeightedMark,
+      classAverage,
+      weightedAverage,
       saveAllMarks,
-      getCoefficientsDisplay
+      getFieldName,
+      hasUnsavedChanges
     }
   }
 }

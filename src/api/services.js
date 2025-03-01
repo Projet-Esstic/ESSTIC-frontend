@@ -238,6 +238,38 @@ export const candidateService = {
     }
   },
 
+  // Update candidate status
+  async updateCandidateStatus(id, { applicationStatus }) {
+    try {
+      console.log('Updating candidate status:', { id, applicationStatus });
+      const updateData = {
+        applicationStatus,
+        highSchool: {
+          schoolName: '',
+          yearCompleted: null,
+          majorSubjects: []
+        },
+        university: {
+          universityName: '',
+          degree: '',
+          yearCompleted: null
+        },
+        professionalExperience: [],
+        extraActivities: [],
+        internationalExposure: []
+      };
+      console.log('Sending update data:', updateData);
+      const response = await axios.put(ENDPOINTS.CANDIDATE_BY_ID(id), updateData);
+      console.log('API Response:', response);
+      const candidate = response.data.data || response.data;
+      console.log('Updated candidate data:', candidate);
+      return candidate;
+    } catch (error) {
+      console.error('Error in updateCandidateStatus:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to update candidate status');
+    }
+  },
+
   // Update candidate with documents
   async updateCandidate(id, formData) {
     try {
@@ -272,6 +304,26 @@ export const candidateService = {
     } catch (error) {
       console.error('Error in updateCandidate:', error);
       throw new Error(error.response?.data?.message || error.message || 'Failed to update candidate');
+    }
+  },
+
+  async updateCandidateMarks(candidateId, courseId, mark) {
+    try {
+      const response = await axios.put(`${ENDPOINTS.CANDIDATE_BY_ID(candidateId)}/marks/${courseId}`, mark)
+      return response.data
+    } catch (error) {
+      console.error('Error updating candidate marks:', error)
+      throw new Error(error.response?.data?.message || 'Failed to update candidate marks')
+    }
+  },
+
+  async updateCandidateResult(candidateId, resultData) {
+    try {
+      const response = await axios.put(`${ENDPOINTS.CANDIDATE_BY_ID(candidateId)}/result`, resultData)
+      return response.data
+    } catch (error) {
+      console.error('Error updating candidate result:', error)
+      throw new Error(error.response?.data?.message || 'Failed to update candidate result')
     }
   }
 }

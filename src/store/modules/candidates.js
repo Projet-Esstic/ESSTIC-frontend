@@ -38,11 +38,11 @@ const actions = {
     }
   },
 
-  async updateCandidateStatus({ commit }, { candidateId, status }) {
+  async updateCandidateStatus({ commit }, { id, applicationStatus }) {
     commit('SET_LOADING', true)
     try {
-      const updatedCandidate = await candidateService.updateCandidate(candidateId, { status })
-      commit('UPDATE_CANDIDATE_STATUS', { candidateId, status: updatedCandidate.status })
+      const updatedCandidate = await candidateService.updateCandidateStatus(id, { applicationStatus })
+      commit('UPDATE_CANDIDATE_STATUS', { candidateId: id, status: updatedCandidate.applicationStatus })
       commit('SET_ERROR', null)
     } catch (error) {
       commit('SET_ERROR', error.message)
@@ -71,6 +71,17 @@ const actions = {
     } finally {
       commit('SET_LOADING', false)
     }
+  },
+
+  async updateCandidateMarks({ commit }, { candidateId, courseId, mark }) {
+    try {
+      const response = await candidateService.updateCandidateMarks(candidateId, courseId, mark)
+      commit('UPDATE_CANDIDATE_MARKS', { candidateId, courseId, mark })
+      return response
+    } catch (error) {
+      console.error('Error updating candidate marks:', error)
+      throw error
+    }
   }
 }
 
@@ -96,6 +107,46 @@ const mutations = {
   },
   SET_UPLOAD_PROGRESS(state, { documentType, progress }) {
     state.uploadProgress[documentType] = progress
+  },
+  UPDATE_CANDIDATE_MARKS(state, { candidateId, courseId, mark }) {
+    const candidate = state.candidates.find(c => c.id === candidateId)
+    if (!candidate) return
+
+    const existingMarkIndex = candidate.Marks?.findIndex(m => m.courseId.toString() === courseId)
+    if (existingMarkIndex !== -1) {
+      // Update existing mark
+      const oldMark = candidate.Marks[existingMarkIndex].mark.currentMark
+      candidate.Marks[existingMarkIndex].mark.currentMark = mark.currentMark
+      
+      // Add to modification history
+      candidate.Marks[existingMarkIndex].mark.modified.push({
+        preMark: oldMark,
+        modMark: mark.currentMark,
+        modifiedBy: {
+          name: mark.modifiedBy.name,
+          userId: mark.modifiedBy.userId
+        },
+        dateModified: new Date()
+      })
+    } else {
+      // Add new mark
+      if (!candidate.Marks) candidate.Marks = []
+      candidate.Marks.push({
+        courseId,
+        mark: {
+          currentMark: mark.currentMark,
+          modified: [{
+            preMark: 0,
+            modMark: mark.currentMark,
+            modifiedBy: {
+              name: mark.modifiedBy.name,
+              userId: mark.modifiedBy.userId
+            },
+            dateModified: new Date()
+          }]
+        }
+      })
+    }
   }
 }
 
