@@ -1,8 +1,8 @@
 <template>
   <div class="max-w-4xl mx-auto bg-background-light dark:bg-background-dark rounded-xl shadow-lg overflow-hidden">
     <div :class="[Theme.applyGradient('primary'), 'p-6']">
-      <h2 :class="[Theme.applyTextStyle('titleLarge'), 'text-text-light dark:text-text-dark mb-2']">Renseignements Divers</h2>
-      <p :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark opacity-80']">Informations complémentaires importantes</p>
+      <h2 :class="[Theme.applyTextStyle('titleLarge'), 'text-white dark:text-text-dark mb-2']">Renseignements Divers</h2>
+      <p :class="[Theme.applyTextStyle('bodyMedium'), 'text-white dark:text-text-dark opacity-80']">Informations complémentaires importantes</p>
     </div>
 
     <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
@@ -90,8 +90,8 @@
           type="submit"
           class="flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200"
         >
-          <span class="material-icons mr-2">check_circle</span>
-          Terminer
+        Terminer
+        <span class="material-icons ml-2">check_circle</span>
         </button>
       </div>
     </form>
@@ -108,10 +108,15 @@ export default {
     const store = useStore()
     
     const form = ref({
-      motivation: '',
-      objectives: '',
-      skills: [{ name: '' }],
-      additionalInfo: ''
+      motivation: 'Je souhaite suivre cette formation pour approfondir mes connaissances en développement web et acquérir de nouvelles compétences en Vue.js. Ayant travaillé pendant 5 ans dans le développement front-end, je cherche maintenant à me spécialiser davantage pour pouvoir prendre en charge des projets plus complexes et innovants.',
+      objectives: `À l'issue de cette formation, j'ambitionne de devenir développeur Vue.js senior et d'intégrer une équipe travaillant sur des projets à forte valeur ajoutée. À moyen terme, je souhaite évoluer vers un poste de lead developer, en apportant mon expertise technique et en encadrant des développeurs juniors.`,
+      skills: [
+        { name: 'Développement front-end (HTML, CSS, JavaScript)' },
+        { name: 'Gestion de projet Agile' },
+        { name: `Conception d'interfaces utilisateur` },
+        { name: 'Anglais professionnel courant' }
+      ],
+      additionalInfo: `Je suis disponible pour commencer la formation immédiatement et peux m'adapter à tout type d'horaire. Je possède mon propre équipement informatique et dispose d'une connexion internet stable pour suivre les cours en ligne si nécessaire. Je suis également intéressé par toute opportunité de stage ou de projet pratique en entreprise pendant ou après la formation.`
     })
 
     const addSkill = () => {

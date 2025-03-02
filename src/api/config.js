@@ -1,10 +1,10 @@
 // API configuration
-export const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:5000/api'
-
+export const API_URL = 'http://localhost:5000/api'
+// process.env.VUE_APP_API_URL ||
 // API endpoints
 export const ENDPOINTS = {
   // Candidates
-  CANDIDATES: `${API_URL}/candidates`,
+  CANDIDATES: `${API_URL}/candidates/register`,
   CANDIDATE_BY_ID: (id) => `${API_URL}/candidates/${id}`,
   CANDIDATES_BY_FIELD: (fieldId) => `${API_URL}/candidates/field/${fieldId}`,
   

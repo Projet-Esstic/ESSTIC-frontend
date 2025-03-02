@@ -218,7 +218,7 @@ export const candidateService = {
         }
       });
 
-      const response = await axios.post(ENDPOINTS.CANDIDATES, data, {
+      const response = await axios.post('http://localhost:5000/api/candidates/register', data, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
@@ -587,39 +587,84 @@ export const fileService = {
   }
 }
 
-const submitPayment = async (paymentData) => {
+const submitPayment = async (data) => {
   try {
-    console.log('Calling submitPayment API');
-    const formData = new FormData()
-    
-    // Add all payment fields
-    Object.keys(paymentData).forEach(key => {
-      if (key === 'receiptFile' && paymentData[key]) {
-        formData.append('receipt', paymentData[key])
-      } else {
-        formData.append(key, paymentData[key])
-      }
-    })
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid input data');
+    }
 
+    // Construct form data object
+    const formDataObj = {
+      email: data.civilStatus.email,
+      password: 'defaultPassword123', // Replace with actual password input
+      firstName: data.civilStatus.firstName,
+      lastName: data.civilStatus.lastName,
+      dateOfBirth: data.civilStatus.dateOfBirth,
+      gender: data.civilStatus.gender,
+      phoneNumber: data.civilStatus.phoneNumber,
+      address: data.civilStatus.address,
+      emergencyContact: data.civilStatus.emergencyContact,
+      examId: data.civilStatus.selectedEntranceExam,
+      highSchool: data.education.highSchool,
+      university: data.education.university,
+      professionalExperience: data.professional.professionalExperience,
+      extraActivities: data.extraActivities.activities,
+      internationalExposure: [],
+      fieldOfStudy: data.civilStatus.fieldOfStudy,
+      payment: data.paymentData,
+    };
+
+    // Create FormData
+    const formData = new FormData();
+    console.log('Appending formData:', JSON.stringify(formDataObj));
+    formData.append('formData', JSON.stringify(formDataObj));
+
+    // Handle files
+    const files = {
+      profileImage: data.civilStatus.documents.profilePicture,
+      transcript: data.education.documents.transcript,
+      diploma: data.education.documents.diploma,
+      cv: data.education.documents.cv,
+      other: data.education.documents.other,
+      receipt: data.paymentData.receiptFile,
+    };
+
+    Object.entries(files).forEach(([key, file]) => {
+      if (file instanceof File) {
+        console.log(`Appending file: ${key}`, file.name, file.size);
+        formData.append(key, file);
+      } else {
+        console.log(`Skipping ${key}: not a File object`, file);
+      }
+    });
+
+    // Log FormData contents
+    const formDataEntries = Object.fromEntries(formData.entries());
+    console.log('Sending FormData:', formData);//why is formData empty here
+
+    // Send request
     const response = await axios.post(
-      `${process.env.VUE_APP_BACKEND_URL}/api/payments/submit`,
+      'http://localhost:5000/api/candidates/register',
       formData,
       {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
+        // timeout: 10000,
       }
-    )
-    
-    console.log('API Response:', response);
-    const paymentData = response.data.data || response.data;
-    console.log('Processed payment data:', paymentData);
-    return paymentData;
+    );
+
+    console.log('API Response:', response.data);
+    return response.data;
   } catch (error) {
-    console.error('Error in submitPayment:', error);
-    throw new Error(error.response?.data?.message || error.message || 'Failed to submit payment');
+    console.error('Error in submitPayment:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    throw error;
   }
-}
+};
 
 export const paymentService = {
   submitPayment

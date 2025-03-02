@@ -2,8 +2,8 @@
   <div class="max-w-4xl mx-auto bg-background-light dark:bg-background-dark rounded-xl shadow-xl overflow-hidden">
     <!-- Header -->
     <div :class="[Theme.applyGradient('primary'), 'p-6']">
-      <h2 :class="[Theme.applyTextStyle('titleLarge'), 'text-text-light dark:text-text-dark mb-2']">Paiement des frais de concours</h2>
-      <p :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark opacity-80']">Veuillez effectuer le paiement pour finaliser votre candidature</p>
+      <h2 :class="[Theme.applyTextStyle('titleLarge'), 'text-white dark:text-text-dark mb-2']">Paiement des frais de concours</h2>
+      <p :class="[Theme.applyTextStyle('bodyMedium'), 'text-white dark:text-text-dark opacity-80']">Veuillez effectuer le paiement pour finaliser votre candidature</p>
     </div>
 
     <div class="p-6 space-y-8">
@@ -149,7 +149,7 @@
           <button
             type="submit"
             :disabled="loading"
-            class="flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors duration-200"
+            class="flex items-center px-6 py-3 bg-black hover:bg-primary-700 text-white rounded-lg transition-colors duration-200"
           >
             <span v-if="loading" class="material-icons animate-spin mr-2">sync</span>
             <span v-else class="material-icons mr-2">check_circle</span>
@@ -162,8 +162,8 @@
 </template>
 
 <script>
-import { ref } from 'vue'
-import { useStore } from 'vuex'
+import { ref, computed } from 'vue'
+import { useStore  } from 'vuex'
 import { useRouter } from 'vue-router'
 import { Theme } from '@/utils/Theme'
 import { paymentService } from '@/api/services'
@@ -184,6 +184,7 @@ export default {
     })
 
     const handleSubmit = async () => {
+      // const store = useStore()
       if (validateForm()) {
         loading.value = true
         try {
@@ -191,12 +192,18 @@ export default {
           const paymentData = {
             ...form.value,
             paymentDate: form.value.paymentMethod === 'mobile' ? 
-              new Date().toISOString() : form.value.paymentDate
+            new Date().toISOString() : form.value.paymentDate
           }
+          
+          const civilStatus = computed(() => store.state.candidateRegistration.formSteps);
+          const data = civilStatus.value; // Extract the raw data from the proxy
 
+            // Merge paymentData into data
+              const formData = { ...data, paymentData };
+              console.log(formData);
           // Submit payment to backend
-          await paymentService.submitPayment(paymentData)
-
+          console.log(paymentData);
+          await paymentService.submitPayment(formData)
           // Update store with form data
           await store.dispatch('candidateRegistration/updateStepData', {
             step: 'payment',

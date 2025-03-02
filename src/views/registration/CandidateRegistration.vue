@@ -58,12 +58,12 @@
                 </span>
 
                 <!-- Tooltip -->
-                <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
+                <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
                   <div :class="[
                     'text-sm px-4 py-2 rounded-lg shadow-xl whitespace-nowrap',
                     isStepComplete(index + 1) ? 'bg-blue-700 text-white' : 'bg-gray-800 text-white'
                   ]">
-                    {{ step.label }}
+                   Phase {{ step.label }}
                   </div>
                 </div>
               </div>

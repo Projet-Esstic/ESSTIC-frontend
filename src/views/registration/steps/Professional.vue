@@ -90,8 +90,8 @@
           type="submit"
           class="flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
         >
-          <span class="material-icons mr-2">arrow_forward</span>
           Suivant
+          <span class="material-icons ml-2">arrow_forward</span>
         </button>
       </div>
     </form>
@@ -110,10 +110,16 @@ export default {
     const form = ref({
       professionalExperience: [
         {
-          company: '',
-          position: '',
-          yearsOfExperience: 0,
-          description: ''
+          company: 'Acme Solutions',
+          position: 'Développeur Web',
+          yearsOfExperience: 2,
+          description: 'Développement de solutions web pour des clients internationaux. Utilisation de Vue.js, Node.js et MongoDB pour créer des applications web performantes et réactives.'
+        },
+        {
+          company: 'Tech Innovations',
+          position: 'Stagiaire en développement',
+          yearsOfExperience: 1,
+          description: 'Participation au développement d\'une application mobile de gestion de projets. Collaboration avec une équipe agile et mise en place de tests automatisés.'
         }
       ]
     })
@@ -158,13 +164,7 @@ export default {
       if (form.value.professionalExperience.length === 0) {
         newErrors.workExperience = 'Au moins une expérience professionnelle est requise'
       }
-
-      // Validate skills
-      // if (formData.skills.length === 0) {
-      //   newErrors.skills = 'Au moins une compétence est requise'
-      // }
       
-      // errors.value = newErrors
       return Object.keys(newErrors).length === 0
     }
 
