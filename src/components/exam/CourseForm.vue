@@ -135,6 +135,7 @@ export default {
             `${process.env.VUE_APP_BACKEND_URL}/api/courses`, 
             form.value
           )
+          console.log(response);
           // Emit success event
           // emit('course-added', response.data)
           // Reset form

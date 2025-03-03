@@ -1,6 +1,6 @@
 <template>
   <div class="h-screen p-8 overflow-auto">
-    <div class="max-w-3xl mx-auto bg-white/80 backdrop-blur-lg rounded-xl shadow-xl p-8 animate-fade-in">
+    <div class="w-full max-w-6xl mx-auto bg-white/80 backdrop-blur-lg rounded-xl shadow-xl p-8 animate-fade-in">
       <!-- Page Title -->
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold text-gray-800 mb-2 animate-slide-up">

@@ -57,7 +57,7 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import { useStore } from 'vuex'
+// import { useStore } from 'vuex'
 import EnrollmentList from './EnrollmentList.vue'
 import StudentList from './StudentList.vue'
 import CourseRegistration from './CourseRegistration.vue'
@@ -81,7 +81,7 @@ export default {
   },
 
   setup() {
-    const store = useStore()
+    // const store = useStore()
     const currentTab = ref('enrollment')
     const departments = ref([])
     const loading = ref(false)
