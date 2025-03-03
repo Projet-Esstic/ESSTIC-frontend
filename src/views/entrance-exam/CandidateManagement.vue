@@ -368,13 +368,14 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Modal from '@/components/Modal.vue';
 import { fieldService } from '@/api/services';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import io from 'socket.io-client'; // Import Socket.IO client
 
 export default {
   name: 'CandidateManagement',
@@ -388,7 +389,7 @@ export default {
     }
   },
   setup(props) {
-    const store = useStore()
+    const store = useStore();
     const router = useRouter();
     const searchQuery = ref('');
     const selectedField = ref('');
@@ -398,6 +399,7 @@ export default {
     const editingCandidate = ref(null);
     const departments = ref([]);
     const selectedReportField = ref('');
+    const socket = ref(null); // Reactive reference for Socket.IO connection
 
     // Status options for filter - only show final statuses
     const statusOptions = [
@@ -416,8 +418,40 @@ export default {
       }
     };
 
+    // Establish Socket.IO connection
+    const connectSocket = () => {
+      // Replace 'http://localhost:3000' with your actual Socket.IO server URL
+      socket.value = io('http://localhost:5000');
+
+      // Log connection status
+      socket.value.on('connect', () => {
+        console.log('Connected to Socket.IO server');
+      });
+
+      socket.value.on('disconnect', () => {
+        console.log('Disconnected from Socket.IO server');
+      });
+
+      // Listen for candidate updates from the server
+      socket.value.on('candidates', (change) => {
+        console.log('Received candidate change:', change);
+        // Refresh the candidates list when an update is received
+        store.dispatch('candidates/fetchCandidates');
+      });
+    };
+
+    // Lifecycle hooks
     onMounted(() => {
       loadDepartments();
+      connectSocket(); // Initialize Socket.IO connection when component mounts
+      store.dispatch('candidates/fetchCandidates'); // Fetch initial candidates
+    });
+
+    onUnmounted(() => {
+      if (socket.value) {
+        socket.value.disconnect(); // Cleanup: Disconnect socket when component unmounts
+        console.log('Socket.IO connection closed');
+      }
     });
 
     const updateStatus = async (candidateId, newStatus) => {
@@ -476,13 +510,8 @@ export default {
       editingCandidate.value = null;
     };
 
-    // Get candidates from store
+    // Get candidates from Vuex store
     const candidates = computed(() => store.getters['candidates/getAllCandidates']);
-
-    // Fetch candidates when component mounts
-    onMounted(async () => {
-      await store.dispatch('candidates/fetchCandidates');
-    });
 
     const getStatistics = computed(() => {
       const filteredCands = selectedReportField.value
@@ -564,34 +593,21 @@ export default {
     };
 
     const addHeader = (doc, pageTitle = '') => {
-      // Add logo (smaller size: 25x25)
       const logoPath = require('@/assets/images/esstic-logo.png');
       doc.addImage(logoPath, 'PNG', 15, 10, 25, 25);
-
-      // Add header text (start after logo + margin)
-      const textStartX = 50; // Logo width (25) + left margin (15) + space (10)
+      const textStartX = 50;
       doc.setFontSize(14);
-      doc.setTextColor(41, 128, 185); // Blue color
-      
-      // Calculate text width to ensure no overlap
+      doc.setTextColor(41, 128, 185);
       const pageWidth = doc.internal.pageSize.width;
-      const textWidth = pageWidth - (textStartX + 15); // 15px right margin
+      const textWidth = pageWidth - (textStartX + 15);
       const centerX = textStartX + (textWidth / 2);
-      
-      // French name
       doc.text('ÉCOLE SUPÉRIEURE DES SCIENCES ET TECHNOLOGIES', centerX, 15, { align: 'center' });
       doc.text('DE L\'INFORMATION ET DE LA COMMUNICATION', centerX, 22, { align: 'center' });
-      
-      // English name
       doc.setFontSize(12);
       doc.text('ADVANCED SCHOOL OF MASS COMMUNICATION', centerX, 29, { align: 'center' });
-      
-      // Add divider line
       doc.setDrawColor(41, 128, 185);
       doc.setLineWidth(0.5);
       doc.line(15, 35, doc.internal.pageSize.width - 15, 35);
-
-      // Add page title if provided
       if (pageTitle) {
         doc.setFontSize(14);
         doc.text(pageTitle, doc.internal.pageSize.width / 2, 45, { align: 'center' });
@@ -602,44 +618,31 @@ export default {
       const doc = new jsPDF();
       const stats = getStatistics.value;
       
-      // Title Page
       addHeader(doc);
-      
       doc.setFontSize(22);
       doc.setTextColor(0);
       doc.text('ENTRANCE EXAMINATION 2024', doc.internal.pageSize.width / 2, 60, { align: 'center' });
-      
       doc.setFontSize(18);
       doc.text('List of Eligible Candidates', doc.internal.pageSize.width / 2, 75, { align: 'center' });
-      
       doc.setFontSize(12);
       doc.text(`Generated on: ${new Date().toLocaleDateString()}`, doc.internal.pageSize.width / 2, 90, { align: 'center' });
-      
-      // Add decorative elements
       doc.setDrawColor(41, 128, 185);
       doc.setLineWidth(0.5);
       doc.line(50, 80, doc.internal.pageSize.width - 50, 80);
-      
-      // Add footer
       const pageHeight = doc.internal.pageSize.height;
       doc.setFontSize(10);
       doc.text('ESSTIC - Excellence in Information and Communication Technology Education', 
         doc.internal.pageSize.width / 2, pageHeight - 20, { align: 'center' });
 
-      // For each field, create a new page with the list of validated candidates
       stats.classStats.forEach(stat => {
         if (stat.validated > 0) {
           doc.addPage();
           addHeader(doc, getFieldName(stat.fieldId));
-          
-          // Get validated candidates for this field
           const fieldCandidates = candidates.value
             .filter(c => c.fieldId === stat.fieldId && c.applicationStatus === 'registered')
             .sort((a, b) => a.name.localeCompare(b.name));
-
-          // Create table of candidates
           const tableData = fieldCandidates.map((candidate, idx) => [
-            (idx + 1).toString(), // Site number
+            (idx + 1).toString(),
             candidate.registrationNumber,
             candidate.user.firstName + ' ' + candidate.user.lastName,
             formatDate(candidate.registrationDate)
@@ -674,24 +677,19 @@ export default {
             }
           });
 
-          // Add footer with total count and page info
           const pageHeight = doc.internal.pageSize.height;
           doc.setDrawColor(41, 128, 185);
           doc.setLineWidth(0.5);
           doc.line(15, pageHeight - 25, doc.internal.pageSize.width - 15, pageHeight - 25);
-
           doc.setFontSize(10);
           doc.setTextColor(100);
-          // Left side
           doc.text('ESSTIC Entrance Examination 2024', 15, pageHeight - 15);
-          // Center
           doc.text(
             `Total Eligible Candidates: ${fieldCandidates.length}`,
             doc.internal.pageSize.width / 2,
             pageHeight - 15,
             { align: 'center' }
           );
-          // Right side
           doc.text(
             `Page ${doc.internal.getCurrentPageInfo().pageNumber}`,
             doc.internal.pageSize.width - 15,
@@ -701,7 +699,6 @@ export default {
         }
       });
 
-      // Save the PDF
       doc.save('entrance-exam-candidates.pdf');
     };
 

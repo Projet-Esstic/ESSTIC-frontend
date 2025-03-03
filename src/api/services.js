@@ -672,3 +672,45 @@ const submitPayment = async (data) => {
 export const paymentService = {
   submitPayment
 }
+
+export const studentService = {
+  enrollCandidate: async (candidateId) => {
+    try {
+      const response = await axios.post(`${ENDPOINTS.STUDENT_ENROLLMENT}/${candidateId}`)
+      return response.data
+    } catch (error) {
+      console.error('Error enrolling candidate:', error)
+      throw new Error(error.response?.data?.message || 'Failed to enroll candidate')
+    }
+  },
+
+  getAllStudents: async () => {
+    try {
+      const response = await axios.get(ENDPOINTS.STUDENTS)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching students:', error)
+      throw new Error(error.response?.data?.message || 'Failed to fetch students')
+    }
+  },
+
+  getStudentById: async (studentId) => {
+    try {
+      const response = await axios.get(`${ENDPOINTS.STUDENT_BY_ID}/${studentId}`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching student:', error)
+      throw new Error(error.response?.data?.message || 'Failed to fetch student')
+    }
+  },
+
+  updateStudent: async (studentId, data) => {
+    try {
+      const response = await axios.put(`${ENDPOINTS.STUDENT_BY_ID}/${studentId}`, data)
+      return response.data
+    } catch (error) {
+      console.error('Error updating student:', error)
+      throw new Error(error.response?.data?.message || 'Failed to update student')
+    }
+  }
+}
