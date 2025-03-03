@@ -616,6 +616,8 @@ const submitPayment = async (data) => {
 
     // Create FormData
     const formData = new FormData();
+    
+    // Important: stringify the object and append as 'formData'
     console.log('Appending formData:', JSON.stringify(formDataObj));
     formData.append('formData', JSON.stringify(formDataObj));
 
@@ -638,9 +640,10 @@ const submitPayment = async (data) => {
       }
     });
 
-    // Log FormData contents
-    const formDataEntries = Object.fromEntries(formData.entries());
-    console.log('Sending FormData:', formData);//why is formData empty here
+    // Log FormData contents for debugging
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
+    }
 
     // Send request
     const response = await axios.post(
@@ -650,7 +653,7 @@ const submitPayment = async (data) => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        // timeout: 10000,
+        timeout: 10000,
       }
     );
 
