@@ -4,8 +4,8 @@
     <div :class="[Theme.applyGradient('primary'), 'relative p-6']">
       <div class="flex items-start justify-between">
         <div class="text-white">
-          <h2 :class="[Theme.applyTextStyle('titleLarge'), 'text-text-light dark:text-text-dark mb-2']">Récapitulatif de votre candidature</h2>
-          <p :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark opacity-80']">Vérifiez vos informations avant la soumission finale</p>
+          <h2 :class="[Theme.applyTextStyle('titleLarge'), 'text-white dark:text-text-dark mb-2']">Récapitulatif de votre candidature</h2>
+          <p :class="[Theme.applyTextStyle('bodyMedium'), 'text-white dark:text-text-dark opacity-80']">Vérifiez vos informations avant la soumission finale</p>
         </div>
         
         <!-- Profile Image -->
@@ -124,8 +124,8 @@
           class="flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
           :disabled="loading"
         >
-          <span class="material-icons mr-2">arrow_forward</span>
-          Procéder au paiement
+          Procéder au paiement  
+        <span class="material-icons mr-2">arrow_forward</span>
         </button>
       </div>
     </div>

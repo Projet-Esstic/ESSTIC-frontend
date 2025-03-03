@@ -1,8 +1,8 @@
 <template>
   <div class="max-w-4xl mx-auto bg-background-light dark:bg-background-dark rounded-xl shadow-lg overflow-hidden">
     <div :class="[Theme.applyGradient('primary'), 'p-6']">
-      <h2 :class="[Theme.applyTextStyle('titleLarge'), 'text-text-light dark:text-text-dark mb-2']">Formation Académique</h2>
-      <p :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark opacity-80']">Détails de votre parcours académique</p>
+      <h2 :class="[Theme.applyTextStyle('titleLarge'), 'text-white dark:text-text-dark mb-2']">Formation Académique</h2>
+      <p :class="[Theme.applyTextStyle('bodyMedium'), 'text-white dark:text-text-dark opacity-80']">Détails de votre parcours académique</p>
     </div>
 
     <form @submit.prevent="handleSubmit" class="p-6 space-y-8">
@@ -90,6 +90,7 @@
       <div class="bg-surface-light dark:bg-surface-dark rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-600">
         <h3 :class="[Theme.applyTextStyle('heading3'), 'text-text-light dark:text-text-dark mb-4']">Documents Académiques</h3>
         <div class="space-y-4">
+          <div class="grid grid-cols-2 md:grid-cols-2 gap-6">
           <div class="form-group">
             <label :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark mb-2']">Relevé de notes</label>
             <input 
@@ -121,6 +122,7 @@
           </div>
         </div>
       </div>
+      </div>
 
       <!-- Navigation Buttons -->
       <div class="flex justify-between items-center pt-6 mt-8 border-t border-gray-200 dark:border-gray-700">
@@ -136,8 +138,8 @@
           type="submit"
           class="flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors duration-200"
         >
-          <span class="material-icons mr-2">arrow_forward</span>
-          Suivant
+        Suivant
+        <span class="material-icons mr-2">arrow_forward</span>
         </button>
       </div>
     </form>
@@ -157,14 +159,14 @@ export default {
 
     const form = ref({
       highSchool: {
-        schoolName: '',
-        yearCompleted: currentYear,
-        majorSubjects: ''
+        schoolName: 'Lycée Victor Hugo',
+        yearCompleted: 2018,
+        majorSubjects: 'Mathématiques, Physique-Chimie, Sciences de la Vie et de la Terre'
       },
       university: {
-        universityName: '',
-        degree: '',
-        yearCompleted: currentYear
+        universityName: 'Université Paris-Saclay',
+        degree: 'Licence en Informatique',
+        yearCompleted: 2021
       },
       documents: {
         transcript: null,

@@ -68,8 +68,8 @@
           type="submit"
           class="flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors duration-200"
         >
-          <span class="material-icons mr-2">arrow_forward</span>
           Suivant
+          <span class="material-icons ml-2">arrow_forward</span>
         </button>
       </div>
     </form>
@@ -88,8 +88,16 @@ export default {
     const form = ref({
       activities: [
         {
-          activity: '',
-          description: ''
+          activity: 'Club de Robotique',
+          description: 'Membre actif du club de robotique universitaire. Participation à des compétitions nationales et conception de robots autonomes.'
+        },
+        {
+          activity: 'Bénévolat - Les Restos du Cœur',
+          description: 'Distribution de repas et aide à l\'organisation d\'événements de collecte. Contribution hebdomadaire de 4 heures pendant 2 ans.'
+        },
+        {
+          activity: 'Association Sportive - Basketball',
+          description: 'Capitaine de l\'équipe universitaire de basketball. Organisation d\'entraînements et participation à des tournois régionaux.'
         }
       ]
     })
