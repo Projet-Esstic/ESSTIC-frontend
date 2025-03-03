@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
+import ExamResults from '@/views/entrance-exam/ExamResults.vue'
 
 const routes = [
   {
@@ -15,6 +16,15 @@ const routes = [
         path: 'entrance-exam',
         name: 'EntranceExam',
         component: () => import('../views/entrance-exam/EntranceExam.vue')
+      },
+      {
+        path: 'entrance-exam/results',
+        name: 'exam-results',
+        component: ExamResults,
+        meta: {
+          requiresAuth: true,
+          title: 'Exam Results'
+        }
       },
       {
         path: 'all-routes',

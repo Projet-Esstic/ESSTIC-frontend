@@ -1,113 +1,109 @@
-import { courseService } from '../../api/services'
+import axios from 'axios'
 
 const state = {
   courses: [],
-  selectedCourse: null,
   loading: false,
   error: null
 }
 
-const getters = {
-  getAllCourses: state => state.courses,
-  getSelectedCourse: state => state.selectedCourse,
-  isLoading: state => state.loading,
-  getError: state => state.error
-}
-
 const mutations = {
-  SET_COURSES(state, courses) {
-    state.courses = courses
+  setCourses(state, courses) {
+    state.courses = courses || [] // Ensure we always set an array
   },
-  ADD_COURSE(state, course) {
-    state.courses.push(course)
-  },
-  UPDATE_COURSE(state, updatedCourse) {
-    const index = state.courses.findIndex(course => course.id === updatedCourse.id)
-    if (index !== -1) {
-      state.courses.splice(index, 1, updatedCourse)
-    }
-  },
-  DELETE_COURSE(state, courseId) {
-    state.courses = state.courses.filter(course => course.id !== courseId)
-  },
-  SET_SELECTED_COURSE(state, course) {
-    state.selectedCourse = course
-  },
-  SET_LOADING(state, status) {
+  setLoading(state, status) {
     state.loading = status
   },
-  SET_ERROR(state, error) {
+  setError(state, error) {
     state.error = error
+  },
+  addCourse(state, course) {
+    state.courses.push(course)
+  },
+  updateCourse(state, updatedCourse) {
+    const index = state.courses.findIndex(course => course._id === updatedCourse._id)
+    if (index !== -1) {
+      state.courses[index] = updatedCourse
+    }
+  },
+  deleteCourse(state, courseId) {
+    state.courses = state.courses.filter(course => course._id !== courseId)
   }
 }
 
 const actions = {
   async fetchCourses({ commit }) {
     try {
-      commit('SET_LOADING', true)
-      const courses = await courseService.getAllCourses()
-      commit('SET_COURSES', courses)
-      commit('SET_ERROR', null)
+      commit('setLoading', true)
+      commit('setError', null)
+      const response = await axios.get('/api/courses')
+      commit('setCourses', response.data)
     } catch (error) {
-      commit('SET_ERROR', error.message)
+      console.error('Error fetching courses:', error)
+      commit('setError', error.message)
+      commit('setCourses', []) // Set empty array on error
     } finally {
-      commit('SET_LOADING', false)
+      commit('setLoading', false)
     }
   },
 
   async createCourse({ commit }, courseData) {
     try {
-      commit('SET_LOADING', true)
-      const course = await courseService.createCourse(courseData)
-      commit('ADD_COURSE', course)
-      commit('SET_ERROR', null)
-      return course
+      commit('setLoading', true)
+      commit('setError', null)
+      const response = await axios.post('/api/courses', courseData)
+      commit('addCourse', response.data)
+      return response.data
     } catch (error) {
-      commit('SET_ERROR', error.message)
+      console.error('Error creating course:', error)
+      commit('setError', error.message)
       throw error
     } finally {
-      commit('SET_LOADING', false)
+      commit('setLoading', false)
     }
   },
 
   async updateCourse({ commit }, { id, courseData }) {
     try {
-      commit('SET_LOADING', true)
-      const course = await courseService.updateCourse(id, courseData)
-      commit('UPDATE_COURSE', course)
-      commit('SET_ERROR', null)
-      return course
+      commit('setLoading', true)
+      commit('setError', null)
+      const response = await axios.put(`/api/courses/${id}`, courseData)
+      commit('updateCourse', response.data)
+      return response.data
     } catch (error) {
-      commit('SET_ERROR', error.message)
+      console.error('Error updating course:', error)
+      commit('setError', error.message)
       throw error
     } finally {
-      commit('SET_LOADING', false)
+      commit('setLoading', false)
     }
   },
 
   async deleteCourse({ commit }, id) {
     try {
-      commit('SET_LOADING', true)
-      await courseService.deleteCourse(id)
-      commit('DELETE_COURSE', id)
-      commit('SET_ERROR', null)
+      commit('setLoading', true)
+      commit('setError', null)
+      await axios.delete(`/api/courses/${id}`)
+      commit('deleteCourse', id)
     } catch (error) {
-      commit('SET_ERROR', error.message)
+      console.error('Error deleting course:', error)
+      commit('setError', error.message)
       throw error
     } finally {
-      commit('SET_LOADING', false)
+      commit('setLoading', false)
     }
-  },
-
-  selectCourse({ commit }, course) {
-    commit('SET_SELECTED_COURSE', course)
   }
+}
+
+const getters = {
+  getAllCourses: state => state.courses,
+  getLoading: state => state.loading,
+  getError: state => state.error
 }
 
 export default {
   namespaced: true,
   state,
-  getters,
   mutations,
-  actions
+  actions,
+  getters
 }
