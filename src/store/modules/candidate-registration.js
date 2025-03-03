@@ -88,6 +88,9 @@ export default {
     UPDATE_EXAM_ID(state, examId) {
       state.formSteps.civilStatus.selectedEntranceExam = examId
     },
+    UPDATE_FIELD_OF_STUDY(state, fieldId) {
+      state.formSteps.civilStatus.fieldOfStudy = fieldId
+    },
     SET_FORM_DATA(state, { step, data }) {
       state.formSteps[step] = { ...state.formSteps[step], ...data }
     },
@@ -230,46 +233,46 @@ export default {
       }
     },
 
-    async submitApplication({ commit}, formData) {
-      commit('SET_LOADING', true)
-      commit('SET_ERROR', null)
+    // async submitApplication({ commit}, formData) {
+    //   commit('SET_LOADING', true)
+    //   commit('SET_ERROR', null)
       
-      try {
-        // Get all form data
-        const candidateData = JSON.parse(formData.get('candidateData'))
+    //   try {
+    //     // Get all form data
+    //     const candidateData = JSON.parse(formData.get('candidateData'))
 
-        // Create FormData for backend
-        const backendFormData = new FormData()
+    //     // Create FormData for backend
+    //     const backendFormData = new FormData()
 
-        // Add all files
-        if (formData.has('profilePicture')) {
-          backendFormData.append('profilePicture', formData.get('profilePicture'))
-        }
-        if (formData.has('bankReceipt')) {
-          backendFormData.append('bankReceipt', formData.get('bankReceipt'))
-        }
+    //     // Add all files
+    //     if (formData.has('profilePicture')) {
+    //       backendFormData.append('profilePicture', formData.get('profilePicture'))
+    //     }
+    //     if (formData.has('bankReceipt')) {
+    //       backendFormData.append('bankReceipt', formData.get('bankReceipt'))
+    //     }
 
-        // Add all candidate data
-        backendFormData.append('candidateData', JSON.stringify({
-          personalInfo: candidateData.personalInfo,
-          education: candidateData.education,
-          professional: candidateData.professional,
-          extraActivities: candidateData.extraActivities,
-          diversInfo: candidateData.diversInfo,
-          payment: candidateData.payment
-        }))
+    //     // Add all candidate data
+    //     backendFormData.append('candidateData', JSON.stringify({
+    //       personalInfo: candidateData.personalInfo,
+    //       education: candidateData.education,
+    //       professional: candidateData.professional,
+    //       extraActivities: candidateData.extraActivities,
+    //       diversInfo: candidateData.diversInfo,
+    //       payment: candidateData.payment
+    //     }))
 
-        // Create the candidate using the candidateService
-        const response = await candidateService.createCandidate(backendFormData)
+    //     // Create the candidate using the candidateService
+    //     const response = await candidateService.createCandidate(backendFormData)
         
-        // Return the created candidate
-        return response
-      } catch (error) {
-        commit('SET_ERROR', error.message)
-        throw error
-      } finally {
-        commit('SET_LOADING', false)
-      }
-    }
+    //     // Return the created candidate
+    //     return response
+    //   } catch (error) {
+    //     commit('SET_ERROR', error.message)
+    //     throw error
+    //   } finally {
+    //     commit('SET_LOADING', false)
+    //   }
+    // }
   }
 }

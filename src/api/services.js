@@ -651,18 +651,6 @@ const submitPayment = async (data) => {
       formData,
       {
         headers: {
-<<<<<<< HEAD
-          'Content-Type': 'multipart/form-data',
-        },
-        timeout: 10000,
-      }
-    );
-
-    console.log('API Response:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('Error in submitPayment:', {
-=======
           'Content-Type': 'multipart/form-data', // Can actually be omitted, axios will handle it
         },
       }
@@ -672,7 +660,6 @@ const submitPayment = async (data) => {
     return response.data;
   } catch (error) {
     console.error('❌ Error in submitPayment:', {
->>>>>>> 0aaa76b29a8d900408bcdbf4296a5666185e9d87
       message: error.message,
       response: error.response?.data,
       status: error.response?.status,

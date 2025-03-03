@@ -211,7 +211,7 @@ export default {
           })
 
           // Submit the complete application
-          await store.dispatch('candidateRegistration/submitApplication')
+          // await store.dispatch('candidateRegistration/submitApplication')
           
           // Move to success page or dashboard
           router.push('/dashboard')

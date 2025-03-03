@@ -349,8 +349,7 @@ export default {
         loading.value = false
       }
     }
-
-    const determineStatus = (exam) => {
+   const determineStatus = (exam) => {
       const now = new Date()
       const startDate = new Date(exam.startDate)
       const endDate = new Date(exam.endDate)
@@ -361,6 +360,7 @@ export default {
       if (now > examDate) return 'completed'
       return 'in_progress'
     }
+ 
 
     const formatDate = (date) => {
       return new Date(date).toLocaleDateString()
