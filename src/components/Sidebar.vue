@@ -13,8 +13,8 @@
     <!-- Toggle button for desktop -->
     <button 
       @click="toggleSidebar" 
-      class="top-0 absolute z-40 hidden md:block bg-gray-800 text-white p-1 rounded-r-md transition-all"
-      :class="collapsed ? 'left-16' : 'left-60'"
+      class="top-0 fixed z-40 hidden md:block bg-gray-800 text-white p-1 rounded-r-md transition-all"
+      :class="collapsed ? 'left-16' : 'left-64'"
     >
       <span class="material-icons">{{ collapsed ? 'chevron_left' : 'chevron_right' }}</span>
       <!-- Tooltip for desktop button -->
@@ -30,8 +30,8 @@
       ]"
     >
       <!-- Logo/Header -->
-      <div class="p-4 border-b border-gray-700 flex items-center bg-white">
-        <img src="@/assets/images/esstic-logo.png" alt=""  width="100%">
+      <div class="p-1 border-b border-gray-700 flex items-center bg-white">
+        <img src="@/assets/images/logo.png" alt=""  width="100%">
       </div>
 
       <!-- Navigation Menu -->

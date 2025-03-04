@@ -8,7 +8,7 @@ const routes = [
   {
     path: '/',
     component: () => import('../layouts/DefaultLayout.vue'),
-    meta: { requiresAuth: true }, // Protect this route with  router.beforeEach define below
+    // meta: { requiresAuth: true }, // Protect this route with  router.beforeEach define below
     children: [
       {
         path: '',
