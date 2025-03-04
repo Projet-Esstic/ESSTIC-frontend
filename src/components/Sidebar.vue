@@ -75,6 +75,17 @@
             <span v-if="collapsed" class="tooltip">{{ isDark ? 'Light Mode' : 'Dark Mode' }}</span>
           </button>
         </div>
+        <div class="px-2 py-2 mt-4">
+          <button 
+            @click="logOut" 
+            class="relative flex items-center py-2 px-2 rounded-lg hover:bg-gray-700 w-full transition-colors group"
+          >
+            <span class="material-icons">logout</span>
+            <span v-if="!collapsed" class="ml-3">Log out</span>
+            <!-- Tooltip for theme toggle -->
+            <span v-if="collapsed" class="tooltip">Log out</span>
+          </button>
+        </div>
       </nav>
     </div>
 
@@ -91,6 +102,7 @@
 import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
+import {authService} from '@/api/services/index';
 
 export default {
   name: 'Sidebar',
@@ -119,15 +131,23 @@ export default {
     const toggleSidebar = () => {
       emit('toggle');
     };
-
+    
+    
     return {
       isDark,
       toggleTheme,
       toggleSidebar,
       isMobileOpen,
       menuItems,
+      // logOut,
       currentRoute
     };
+  },
+  methods: {  
+    async logOut() {
+      authService.logout()
+      this.$router.push('/login'); // Redirect after login
+    }
   }
 };
 </script>
