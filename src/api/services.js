@@ -8,63 +8,63 @@ axios.defaults.withCredentials = true
 // Helper function to validate course data
 const validateCourseData = (courseData) => {
   const errors = []
-  
+
   if (!courseData.name || courseData.name.trim().length === 0) {
     errors.push('Course name is required')
   }
-  
+
   if (!courseData.code || courseData.code.trim().length === 0) {
     errors.push('Course code is required')
   }
-  
+
   if (!courseData.duration || courseData.duration < 30) {
     errors.push('Duration must be at least 30 minutes')
   }
-  
+
   if (!courseData.totalMarks || courseData.totalMarks <= 0) {
     errors.push('Total marks must be greater than 0')
   }
-  
+
   if (!courseData.coefficients || Object.keys(courseData.coefficients).length === 0) {
     errors.push('At least one field coefficient is required')
   }
-  
+
   return errors
 }
 
 // Helper function to transform frontend data to backend format
 const transformCandidateData = (formData) => {
-    console.log('Transforming data:', formData)
-    const transformedData = {
-        // User related data
-        user: {
-            email: formData.email,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            dateOfBirth: formData.dateOfBirth,
-            gender: formData.gender,
-            phoneNumber: formData.phoneNumber,
-            profilePicture: formData.profilePicture,
-            address: formData.address,
-            emergencyContact: formData.emergencyContact
-        },
+  console.log('Transforming data:', formData)
+  const transformedData = {
+    // User related data
+    user: {
+      email: formData.email,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      dateOfBirth: formData.dateOfBirth,
+      gender: formData.gender,
+      phoneNumber: formData.phoneNumber,
+      profilePicture: formData.profilePicture,
+      address: formData.address,
+      emergencyContact: formData.emergencyContact
+    },
 
-        // Candidate specific data
-        selectedEntranceExam: formData.selectedEntranceExam,
-        fieldOfStudy: formData.fieldOfStudy,
-        examCenter: formData.examCenter,
-        documents: formData.documents,
-        
-        // Additional data
-        lieuDeNaissance: formData.lieuDeNaissance,
-        situationDeFamille: formData.situationDeFamille,
-        boitePostale: formData.boitePostale,
-        referencesFamilales: formData.referencesFamilales,
-        addressParents: formData.addressParents
-    }
-    
-    console.log('Transformed data:', transformedData)
-    return transformedData
+    // Candidate specific data
+    selectedEntranceExam: formData.selectedEntranceExam,
+    fieldOfStudy: formData.fieldOfStudy,
+    examCenter: formData.examCenter,
+    documents: formData.documents,
+
+    // Additional data
+    lieuDeNaissance: formData.lieuDeNaissance,
+    situationDeFamille: formData.situationDeFamille,
+    boitePostale: formData.boitePostale,
+    referencesFamilales: formData.referencesFamilales,
+    addressParents: formData.addressParents
+  }
+
+  console.log('Transformed data:', transformedData)
+  return transformedData
 };
 
 export const courseService = {
@@ -201,10 +201,10 @@ export const candidateService = {
       console.log('Calling createCandidate API');
       const transformedData = transformCandidateData(formData);
       const data = new FormData();
-      
+
       // Add transformed data as JSON
       data.append('formData', JSON.stringify(transformedData));
-      
+
       // Handle document uploads
       if (formData.profileImageFile) {
         data.append('profile', formData.profileImageFile);
@@ -276,9 +276,9 @@ export const candidateService = {
       console.log('Calling updateCandidate API');
       const transformedData = transformCandidateData(formData);
       const data = new FormData();
-      
+
       data.append('formData', JSON.stringify(transformedData));
-      
+
       // Handle document updates
       if (formData.profileImageFile) {
         data.append('profile', formData.profileImageFile);
@@ -543,7 +543,7 @@ export const fileService = {
       console.log('Calling uploadFile API');
       const formData = new FormData()
       formData.append('file', file)
-      
+
       const response = await axios.post(ENDPOINTS.FILE_UPLOAD, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -616,7 +616,7 @@ const submitPayment = async (data) => {
 
     // Create FormData
     const formData = new FormData();
-    
+
     // Important: stringify the object and append as 'formData'
     console.log('Appending formData:', JSON.stringify(formDataObj));
     formData.append('formData', JSON.stringify(formDataObj));
