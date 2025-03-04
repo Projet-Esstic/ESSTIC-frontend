@@ -1,12 +1,19 @@
 <template>
   <div class="flex flex-col md:flex-row min-h-screen">
+     <!-- Flash Notification -->
+     <flash-notification 
+      :message="errorMessage" 
+      type="error" 
+      :duration="3000"
+      @close="errorMessage = ''"
+    />
     <!-- School Illustration Section -->
     <div class="md:w-1/2 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center p-4 md:p-6">
       <div class="text-center max-w-lg w-full">
         <img 
           src="@/assets/images/esstic-logo.png" 
           alt="School Campus" 
-          class="mx-auto mb-4 object-contain rounded-lg shadow-2xl transform transition hover:scale-105"
+          class="mx-auto mb-4 object-contain rounded-[10px] shadow-2xl transform transition hover:scale-105 hover:shadow-3xl"
         />
         <h1 class="text-2xl md:text-4xl font-bold text-gray-800 mb-3 md:mb-4">
           ESSTIC School Portal
@@ -152,10 +159,6 @@
             Sign In
           </button>
           
-          <p v-if="errorMessage" class="text-red-500 text-xs md:text-sm text-center mt-2">
-            {{ errorMessage }}
-          </p>
-          
           <div class="text-center mt-4">
             <p class="text-xs md:text-sm text-gray-600">
               Don't have an account? 
@@ -172,6 +175,7 @@
 
 <script>
 import { authService } from '@/api/services/index';
+import FlashNotification from '@/components/FlashNotification.vue';
 
 export default {
   data() {
@@ -189,12 +193,15 @@ export default {
         await authService.login(this.email, this.password);
         this.$router.push('/'); // Redirect after successful login
       } catch (error) {
-        this.errorMessage = error.message;
+        this.errorMessage = error.message || 'Login failed. Please try again';
       }
     },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
     }
+  },
+  components: {
+    FlashNotification
   }
 };
 </script>
