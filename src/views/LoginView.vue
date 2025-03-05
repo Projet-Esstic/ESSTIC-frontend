@@ -171,14 +171,14 @@
             Sign In
           </button>
 
-          <div class="text-center mt-4">
+          <!-- <div class="text-center mt-4">
             <p class="text-xs md:text-sm text-gray-600 dark:text-gray-300">
               Don't have an account?
               <a href="#" class="text-blue-600 hover:text-blue-500 font-semibold">
                 Sign up
               </a>
             </p>
-          </div>
+          </div> -->
         </form>
       </div>
     </div>
