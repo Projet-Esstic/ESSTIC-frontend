@@ -359,18 +359,15 @@ export const marksService = {
     }
   },
 
-  // Update marks for a candidate
-  async updateCandidateMarks(candidateId, subjectId, mark) {
+  // Update marks for multiple candidates
+  async updateCandidateMarks(marks) {
     try {
       console.log('Calling updateCandidateMarks API');
-      const response = await axios.put(ENDPOINTS.MARKS_BY_CANDIDATE(candidateId), {
-        subjectId,
-        mark
-      });
+      const response = await axios.put(`${ENDPOINTS.CANDIDATES}/update`, marks); // Adjust the endpoint as necessary
       console.log('API Response:', response);
-      const marks = response.data.data || response.data;
-      console.log('Processed marks data:', marks);
-      return marks;
+      const updatedMarks = response.data.data || response.data;
+      console.log('Processed updated marks data:', updatedMarks);
+      return updatedMarks;
     } catch (error) {
       console.error('Error in updateCandidateMarks:', error);
       throw new Error(error.response?.data?.message || error.message || 'Failed to update candidate marks');
