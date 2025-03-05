@@ -13,7 +13,7 @@
     <!-- Toggle button for desktop -->
     <button 
       @click="toggleSidebar" 
-      class="top-0 fixed z-40 hidden md:block bg-gray-800 text-white p-1 rounded-r-md transition-all"
+      class="top-0 fixed z-40 hidden md:block bg-blue-600 text-white p-1 rounded-r-md transition-all"
       :class="collapsed ? 'left-16' : 'left-64'"
     >
       <span class="material-icons">{{ collapsed ? 'chevron_left' : 'chevron_right' }}</span>

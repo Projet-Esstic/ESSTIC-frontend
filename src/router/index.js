@@ -3,10 +3,15 @@ import Home from '../views/Home.vue'
 import ExamResults from '@/views/entrance-exam/ExamResults.vue'
 import LoginView from '@/views/LoginView.vue';
 import {authService} from '@/api/services/index';
+import LandingPage from '../views/LandingPage.vue';
 
 const routes = [
+  { 
+    path: '/', 
+    component: LandingPage 
+  },
   {
-    path: '/',
+    path: '/dashboard',
     component: () => import('../layouts/DefaultLayout.vue'),
     meta: { requiresAuth: true }, // Protect this route with  router.beforeEach define below
     children: [
