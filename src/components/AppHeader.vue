@@ -25,7 +25,7 @@
   
           <!-- Notification Bell -->
           <div class="relative">
-            <button 
+            <button ESSTIC Analytics
               @click="toggleNotifications" 
               class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors relative"
             >
