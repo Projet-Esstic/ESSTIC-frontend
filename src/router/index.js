@@ -13,7 +13,7 @@ const routes = [
   {
     path: '/dashboard',
     component: () => import('../layouts/DefaultLayout.vue'),
-    meta: { requiresAuth: true }, // Protect this route with  router.beforeEach define below
+    // meta: { requiresAuth: true }, // Protect this route with  router.beforeEach define below
     children: [
       {
         path: '',
@@ -47,6 +47,33 @@ const routes = [
   { 
     path: '/login', 
     component: LoginView 
+  },
+  {
+    path: '/student',
+    component: () => import('../layouts/StudentLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'StudentHome',
+        component: () => import('../views/student/StudentHome.vue')
+      },
+      {
+        path: '/courses',
+        name: 'Courses',
+        component: () => import('../views/student/StudentCourses.vue')
+      },
+      {
+        path: '/results',
+        name: 'results',
+        component: () => import('../views/student/StudentResult.vue')
+      },
+      {
+        path: '/settings',
+        name: 'settings',
+        component: () => import('../views/student/StudentSettings.vue')
+      },
+     
+    ]
   },
   // Public routes
   {
