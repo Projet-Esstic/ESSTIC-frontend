@@ -3,7 +3,9 @@
     <!-- Flash Notification -->
     <flash-notification :message="errorMessage" type="error" :duration="3000" @close="errorMessage = ''" />
     <!-- School Illustration Section -->
-    <div class="md:w-1/2 bg-gradient-to-br from-blue-600 to-blue-600 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4 md:p-6" id="boder">
+    <div
+      class="md:w-1/2 bg-gradient-to-br from-blue-600 to-blue-600 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4 md:p-6"
+      id="boder">
       <div class="text-center max-w-lg w-full">
         <img src="@/assets/images/logo.png" alt="School Campus"
           class="mx-auto mb-4 h-32 p-2 object-contain bg-white rounded-[10px] shadow-2xl transform transition hover:scale-105 hover:shadow-3xl" />
@@ -15,15 +17,18 @@
         </p>
 
         <div class="grid grid-cols-3 gap-2 md:gap-4 mb-3 hide">
-          <div class="bg-white p-2 md:p-4 rounded-lg shadow-md hover:shadow-xl transition transform hover:-translate-y-1">
+          <div
+            class="bg-white p-2 md:p-4 rounded-lg shadow-md hover:shadow-xl transition transform hover:-translate-y-1">
             <h3 class="font-bold text-blue-600 dark:text-blue-400 text-sm md:text-base mb-1 md:mb-2">Students</h3>
             <p class="text-xs md:text-sm text-gray-600 dark:text-gray-600">1,200+ Active</p>
           </div>
-          <div class="bg-white p-2 md:p-4 rounded-lg shadow-md hover:shadow-xl transition transform hover:-translate-y-1">
+          <div
+            class="bg-white p-2 md:p-4 rounded-lg shadow-md hover:shadow-xl transition transform hover:-translate-y-1">
             <h3 class="font-bold text-green-600 dark:text-green-400 text-sm md:text-base mb-1 md:mb-2">Teachers</h3>
             <p class="text-xs md:text-sm text-gray-600 dark:text-gray-600">85 Dedicated</p>
           </div>
-          <div class="bg-white p-2 md:p-4 rounded-lg shadow-md hover:shadow-xl transition transform hover:-translate-y-1">
+          <div
+            class="bg-white p-2 md:p-4 rounded-lg shadow-md hover:shadow-xl transition transform hover:-translate-y-1">
             <h3 class="font-bold text-purple-600 dark:text-purple-400 text-sm md:text-base mb-1 md:mb-2">Courses</h3>
             <p class="text-xs md:text-sm text-gray-600 dark:text-gray-600">50+ Unique</p>
           </div>
@@ -66,16 +71,22 @@
     <!-- Login Form Section -->
     <div class="md:w-1/2 bg-gray-0 dark:bg-gray-0 flex items-center justify-center p-4 md:p-12 relative">
       <!-- Dark Mode Toggle -->
-      <button @click="toggleDarkMode" class="absolute top-4 right-4 p-2 rounded-full bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-        <svg v-if="isDarkMode" class="h-6 w-6 text-black dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+      <button @click="toggleDarkMode"
+        class="absolute top-4 right-4 p-2 rounded-full bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+        <svg v-if="isDarkMode" class="h-6 w-6 text-black dark:text-white" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
         <svg v-else class="h-6 w-6 text-gray-600 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
         </svg>
       </button>
 
-      <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 md:p-8 border border-gray-100 dark:border-gray-700" id="form">
+      <div
+        class="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 md:p-8 border border-gray-100 dark:border-gray-700"
+        id="form">
         <div class="text-center mb-6 md:mb-8">
           <h2 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-2">
             Welcome Back
@@ -233,12 +244,12 @@ export default {
 #bgcolor {
   background-color: #e5e5f7;
   opacity: 0.8;
-  background-image: linear-gradient(30deg, #7b84ff 12%, transparent 12.5%, transparent 87%, #7b84ff 87.5%, #7b84ff), 
-                    linear-gradient(150deg, #7b84ff 12%, transparent 12.5%, transparent 87%, #7b84ff 87.5%, #7b84ff), 
-                    linear-gradient(30deg, #7b84ff 12%, transparent 12.5%, transparent 87%, #7b84ff 87.5%, #7b84ff), 
-                    linear-gradient(150deg, #7b84ff 12%, transparent 12.5%, transparent 87%, #7b84ff 87.5%, #7b84ff), 
-                    linear-gradient(60deg, #7b84ff77 25%, transparent 25.5%, transparent 75%, #7b84ff77 75%, #7b84ff77), 
-                    linear-gradient(60deg, #7b84ff77 25%, transparent 25.5%, transparent 75%, #7b84ff77 75%, #7b84ff77);
+  background-image: linear-gradient(30deg, #7b84ff 12%, transparent 12.5%, transparent 87%, #7b84ff 87.5%, #7b84ff),
+    linear-gradient(150deg, #7b84ff 12%, transparent 12.5%, transparent 87%, #7b84ff 87.5%, #7b84ff),
+    linear-gradient(30deg, #7b84ff 12%, transparent 12.5%, transparent 87%, #7b84ff 87.5%, #7b84ff),
+    linear-gradient(150deg, #7b84ff 12%, transparent 12.5%, transparent 87%, #7b84ff 87.5%, #7b84ff),
+    linear-gradient(60deg, #7b84ff77 25%, transparent 25.5%, transparent 75%, #7b84ff77 75%, #7b84ff77),
+    linear-gradient(60deg, #7b84ff77 25%, transparent 25.5%, transparent 75%, #7b84ff77 75%, #7b84ff77);
   background-size: 74px 130px;
   background-position: 0 0, 0 0, 37px 65px, 37px 65px, 0 0, 37px 65px;
 }
@@ -253,6 +264,7 @@ export default {
     border-radius: 0 0px 30px 30px;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
   }
+
   .hide {
     display: none;
   }
