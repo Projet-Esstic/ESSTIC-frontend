@@ -2,7 +2,7 @@
     <header class="fixed top-0 left-0 w-full bg-gray-50 dark:bg-gray-900 z-10 shadow-md">
       <div :class="['flex flex-col md:flex-row justify-between items-center px-4 py-4', isSidebarCollapsed ? 'ml-16' : 'ml-64']">
         <div class="mb-4 md:mb-0">
-          <h1 class="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">ESSTIC Analytics</h1>
+          <h1 class="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">ESSTIC</h1>
           <p class="text-gray-600 dark:text-gray-300 mt-2 text-lg">Comprehensive Institute Performance Insights</p>
         </div>
   
