@@ -1,10 +1,10 @@
 <template>
-  <div class="flex flex-col md:flex-row min-h-screen" :class="{ 'dark': isDarkMode }" id="bgcolor">
+  <div class="flex flex-col md:flex-row min-h-screen" :class="{ 'dark': isDarkMode }" id="bgimage">
     <!-- Flash Notification -->
     <flash-notification :message="errorMessage" type="error" :duration="3000" @close="errorMessage = ''" />
     <!-- School Illustration Section -->
     <div
-      class="md:w-1/2 bg-gradient-to-br from-blue-600 to-blue-600 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4 md:p-6"
+      class="md:w-1/2 bg-gradient-to-br from-blue-400 to-blue-400 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4 md:p-6"
       id="boder">
       <div class="text-center max-w-lg w-full">
         <img src="@/assets/images/logo.png" alt="School Campus"
@@ -69,7 +69,7 @@
     </div>
 
     <!-- Login Form Section -->
-    <div class="md:w-1/2 bg-gray-0 dark:bg-gray-0 flex items-center justify-center p-4 md:p-12 relative">
+    <div class="md:w-1/2 bg-gray-0 dark:bg-gray-0 flex items-center justify-center p-4 md:p-12 relative" >
       <!-- Dark Mode Toggle -->
       <button @click="toggleDarkMode"
         class="absolute top-4 right-4 p-2 rounded-full bg-gray-200 dark:hover:bg-gray-700 transition-colors">
@@ -171,14 +171,14 @@
             Sign In
           </button>
 
-          <div class="text-center mt-4">
+          <!-- <div class="text-center mt-4">
             <p class="text-xs md:text-sm text-gray-600 dark:text-gray-300">
               Don't have an account?
               <a href="#" class="text-blue-600 hover:text-blue-500 font-semibold">
                 Sign up
               </a>
             </p>
-          </div>
+          </div> -->
         </form>
       </div>
     </div>
@@ -241,21 +241,15 @@ export default {
 </script>
 
 <style scoped>
-#bgcolor {
-  background-color: #e5e5f7;
-  opacity: 0.8;
-  background-image: linear-gradient(30deg, #7b84ff 12%, transparent 12.5%, transparent 87%, #7b84ff 87.5%, #7b84ff),
-    linear-gradient(150deg, #7b84ff 12%, transparent 12.5%, transparent 87%, #7b84ff 87.5%, #7b84ff),
-    linear-gradient(30deg, #7b84ff 12%, transparent 12.5%, transparent 87%, #7b84ff 87.5%, #7b84ff),
-    linear-gradient(150deg, #7b84ff 12%, transparent 12.5%, transparent 87%, #7b84ff 87.5%, #7b84ff),
-    linear-gradient(60deg, #7b84ff77 25%, transparent 25.5%, transparent 75%, #7b84ff77 75%, #7b84ff77),
-    linear-gradient(60deg, #7b84ff77 25%, transparent 25.5%, transparent 75%, #7b84ff77 75%, #7b84ff77);
-  background-size: 74px 130px;
-  background-position: 0 0, 0 0, 37px 65px, 37px 65px, 0 0, 37px 65px;
+#bgimage{
+  background-image: linear-gradient(rgba(0, 0, 0, 0.219), rgba(0, 0, 0, 0.192)), url('@/assets/images/bgimage.avif');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: left;
 }
 
 #boder {
-  border-radius: 0 30px 30px 0;
+  border-radius: 0 60px 60px 0;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
 }
 

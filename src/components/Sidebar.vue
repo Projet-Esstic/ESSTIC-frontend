@@ -13,7 +13,7 @@
     <!-- Toggle button for desktop -->
     <button 
       @click="toggleSidebar" 
-      class="top-0 fixed z-40 hidden md:block bg-gray-800 text-white p-1 rounded-r-md transition-all"
+      class="top-0 fixed z-40 hidden md:block bg-blue-600 text-white p-1 rounded-r-md transition-all"
       :class="collapsed ? 'left-16' : 'left-64'"
     >
       <span class="material-icons">{{ collapsed ? 'chevron_left' : 'chevron_right' }}</span>
@@ -37,8 +37,8 @@
       <!-- Navigation Menu -->
       <nav class="mt-4">
         <div class="px-2 py-2">
-          <router-link to="/" class="relative flex items-center py-2 px-2 rounded-lg transition-colors group"
-            :class="[$route.path === '/' ? 'bg-blue-600' : 'hover:bg-gray-700']">
+          <router-link to="/dashboard" class="relative flex items-center py-2 px-2 rounded-lg transition-colors group"
+            :class="[$route.path === '/dashboard' ? 'bg-blue-600' : 'hover:bg-gray-700']">
             <span class="material-icons">dashboard</span>
             <span v-if="!collapsed" class="ml-3">Dashboard</span>
             <!-- Tooltip for Dashboard -->

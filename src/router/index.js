@@ -3,10 +3,35 @@ import Home from '../views/Home.vue'
 import ExamResults from '@/views/entrance-exam/ExamResults.vue'
 import LoginView from '@/views/LoginView.vue';
 import {authService} from '@/api/services/index';
+import LandingPage from '../views/LandingPage.vue';
 
 const routes = [
+  { 
+    path: '/', 
+    component: LandingPage 
+  },
   {
-    path: '/',
+    path: '/register-student',
+    component: () => import('../layouts/RegisterStudent.vue'),
+    children: [
+      {
+        path: '',
+        name: 'CandidateRegistration',
+        component: () => import('../views/registration/CandidateRegistration.vue'),
+        meta: {
+          title: 'Inscription au Concours ESSTIC'
+        },
+        beforeEnter: (to, from, next) => {
+          if (to.query.source === 'admin') {
+            to.meta.isAdmin = true;
+          }
+          next();
+        }
+      }
+    ]
+  },
+  {
+    path: '/dashboard',
     component: () => import('../layouts/DefaultLayout.vue'),
     // meta: { requiresAuth: true }, // Protect this route with  router.beforeEach define below
     children: [
@@ -16,12 +41,12 @@ const routes = [
         component: Home
       },
       {
-        path: 'entrance-exam',
+        path: '/entrance-exam',
         name: 'EntranceExam',
         component: () => import('../views/entrance-exam/EntranceExam.vue')
       },
       {
-        path: 'entrance-exam/results',
+        path: '/entrance-exam/results',
         name: 'exam-results',
         component: ExamResults,
         meta: {
@@ -30,7 +55,7 @@ const routes = [
         }
       },
       {
-        path: 'all-routes',
+        path: '/all-routes',
         name: 'AllRoutes',
         component: () => import('../views/AllRoute.vue'),
         meta: {

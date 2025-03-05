@@ -7,27 +7,27 @@
     ]" aria-label="ESSTIC welcome section">
       <!-- Progress Bar for multi-step process -->
       <div class="absolute top-4 left-4 right-4 z-20">
-        <div class="w-full bg-white/20 rounded-full h-2 mb-1">
-          <div class="bg-white h-2 rounded-full transition-all duration-500"
+        <div class="w-full bg-black/20 rounded-full h-2 mb-1">
+          <div class="bg-black h-2 rounded-full transition-all duration-500"
                :style="{width: `${(currentStepIndex + 1) * 25}%`}"
                :aria-valuenow="currentStepIndex + 1"
                aria-valuemin="1"
                aria-valuemax="4"
                aria-label="Progress through application steps"></div>
         </div>
-        <div class="flex justify-between text-xs text-white/70">
+        <div class="flex justify-between text-xs text-black/70">
           <span>Étape {{ currentStepIndex + 1 }} / 4</span>
           <span>{{ getEstimatedTime() }} min restantes</span>
         </div>
       </div>
 
       <!-- Welcome Message Above Logo -->
-      <div class="relative z-10 mb-6 md:mb-8 text-center w-full max-w-md">
+      <div class="relative z-10 mb-3 md:mb-8 text-center w-full max-w-md">
         <div class="bg-white/10 backdrop-blur-md rounded-lg p-4 shadow-lg border border-white/20">
-          <h2 class="text-white text-xl md:text-2xl font-semibold mb-2 typing-animation">
+          <h2 class="text-black text-xl md:text-2xl font-semibold mb-2 typing-animation">
             Bienvenue à l'ESSTIC
           </h2>
-          <p class="text-white/90 typing-animation-delay-1">
+          <p class="text-black/90 typing-animation-delay-1">
             Prêt à commencer votre aventure académique ?
           </p>
         </div>
@@ -35,7 +35,7 @@
         <!-- Language Selector -->
         <div class="mt-4 text-right">
           <select 
-            class="bg-white/10 border border-white/20 text-white rounded-md px-2 py-1 text-sm" 
+            class="bg-black/10 border border-black/20 text-black rounded-md px-2 py-1 text-sm" 
             aria-label="Sélecteur de langue"
             v-model="selectedLanguage"
           >
@@ -46,10 +46,10 @@
       </div>
       
       <!-- Gradient Background instead of circles -->
-      <div class="absolute inset-0 bg-gradient-radial from-white/5 to-transparent z-0"></div>
+      <div class="absolute inset-0 bg-gradient-radial from-black/5 to-transparent z-0"></div>
       
       <!-- Logo and School Name -->
-      <div class="relative z-10 text-center mb-6 md:mb-8 w-full max-w-md">
+      <div class="relative z-10 text-center mb-3 md:mb-8 w-full max-w-md">
         <div class="logo-container relative inline-block mb-6">
           <img
             src="@/assets/images/esstic-logo.png"
@@ -60,17 +60,17 @@
           <div class="absolute inset-0 bg-white/10 rounded-full animate-ping opacity-75"></div>
         </div>
         <div class="bg-white/10 backdrop-blur-md rounded-lg p-4 shadow-lg border border-white/20">
-          <h1 class="text-white text-2xl md:text-3xl font-bold mb-3 md:mb-4 animate-fade-in">
+          <h1 class="text-black text-2xl md:text-3xl font-bold mb-3 md:mb-4 animate-fade-in">
             ESSTIC
           </h1>
-          <p class="text-white/90 text-base md:text-lg animate-fade-in-delay">
+          <p class="text-black/90 text-base md:text-lg animate-fade-in-delay">
             École Supérieure des Sciences et Technologies de l'Information et de la Communication
           </p>
         </div>
       </div>
 
       <!-- Step Messages Below Logo -->
-      <div class="relative z-10 mt-6 md:mt-8 w-full max-w-md">
+      <div class="relative z-10 mt-2 md:mt-2 w-full max-w-md">
         <transition-group name="fade-slide" mode="out-in">
           <div 
             v-for="(message, index) in stepMessages" 
@@ -80,12 +80,12 @@
             tabindex="0"
             :aria-label="`Étape ${index + 1}: ${message.title}`"
           >
-            <h3 class="text-white text-xl font-semibold mb-2 typing-text">{{ message.title }}</h3>
-            <p class="text-white/90 typing-text-delay">{{ message.description }}</p>
+            <h3 class="text-black text-xl font-semibold mb-2 typing-text">{{ message.title }}</h3>
+            <p class="text-black/90 typing-text-delay">{{ message.description }}</p>
             
             <!-- Save Progress Button -->
             <button 
-              class="mt-4 bg-white/20 hover:bg-white/30 focus:bg-white/30 text-white py-2 px-4 rounded-md transition-colors text-sm flex items-center focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-primary-700"
+              class="mt-4 bg-white/20 hover:bg-white/30 focus:bg-white/30 text-black py-2 px-4 rounded-md transition-colors text-sm flex items-center focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-primary-700"
               @click="saveProgress"
               aria-label="Sauvegarder et continuer plus tard"
             >
