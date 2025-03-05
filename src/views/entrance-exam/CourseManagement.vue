@@ -12,7 +12,7 @@
 
     <!-- Content -->
     <div v-else>
-      <EntranceExamNav />
+      <!-- <EntranceExamNav /> -->
       
       <!-- Course List and Add Button -->
       <div class="flex justify-between items-center">
@@ -34,7 +34,7 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Course Code</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Course Name</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Description</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Coefficient</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -50,7 +50,7 @@
                 {{ course.description }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                {{ course.coefficient }}
+                {{ course.isActive ? 'Active' : 'Inactive' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm">
                 <div class="flex items-center gap-2">
@@ -138,16 +138,57 @@
                   ></textarea>
                 </div>
 
-                <!-- Coefficient -->
+                <!-- Active Status -->
+                <div class="flex items-center">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      v-model="courseForm.isActive"
+                      class="sr-only peer"
+                    >
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    <span class="ml-3 text-sm font-medium text-gray-700">Active</span>
+                  </label>
+                </div>
+
+                <!-- Department Coefficients -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Coefficient</label>
-                  <input 
-                    v-model.number="courseForm.coefficient"
-                    type="number"
-                    min="1"
-                    required
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Department Coefficients</label>
+                  <div v-for="(dept, index) in courseForm.department" :key="index" class="flex gap-4 mb-2">
+                    <select 
+                      v-model="dept.departmentInfo"
+                      class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    >
+                      <option value="">Select Department</option>
+                      <option 
+                        v-for="department in departments" 
+                        :key="department._id" 
+                        :value="department._id"
+                      >
+                        {{ department.name }} ({{ department.code }})
+                      </option>
+                    </select>
+                    <input 
+                      v-model.number="dept.coefficient"
+                      type="number"
+                      min="1"
+                      placeholder="Coefficient"
+                      class="w-32 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    >
+                    <button 
+                      @click="removeDepartment(index)"
+                      class="text-red-600 hover:text-red-900"
+                    >
+                      <i class="material-icons">remove_circle</i>
+                    </button>
+                  </div>
+                  <button 
+                    @click="addDepartment"
+                    class="mt-2 text-blue-600 hover:text-blue-900 flex items-center gap-1"
                   >
+                    <i class="material-icons">add_circle</i>
+                    Add Department
+                  </button>
                 </div>
               </div>
 
@@ -227,14 +268,11 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import EntranceExamNav from '@/components/EntranceExamNav.vue'
-import { courseService } from '@/api/services'
+import {  courseService, departmentService } from '@/api/services/index'
 
 export default {
   name: 'CourseManagement',
-  components: {
-    EntranceExamNav
-  },
+
   setup() {
     const showModal = ref(false)
     const showDeleteModal = ref(false)
@@ -242,6 +280,9 @@ export default {
     const loading = ref(false)
     const error = ref(null)
     const courses = ref([])
+    const departments = ref([])
+    const formError=ref(null)
+
 
     // Form state
     const courseForm = ref({
@@ -249,8 +290,20 @@ export default {
       courseCode: '',
       courseName: '',
       description: '',
-      coefficient: 1
+      isActive: true,
+      isEntranceExam: true,
+      department: []
     })
+
+    const loadDepartments = async () => {
+      try {
+        const response = await departmentService.getAllDepartments()
+        departments.value = response
+      } catch (err) {
+        console.error('Failed to load departments:', err)
+        formError.value = 'Failed to load departments'
+      }
+    }
 
     // Methods
     const fetchCourses = async () => {
@@ -269,6 +322,7 @@ export default {
 
     onMounted(() => {
       fetchCourses()
+      loadDepartments()
     })
 
     const openCreateModal = () => {
@@ -277,7 +331,9 @@ export default {
         courseCode: '',
         courseName: '',
         description: '',
-        coefficient: 1
+        isActive: true,
+        isEntranceExam: true,
+        department: []
       }
       showModal.value = true
     }
@@ -329,6 +385,17 @@ export default {
       }
     }
 
+    const addDepartment = () => {
+      courseForm.value.department.push({
+        departmentInfo: '',
+        coefficient: 1
+      })
+    }
+
+    const removeDepartment = (index) => {
+      courseForm.value.department.splice(index, 1)
+    }
+
     return {
       courses,
       loading,
@@ -341,7 +408,11 @@ export default {
       editCourse,
       deleteCourse,
       confirmDelete,
-      saveCourse
+      saveCourse,
+      addDepartment,
+      removeDepartment,
+      departments,
+      loadDepartments
     }
   }
 }

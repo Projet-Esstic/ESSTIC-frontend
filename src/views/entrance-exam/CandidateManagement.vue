@@ -56,14 +56,18 @@
 
         <!-- Department Filter -->
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Field of Study</label>
           <select
             v-model="selectedField"
             class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           >
-            <option value="">All Departments</option>
-            <option v-for="dept in departments" :key="dept._id" :value="dept._id">
-              {{ dept.name }}
+            <option value="">All Fields of Study</option>
+            <option 
+              v-for="department in departments"
+              :key="department._id"
+              :value="department._id"
+            >
+              {{ department.name }}
             </option>
           </select>
         </div>
@@ -94,10 +98,10 @@
             <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
               <tr v-for="candidate in filteredCandidates" :key="candidate._id">
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900 dark:text-white">{{ candidate.user.firstName }} {{ candidate.user.lastName }}</div>
+                  <div class="text-sm font-medium text-gray-900 dark:text-white">{{ candidate.user ? `${candidate.user.firstName} ${candidate.user.lastName}` : 'N/A' }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-500 dark:text-gray-300">{{ candidate.user.email }}</div>
+                  <div class="text-sm text-gray-500 dark:text-gray-300">{{ candidate.user ? candidate.user.email : 'N/A' }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-500 dark:text-gray-300">{{ candidate.fieldId?.title || 'Not assigned' }}</div>
@@ -272,13 +276,13 @@
             v-model="selectedReportField"
             class="w-full px-3 py-2 border rounded-md"
           >
-            <option value="">All Fields</option>
+            <option value="">All Fields of Study</option>
             <option 
-              v-for="field in fields" 
-              :key="field.id" 
-              :value="field.id"
+              v-for="department in departments"
+              :key="department._id"
+              :value="department._id"
             >
-              {{ field.name }}
+              {{ department.name }}
             </option>
           </select>
         </div>
@@ -372,7 +376,8 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Modal from '@/components/Modal.vue';
-import { fieldService } from '@/api/services';
+import {  departmentService } from '@/api/services/index'
+
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import io from 'socket.io-client'; // Import Socket.IO client
@@ -397,7 +402,8 @@ export default {
     const showEditModal = ref(false);
     const showGenerateModal = ref(false);
     const editingCandidate = ref(null);
-    const departments = ref([]);
+    const departments = ref([])
+    const formError = ref(null)
     const selectedReportField = ref('');
     const socket = ref(null); // Reactive reference for Socket.IO connection
 
@@ -411,12 +417,13 @@ export default {
     // Load departments/fields
     const loadDepartments = async () => {
       try {
-        const response = await fieldService.getAllFields();
-        departments.value = response;
-      } catch (error) {
-        console.error('Failed to load departments:', error);
+        const response = await departmentService.getAllDepartments()
+        departments.value = response
+      } catch (err) {
+        console.error('Failed to load departments:', err)
+        formError.value = 'Failed to load departments'
       }
-    };
+    }
 
     // Establish Socket.IO connection
     const connectSocket = () => {
@@ -515,7 +522,7 @@ export default {
 
     const getStatistics = computed(() => {
       const filteredCands = selectedReportField.value
-        ? candidates.value.filter(c => c.fieldId === selectedReportField.value)
+        ? candidates.value.filter(c => c.fieldOfStudy === selectedReportField.value)
         : candidates.value;
 
       const stats = {
@@ -526,16 +533,16 @@ export default {
       };
 
       // Group by field
-      const fieldGroups = props.fields.reduce((acc, field) => {
-        const fieldCandidates = filteredCands.filter(c => c.fieldId === field.id);
-        if (fieldCandidates.length > 0) {
+      const fieldGroups = departments.value.reduce((acc, department) => {
+        const departmentCandidates = filteredCands.filter(c => c.fieldOfStudy === department._id);
+        if (departmentCandidates.length > 0) {
           acc.push({
-            fieldId: field.id,
-            total: fieldCandidates.length,
-            validated: fieldCandidates.filter(c => c.applicationStatus === 'registered').length,
-            pending: fieldCandidates.filter(c => c.applicationStatus === 'pending').length,
-            rejected: fieldCandidates.filter(c => c.applicationStatus === 'rejected').length,
-            dateRange: getDateRange(fieldCandidates)
+            fieldId: department._id,
+            total: departmentCandidates.length,
+            validated: departmentCandidates.filter(c => c.applicationStatus === 'registered').length,
+            pending: departmentCandidates.filter(c => c.applicationStatus === 'pending').length,
+            rejected: departmentCandidates.filter(c => c.applicationStatus === 'rejected').length,
+            dateRange: getDateRange(departmentCandidates)
           });
         }
         return acc;
@@ -551,11 +558,12 @@ export default {
       // Apply search filter
       if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase();
-        filtered = filtered.filter(candidate => 
-          candidate.user.firstName.toLowerCase().includes(query) ||
-          candidate.user.lastName.toLowerCase().includes(query) ||
-          candidate.user.email.toLowerCase().includes(query)
-        );
+        filtered = filtered.filter(candidate => {
+          if (!candidate.user) return false;
+          return candidate.user.firstName.toLowerCase().includes(query) ||
+                 candidate.user.lastName.toLowerCase().includes(query) ||
+                 candidate.user.email.toLowerCase().includes(query);
+        });
       }
 
       // Apply status filter
@@ -565,10 +573,10 @@ export default {
         );
       }
 
-      // Apply field filter
+      // Apply field of study filter
       if (selectedField.value) {
         filtered = filtered.filter(candidate => 
-          candidate.fieldId?._id === selectedField.value
+          candidate.fieldOfStudy === selectedField.value
         );
       }
 
