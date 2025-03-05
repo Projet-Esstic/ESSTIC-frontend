@@ -8,7 +8,7 @@ const routes = [
   {
     path: '/',
     component: () => import('../layouts/DefaultLayout.vue'),
-    // meta: { requiresAuth: true }, // Protect this route with  router.beforeEach define below
+    meta: { requiresAuth: true }, // Protect this route with  router.beforeEach define below
     children: [
       {
         path: '',
@@ -54,6 +54,26 @@ const routes = [
         component: () => import('../views/registration/CandidateRegistration.vue'),
         meta: {
           title: 'Inscription au Concours ESSTIC'
+        },
+        beforeEnter: (to, from, next) => {
+          if (to.query.source === 'admin') {
+            to.meta.isAdmin = true;
+          }
+          next();
+        }
+      }
+    ]
+  },
+  {
+    path: '/personnel-registration',
+    component: () => import('../layouts/PublicLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'PersonnelRegistration',
+        component: () => import('../views/personnel/PersonnelRegistration.vue'),
+        meta: {
+          title: 'Register Personnel'
         },
         beforeEnter: (to, from, next) => {
           if (to.query.source === 'admin') {
