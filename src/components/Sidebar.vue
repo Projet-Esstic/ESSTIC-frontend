@@ -13,8 +13,8 @@
     <!-- Toggle button for desktop -->
     <button 
       @click="toggleSidebar" 
-      class="top-0 absolute z-40 hidden md:block bg-gray-800 text-white p-1 rounded-r-md transition-all"
-      :class="collapsed ? 'left-0' : 'left-56'"
+      class="top-0 fixed z-40 hidden md:block bg-gray-800 text-white p-1 rounded-r-md transition-all"
+      :class="collapsed ? 'left-16' : 'left-64'"
     >
       <span class="material-icons">{{ collapsed ? 'chevron_left' : 'chevron_right' }}</span>
       <!-- Tooltip for desktop button -->
@@ -30,8 +30,8 @@
       ]"
     >
       <!-- Logo/Header -->
-      <div class="p-4 border-b border-gray-700 flex items-center">
-        <h1 v-if="!collapsed" class="text-2xl font-bold text-white">ESSTIC</h1>
+      <div class="p-1 border-b border-gray-700 flex items-center bg-white">
+        <img src="@/assets/images/logo.png" alt="" width="100%">
       </div>
 
       <!-- Navigation Menu -->
@@ -66,13 +66,13 @@
 
         <div class="px-2 py-2 mt-4">
           <button 
-            @click="toggleTheme" 
+            @click="logOut" 
             class="relative flex items-center py-2 px-2 rounded-lg hover:bg-gray-700 w-full transition-colors group"
           >
-            <span class="material-icons">{{ isDark ? 'light_mode' : 'dark_mode' }}</span>
-            <span v-if="!collapsed" class="ml-3">{{ isDark ? 'Light Mode' : 'Dark Mode' }}</span>
-            <!-- Tooltip for theme toggle -->
-            <span v-if="collapsed" class="tooltip">{{ isDark ? 'Light Mode' : 'Dark Mode' }}</span>
+            <span class="material-icons">logout</span>
+            <span v-if="!collapsed" class="ml-3">Log out</span>
+            <!-- Tooltip for logout -->
+            <span v-if="collapsed" class="tooltip">Log out</span>
           </button>
         </div>
       </nav>
@@ -88,48 +88,51 @@
 </template>
 
 <script>
-import { computed, ref } from 'vue';
-import { useStore } from 'vuex';
-import { useRoute } from 'vue-router';
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { authService } from '@/api/services/index'
 
 export default {
   name: 'Sidebar',
   props: {
     collapsed: {
       type: Boolean,
-      default: false,
+      default: false
     }
   },
   setup(props, { emit }) {
-    const store = useStore();
-    const route = useRoute();
-    const isMobileOpen = ref(false);
+    const route = useRoute()
+    const isMobileOpen = ref(false)
 
-    const isDark = computed(() => store.getters.isDarkMode);
-    const currentRoute = computed(() => route);
-
+    const currentRoute = computed(() => route)
     const menuItems = [
       { path: '/entrance-exam', name: 'EntranceExam', meta: { title: 'Entrance Exam', icon: 'school' } }
-    ];
-
-    const toggleTheme = () => {
-      store.commit('toggleTheme');
-    };
+    ]
 
     const toggleSidebar = () => {
-      emit('toggle');
-    };
+      emit('toggle')
+      if (isMobileOpen.value) isMobileOpen.value = false // Close mobile sidebar when toggling
+    }
+
+    const closeMobileSidebar = () => {
+      isMobileOpen.value = false
+    }
 
     return {
-      isDark,
-      toggleTheme,
       toggleSidebar,
       isMobileOpen,
       menuItems,
-      currentRoute
-    };
+      currentRoute,
+      closeMobileSidebar
+    }
+  },
+  methods: {
+    async logOut() {
+      await authService.logout()
+      this.$router.push('/login') // Redirect after logout
+    }
   }
-};
+}
 </script>
 
 <style scoped>

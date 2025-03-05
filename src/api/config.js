@@ -29,5 +29,10 @@ export const ENDPOINTS = {
   // Files
   FILES: `${API_URL}/files`,
   FILE_INFO: (fileId) => `${API_URL}/files/${fileId}`,
-  FILE_UPLOAD: `${API_URL}/files/upload`
+  FILE_UPLOAD: `${API_URL}/files/upload`,
+
+  // Auth
+  LOGIN: `${API_URL}/auth/login`,
+  REGISTER: `${API_URL}/auth/register`,
+
 }
