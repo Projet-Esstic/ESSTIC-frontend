@@ -106,7 +106,8 @@ export default {
 
     const currentRoute = computed(() => route)
     const menuItems = [
-      { path: '/entrance-exam', name: 'EntranceExam', meta: { title: 'Entrance Exam', icon: 'school' } }
+      { path: '/entrance-exam', name: 'EntranceExam', meta: { title: 'Entrance Exam', icon: 'school' } },
+      { path: '/student-management', name: 'StudentManagement', meta: { title: 'Student Management', icon: 'school' } }
     ]
 
     const toggleSidebar = () => {

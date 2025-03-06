@@ -137,8 +137,8 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue'
-import { useStore } from 'vuex'
-import { candidateService, studentService } from '@/api/services'
+// import { useStore } from 'vuex'
+import { candidateService, studentService } from '@/api/services/index'
 
 export default {
   name: 'EnrollmentList',
@@ -152,7 +152,7 @@ export default {
   },
 
   setup(props) {
-    const store = useStore()
+   // const store = useStore()
     const loading = ref(false)
     const error = ref(null)
     const candidates = ref([])

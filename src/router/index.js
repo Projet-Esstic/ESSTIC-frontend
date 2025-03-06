@@ -10,9 +10,31 @@ const routes = [
     path: '/', 
     component: LandingPage 
   },
+  // {
+  //   path: '/register-student',
+  //   component: () => import('../layouts/RegisterStudent.vue'),
+  //   children: [
+  //     {
+  //       path: '',
+  //       name: 'CandidateRegistration',
+  //       component: () => import('../views/registration/CandidateRegistration.vue'),
+  //       meta: {
+  //         title: 'Inscription au Concours ESSTIC'
+  //       },
+  //       beforeEnter: (to, from, next) => {
+  //         if (to.query.source === 'admin') {
+  //           to.meta.isAdmin = true;
+  //         }
+  //         next();
+  //       }
+  //     }
+  //   ]
+  // },
+
+
   {
     path: '/register-student',
-    component: () => import('../layouts/RegisterStudent.vue'),
+    component: () => import('../layouts/PublicLayout.vue'),
     children: [
       {
         path: '',
@@ -30,6 +52,7 @@ const routes = [
       }
     ]
   },
+
   {
     path: '/dashboard',
     component: () => import('../layouts/DefaultLayout.vue'),
@@ -44,6 +67,11 @@ const routes = [
         path: '/entrance-exam',
         name: 'EntranceExam',
         component: () => import('../views/entrance-exam/EntranceExam.vue')
+      },
+      {
+        path: '/student-management',
+        name: 'StudentManagement',
+        component: () => import('../views/student/StudentManagement.vue')
       },
       {
         path: '/entrance-exam/results',

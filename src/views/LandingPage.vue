@@ -136,6 +136,7 @@ import bgImage from '@/assets/images/bgimage.avif'
 
 const isMobileMenuOpen = ref(false)
 const searchQuery = ref('')
+
 </script>
 
 <style scoped>

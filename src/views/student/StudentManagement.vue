@@ -60,12 +60,12 @@ import { ref, onMounted } from 'vue'
 // import { useStore } from 'vuex'
 import EnrollmentList from './EnrollmentList.vue'
 import StudentList from './StudentList.vue'
-import CourseRegistration from './CourseRegistration.vue'
+//import CourseRegistration from './CourseRegistration.vue'
 import Attendance from './Attendance.vue'
 import GradeManagement from './GradeManagement.vue'
 import AcademicProgress from './AcademicProgress.vue'
 import Graduation from './Graduation.vue'
-import { departmentService } from '@/api/services'
+import { departmentService } from '@/api/services/index'
 
 export default {
   name: 'StudentManagement',
@@ -73,7 +73,7 @@ export default {
   components: {
     EnrollmentList,
     StudentList,
-    CourseRegistration,
+   // CourseRegistration,
     Attendance,
     GradeManagement,
     AcademicProgress,
