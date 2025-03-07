@@ -34,12 +34,12 @@ const routes = [
 
   {
     path: '/register-student',
-    component: () => import('../layouts/PublicLayout.vue'),
+    component: () => import('../layouts/RegisterStudent.vue'),
     children: [
       {
         path: '',
         name: 'CandidateRegistration',
-        component: () => import('../views/registration/CandidateRegistration.vue'),
+        component: () => import('@/views/registration/CandidateRegistration.vue'),
         meta: {
           title: 'Inscription au Concours ESSTIC'
         },
