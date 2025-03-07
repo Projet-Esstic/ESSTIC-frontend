@@ -1,58 +1,62 @@
 <template>
   <form @submit.prevent="handleSubmit" class="civil-status-form mb-6 p-4 bg-white dark:bg-background-dark rounded shadow-md">
-    <!-- Profile Image Upload -->
     <!-- Exam Selection -->
     <div class="form-section mb-6">
-      <h3 class="section-title">Sélection de l'Examen</h3>
-      <ExamSelection v-model="form.selectedEntranceExam" v-model:selectedField="form.fieldOfStudy" />
+      <h3 class="section-title">Sélection de l'Examen <span class="text-red-500">*</span></h3>
+      <ExamSelection v-model="form.selectedEntranceExam" v-model:selectedField="form.fieldOfStudy" required />
     </div>
 
     <!-- Profile Image -->
     <div class="form-section">
-      <h3 class="section-title">Photo de profil</h3>
-      <ProfileImageUpload />
+      <h3 class="section-title">Photo de profil <span class="text-red-500">*</span></h3>
+      <ProfileImageUpload required />
     </div>
 
     <!-- Informations de base -->
     <div class="grid grid-cols-2 gap-4">
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Email</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Email <span class="text-red-500">*</span></label>
         <input 
           v-model="form.email" 
           type="email" 
           placeholder="exemple@email.com"
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
         />
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Prénom</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Prénom <span class="text-red-500">*</span></label>
         <input 
           v-model="form.firstName" 
           type="text" 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
         />
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Nom</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Nom <span class="text-red-500">*</span></label>
         <input 
           v-model="form.lastName" 
           type="text" 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
         />
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Date de Naissance</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Date de Naissance <span class="text-red-500">*</span></label>
         <input 
           v-model="form.dateOfBirth" 
           type="date" 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
         />
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Genre</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Genre <span class="text-red-500">*</span></label>
         <select 
           v-model="form.gender" 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
         >
           <option value="">Sélectionnez votre genre</option>
           <option value="male">Masculin</option>
@@ -61,28 +65,31 @@
         </select>
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Numéro de Téléphone</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Numéro de Téléphone <span class="text-red-500">*</span></label>
         <input 
           v-model="form.phoneNumber" 
           type="tel" 
           pattern="[0-9]{9}"
           placeholder="6XXXXXXXX"
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
         />
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Lieu de Naissance</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Lieu de Naissance <span class="text-red-500">*</span></label>
         <input 
           v-model="form.lieuDeNaissance" 
           type="text" 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
         />
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Situation de Famille</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Situation de Famille <span class="text-red-500">*</span></label>
         <select 
           v-model="form.situationDeFamille" 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
         >
           <option value="">Sélectionnez</option>
           <option value="Célibataire">Célibataire</option>
@@ -91,73 +98,81 @@
         </select>
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Boîte Postale</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Boîte Postale <span class="text-red-500">*</span></label>
         <input 
           v-model="form.boitePostale" 
           type="text" 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
         />
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Nom du Père</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Nom du Père <span class="text-red-500">*</span></label>
         <input 
           v-model="form.referencesFamilales.nom_pere" 
           type="text" 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
         />
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Nom de la Mère</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Nom de la Mère <span class="text-red-500">*</span></label>
         <input 
           v-model="form.referencesFamilales.nom_mere" 
           type="text" 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
         />
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Adresse des Parents</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Adresse des Parents <span class="text-red-500">*</span></label>
         <input 
           v-model="form.addressParents" 
           type="text" 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
         />
       </div>
     </div>
 
     <!-- Adresse -->
     <div class="mt-6">
-      <h3 :class="[Theme.applyTextStyle('titleMedium'), 'mb-4']">Adresse</h3>
+      <h3 :class="[Theme.applyTextStyle('titleMedium'), 'mb-4']">Adresse <span class="text-red-500">*</span></h3>
       <div class="grid grid-cols-2 gap-4">
         <div class="form-group">
-          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Rue</label>
+          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Rue <span class="text-red-500">*</span></label>
           <input 
             v-model="form.address.street" 
             type="text" 
             class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+            required
           />
         </div>
         <div class="form-group">
-          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Ville</label>
+          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Ville <span class="text-red-500">*</span></label>
           <input 
             v-model="form.address.city" 
             type="text" 
             class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+            required
           />
         </div>
         <div class="form-group">
-          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Région</label>
+          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Région <span class="text-red-500">*</span></label>
           <input 
             v-model="form.address.state" 
             type="text" 
             class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+            required
           />
         </div>
         <div class="form-group">
-          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Pays</label>
+          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Pays <span class="text-red-500">*</span></label>
           <input 
             v-model="form.address.country" 
             type="text" 
             class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+            required
           />
         </div>
       </div>
@@ -165,42 +180,50 @@
 
     <!-- Contact d'Urgence -->
     <div class="mt-6">
-      <h3 :class="[Theme.applyTextStyle('titleMedium'), 'mb-4']">Contact d'Urgence</h3>
+      <h3 :class="[Theme.applyTextStyle('titleMedium'), 'mb-4']">Contact d'Urgence <span class="text-red-500">*</span></h3>
       <div class="grid grid-cols-2 gap-4">
         <div class="form-group">
-          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Nom Complet</label>
+          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Nom Complet <span class="text-red-500">*</span></label>
           <input 
             v-model="form.emergencyContact.name" 
             type="text" 
             class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+            required
           />
         </div>
         <div class="form-group">
-          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Relation</label>
+          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Relation <span class="text-red-500">*</span></label>
           <input 
             v-model="form.emergencyContact.relationship" 
             type="text" 
             class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+            required
           />
         </div>
         <div class="form-group">
-          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Téléphone</label>
+          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Téléphone <span class="text-red-500">*</span></label>
           <input 
             v-model="form.emergencyContact.phone" 
             type="tel" 
             pattern="[0-9]{9}"
             placeholder="6XXXXXXXX"
             class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+            required
           />
         </div>
       </div>
+    </div>
+
+    <!-- Required Fields Notice -->
+    <div class="mt-4 text-sm text-red-500">
+      * Tous les champs sont obligatoires
     </div>
 
     <!-- Boutons de navigation -->
     <div class="flex justify-between mt-8">
       <button 
         type="button" 
-        @click="$emit('previous-step')"
+        @click.stop="$emit('previous-step')"
         class="bg-secondary-light dark:bg-secondary-dark text-white hover:bg-secondary-hover rounded p-2"
       >
         Précédent
@@ -221,7 +244,7 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { Theme } from '@/utils/Theme'
 import ProfileImageUpload from '@/components/registration/ProfileImageUpload.vue'
@@ -233,7 +256,8 @@ export default {
     ProfileImageUpload,
     ExamSelection
   },
-  setup() {
+  emits: ['previous-step', 'next-step'],
+  setup(props, { emit }) {
     const store = useStore()
     const loading = ref(false)
 
@@ -276,8 +300,24 @@ export default {
       addressParents: ''
     })
 
+    // Load saved data if available
+    onMounted(() => {
+      const savedData = store.state.candidateRegistration.steps?.civilStatus
+      if (savedData) {
+        Object.assign(form.value, savedData)
+      }
+    })
+
+    // Custom form validation
+    const validateForm = () => {
+      // Add custom validation if needed beyond HTML5 validation
+      return true
+    }
+
     // Handle form submission
     const handleSubmit = async () => {
+      if (!validateForm()) return
+      
       loading.value = true
       try {
         // Submit the entire form object, which contains only user-entered data
@@ -286,9 +326,10 @@ export default {
           step: 'civilStatus',
           data: form.value
         })
-        store.dispatch('candidateRegistration/nextStep')
+        emit('next-step')
       } catch (error) {
         console.error('Error updating civil status:', error)
+        // Add error handling/notification here
       } finally {
         loading.value = false
       }
@@ -320,4 +361,21 @@ export default {
 .form-section {
   @apply mb-6;
 }
+
+/* Highlight fields with errors */
+input:invalid,
+select:invalid,
+textarea:invalid {
+  @apply border-red-500 bg-red-50 dark:bg-red-900/20;
+}
+input:valid,
+select:valid,
+textarea:valid {
+  @apply border-green-500 bg-green-50 dark:bg-green-900/20;
+}
+
+/* Style the required asterisk */
+/* .text-red-500 {
+  @apply text-red-500 dark:text-red-400;
+} */
 </style>

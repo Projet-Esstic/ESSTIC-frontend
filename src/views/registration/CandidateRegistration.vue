@@ -1,6 +1,6 @@
 <template>
   <div class="h-screen p-8 overflow-auto">
-    <div class="w-full max-w-6xl mx-auto bg-white/50 backdrop-blur-lgx rounded-xl shadow-xl p-8 animate-fade-in">
+    <div class="w-full max-w-6xl mx-auto bg-white/50 backdrop-blur-lg rounded-xl shadow-xl p-8 animate-fade-in">
       <!-- Page Title -->
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold text-black mb-2 animate-slide-up">
@@ -13,7 +13,7 @@
       <!-- Back button for admin mode -->
       <div v-if="isAdminMode" class="mb-6 animate-fade-in">
         <button
-          @click="goBack"
+          @click.stop="goBack"
           class="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all duration-200"
         >
           <span class="material-icons text-lg">arrow_back</span>
@@ -30,7 +30,7 @@
             <div class="relative z-10 flex-shrink-0">
               <div 
                 :class="[
-                  'step-indicator group',
+                  'step-indicator group cursor-pointer',
                   {
                     'bg-blue-600 text-white shadow-lg shadow-blue-500/30': isStepComplete(index + 1) || index + 1 < currentStep,
                     'bg-blue-500 text-white shadow-lg shadow-blue-500/30': currentStep === index + 1,
@@ -39,6 +39,7 @@
                   'relative flex items-center justify-center w-14 h-14 rounded-full text-lg font-semibold transition-all duration-500'
                 ]"
                 @mouseenter="animateStep(index)"
+                @click.stop="goToStep(index + 1)"
               >
                 <!-- Step Number -->
                 <span :class="[
@@ -170,22 +171,48 @@ export default {
     }
 
     const nextStep = () => {
-      if (currentStep.value < steps.length) {
-        // Mark current step as complete
-        markStepComplete(currentStep.value)
-        
-        // Move to next step
-        const nextStepNumber = currentStep.value + 1
-        store.commit('setCurrentStep', nextStepNumber)
-        router.push({ query: { ...route.query, step: nextStepNumber } })
-      }
-    }
+  if (currentStep.value < steps.length) {
+    // Mark current step as complete
+    markStepComplete(currentStep.value)
+    
+    // Move to next step
+    const nextStepNumber = currentStep.value + 1
+    store.commit('setCurrentStep', nextStepNumber)
+    router.push({ query: { ...route.query, step: nextStepNumber } })
+    
+    // Scroll to top of the container
+    scrollToTop()
+  }
+}
 
-    const previousStep = () => {
-      if (currentStep.value > 1) {
-        const prevStepNumber = currentStep.value - 1
-        store.commit('setCurrentStep', prevStepNumber)
-        router.push({ query: { ...route.query, step: prevStepNumber } })
+const previousStep = () => {
+  if (currentStep.value > 1) {
+    const prevStepNumber = currentStep.value - 1
+    store.commit('setCurrentStep', prevStepNumber)
+    router.push({ query: { ...route.query, step: prevStepNumber } })
+    
+    // Scroll to top of the container
+    scrollToTop()
+  }
+}
+
+// Add a scroll to top function
+const scrollToTop = () => {
+  // You can target the specific container that needs scrolling
+  const container = document.querySelector('.h-screen.overflow-auto')
+  if (container) {
+    container.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
+  }
+}
+
+    const goToStep = (stepNumber) => {
+      // Only allow navigation to completed steps or the next available step
+      if (stepNumber <= currentStep.value || isStepComplete(stepNumber - 1)) {
+        store.commit('setCurrentStep', stepNumber)
+        router.push({ query: { ...route.query, step: stepNumber } })
       }
     }
 
@@ -244,7 +271,8 @@ export default {
       isStepComplete,
       nextStep,
       previousStep,
-      markStepComplete
+      markStepComplete,
+      goToStep
     }
   }
 }
@@ -308,11 +336,11 @@ export default {
 }
 
 .animate-slide-up {
-  animation: slideUp 0.6s ease-out;
+  animation: fadeIn 0.6s ease-out, slideUp 0.6s ease-out;
 }
 
 .animate-slide-up-delay {
-  animation: slideUp 0.6s ease-out 0.2s both;
+  animation: fadeIn 0.6s ease-out 0.2s both, slideUp 0.6s ease-out 0.2s both;
 }
 
 @keyframes fadeIn {
@@ -350,5 +378,16 @@ export default {
 .component-fade-enter-from,
 .component-fade-leave-to {
   opacity: 0;
+}
+
+/* Fix for scrolling and container */
+.h-screen {
+  height: 100vh; 
+  min-height: 100vh;
+}
+
+.overflow-auto {
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
 }
 </style>

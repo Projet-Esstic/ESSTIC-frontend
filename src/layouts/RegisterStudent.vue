@@ -67,7 +67,7 @@
     </div>
 
     <!-- Right Section with Content - Adjusted for fixed header -->
-    <div class="w-full md:w-2/3 md:ml-[33.333333%] flex flex-col h-screen">
+    <div class="w-full md:w-2/3 md:ml-[33.333333%] flex flex-col h-screen border-l-2 border-white/20">
       <!-- Header with help and support - Fixed -->
       <div class="p-4 border-b bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-800 z-10 sticky top-0 flex justify-between items-center">
         <div class="logo-container relative inline-block">
