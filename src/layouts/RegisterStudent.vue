@@ -1,171 +1,159 @@
 <template>
-    <div :class="[themeClasses.app, 'min-h-screen flex flex-col md:flex-row']">
-      <!-- Left Section with Logo - Now responsive -->
-      <div :class="[
-        'md:w-1/3 w-full flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden transition-colors duration-1000',
+  <div :class="[themeClasses.app, 'min-h-screen flex flex-col md:flex-row']">
+    <!-- Left Section with Logo - Now responsive and fixed -->
+    <div :class="[
+        'md:w-1/3 w-full flex flex-col items-center fixed left-0 top-0 h-full bg-blue-600',
         `bg-gradient-to-br ${getGradientClass()}`
       ]" aria-label="ESSTIC welcome section">
-        <!-- Progress Bar for multi-step process --> 
-        <div class="absolute top-4 left-4 right-4 z-20">
-          <div class="w-full bg-black/20 rounded-full h-2 mb-1">
-            <div class="bg-black h-2 rounded-full transition-all duration-500"
-                 :style="{width: `${(currentStepIndex + 1) * 25}%`}"
-                 :aria-valuenow="currentStepIndex + 1"
-                 aria-valuemin="1"
-                 aria-valuemax="4"
-                 aria-label="Progress through application steps"></div>
-          </div>
-          <div class="flex justify-between text-xs text-black/70">
-            <span>Étape {{ currentStepIndex + 1 }} / 4</span>
-            <span>{{ getEstimatedTime() }} min restantes</span>
-          </div>
-        </div>
-  
+
+      <!-- Home Button -->
+      <div class="absolute top-4 left-4 z-20">
+        <button @click="goToHome"
+          class="flex items-center text-white hover:bg-white/20 rounded-lg px-4 py-2 transition-colors">
+          <span class="mr-2">🏠</span> Accueil
+        </button>
+      </div>
+
+      <!-- Content Container with proper spacing from top -->
+      <div class="flex flex-col items-center justify-center h-full w-full px-4 md:px-8 py-16">
         <!-- Welcome Message Above Logo -->
-        <div class="relative z-10 mb-3 md:mb-8 text-center w-full max-w-md">
+        <div class="relative z-10 mb-1 md:mb-1 text-center w-full max-w-md">
           <div class="bg-white/10 backdrop-blur-md rounded-lg p-4 shadow-lg border border-white/20">
-            <h2 class="text-black text-xl md:text-2xl font-semibold mb-2 typing-animation">
+            <h2 class="text-white text-xl md:text-2xl font-semibold mb-2 typing-animation">
               Bienvenue à l'ESSTIC
             </h2>
-            <p class="text-black/90 typing-animation-delay-1">
-              Prêt à commencer votre aventure académique ?
-            </p>
-          </div>
-          
-          <!-- Language Selector -->
-          <div class="mt-4 text-right">
-            <select 
-              class="bg-black/10 border border-black/20 text-black rounded-md px-2 py-1 text-sm" 
-              aria-label="Sélecteur de langue"
-              v-model="selectedLanguage"
-            >
-              <option value="fr">Français</option>
-              <option value="en">English</option>
-            </select>
+            <transition name="fade" mode="out-in">
+              <p :key="currentMessageIndex" class="text-white/90 typing-animation-delay-1">
+                {{ welcomeMessages[currentMessageIndex] }}
+              </p>
+            </transition>
           </div>
         </div>
-        
+
         <!-- Gradient Background instead of circles -->
         <div class="absolute inset-0 bg-gradient-radial from-black/5 to-transparent z-0"></div>
-        
+
         <!-- Logo and School Name -->
-        <div class="relative z-10 text-center mb-3 md:mb-8 w-full max-w-md">
-          <div class="logo-container relative inline-block mb-6">
-            <img
-              src="@/assets/images/esstic-logo.png"
-              alt="ESSTIC Logo"
-              class="w-24 h-24 md:w-32 md:h-32 object-contain animate-pulse-subtle"
-              loading="lazy"
-            />
-            <div class="absolute inset-0 bg-white/10 rounded-full animate-ping opacity-75"></div>
-          </div>
+        <div class="relative z-10 text-center mb-1 md:mb-2 w-full max-w-md">
           <div class="bg-white/10 backdrop-blur-md rounded-lg p-4 shadow-lg border border-white/20">
-            <h1 class="text-black text-2xl md:text-3xl font-bold mb-3 md:mb-4 animate-fade-in">
+            <h1 class="text-white text-2xl md:text-3xl font-bold mb-3 md:mb-4 animate-fade-in">
               ESSTIC
             </h1>
-            <p class="text-black/90 text-base md:text-lg animate-fade-in-delay">
+            <p class="text-white/90 text-base md:text-lg animate-fade-in-delay">
               École Supérieure des Sciences et Technologies de l'Information et de la Communication
             </p>
           </div>
         </div>
-  
+
         <!-- Step Messages Below Logo -->
-        <div class="relative z-10 mt-2 md:mt-2 w-full max-w-md">
+        <div class="relative z-10 mt-1 md:mt-1 w-full max-w-md">
           <transition-group name="fade-slide" mode="out-in">
-            <div 
-              v-for="(message, index) in stepMessages" 
-              :key="message.title"
-              v-show="currentStepIndex === index"
-              class="bg-white/10 backdrop-blur-md rounded-lg p-5 md:p-6 shadow-lg typing-animation-delay-2 border border-white/20"
-              tabindex="0"
-              :aria-label="`Étape ${index + 1}: ${message.title}`"
-            >
-              <h3 class="text-black text-xl font-semibold mb-2 typing-text">{{ message.title }}</h3>
-              <p class="text-black/90 typing-text-delay">{{ message.description }}</p>
-              
+            <div v-for="(message, index) in stepMessages" :key="message.title" v-show="currentStepIndex === index"
+              class="bg-white/10 backdrop-blur-md rounded-lg p-4 shadow-lg border border-white/20" tabindex="0"
+              :aria-label="`Étape ${index + 1}: ${message.title}`">
+              <h3 class="text-white text-xl font-semibold mb-3 typing-text">{{ message.title }}</h3>
+              <p class="text-white/90 typing-text-delay">{{ message.description }}</p>
+
               <!-- Save Progress Button -->
-              <button 
-                class="mt-4 bg-white/20 hover:bg-white/30 focus:bg-white/30 text-black py-2 px-4 rounded-md transition-colors text-sm flex items-center focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-primary-700"
-                @click="saveProgress"
-                aria-label="Sauvegarder et continuer plus tard"
-              >
+              <button
+                class="mt-4 bg-white/20 hover:bg-white/30 focus:bg-white/30 text-white py-2 px-4 rounded-md transition-colors text-sm flex items-center focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-primary-700"
+                @click="saveProgress" aria-label="Sauvegarder et continuer plus tard">
                 <span class="mr-2">💾</span> Sauvegarder et continuer plus tard
               </button>
             </div>
           </transition-group>
         </div>
       </div>
-  
-      <!-- Right Section with Content -->
-      <div class="w-full md:w-2/3 overflow-auto bg-white dark:bg-gray-900 flex flex-col">
-        <!-- Header with help and support -->
-        <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
-          <h2 class="text-primary-900 dark:text-white font-medium">
-            {{ stepMessages[currentStepIndex]?.title || 'Inscription' }}
-          </h2>
-          <div class="flex items-center space-x-4">
-            <button 
-              class="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md p-1"
-              aria-label="Obtenir de l'aide"
-            >
-              <span class="flex items-center"><span class="mr-1">❓</span> Aide</span>
-            </button>
-          </div>
+    </div>
+
+    <!-- Right Section with Content - Adjusted margin for fixed left panel -->
+    <div class="w-full md:w-2/3 overflow-auto bg-white dark:bg-gray-900 flex flex-col md:ml-[33.333333%]">
+      <!-- Header with help and support -->
+      <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+        <div class="logo-container relative inline-block mb-1">
+          <img src="@/assets/images/esstic-logo.png" alt="ESSTIC Logo"
+            class="w-24 h-24 md:w-22 md:h-10 object-contain animate-pulse-subtle" loading="lazy" />
+          <div class="absolute inset-0 bg-white/10 rounded-full animate-ping opacity-75"></div>
         </div>
-        
-        <!-- Main Content Area -->
-        <div class="flex-grow p-4 md:p-6 overflow-auto">
-          <router-view v-slot="{ Component }">
-            <transition
-              name="fade-slide"
-              mode="out-in"
-            >
-              <component :is="Component" />
-            </transition>
-          </router-view>
-        </div>
-        
-        <!-- Footer with navigation buttons -->
-        <div class="p-4 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
-          <button 
-            v-if="currentStepIndex > 0"
-            class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
-            @click="goToPrevStep"
-            aria-label="Retour à l'étape précédente"
-          >
-            Précédent
-          </button>
-          <div v-else></div>
-          
-          <button 
-            class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
-            @click="goToNextStep"
-            :aria-label="currentStepIndex < 3 ? 'Continuer à l\'étape suivante' : 'Soumettre votre candidature'"
-          >
-            {{ currentStepIndex < 3 ? 'Continuer' : 'Soumettre' }}
+        <h2 class="text-primary-900 dark:text-white font-medium">
+          {{ stepMessages[currentStepIndex]?.title || 'Inscription' }}
+        </h2>
+        <div class="flex items-center space-x-4">
+          <select
+            class="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-primary-900 dark:text-white rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+            aria-label="Sélecteur de langue" v-model="selectedLanguage">
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+          </select>
+          <button
+            class="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md p-1"
+            aria-label="Obtenir de l'aide">
+            <span class="flex items-center"><span class="mr-1">❓</span> Aide</span>
           </button>
         </div>
       </div>
+
+      <!-- Main Content Area -->
+      <div class="flex-grow p-4 md:p-6 overflow-auto">
+        <!-- For testing: -->
+        <candidate-registration></candidate-registration>
+
+        <!-- Original router-view: -->
+        <router-view v-slot="{ Component }">
+          <transition name="fade-slide" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
+      </div>
+
+      <!-- Footer with navigation buttons -->
+      <div class="p-4 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
+        <button v-if="currentStepIndex > 0"
+          class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+          @click="goToPrevStep" aria-label="Retour à l'étape précédente">
+          Précédent
+        </button>
+        <div v-else></div>
+
+        <button
+          class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+          @click="goToNextStep"
+          :aria-label="currentStepIndex < 3 ? 'Continuer à l\'étape suivante' : 'Soumettre votre candidature'">
+          {{ currentStepIndex < 3 ? 'Continuer' : 'Soumettre' }} </button>
+      </div>
     </div>
-  </template>
+  </div>
+</template>
   
   <script>
-  import { computed, ref } from 'vue'
+  import { computed, ref, onMounted, onUnmounted } from 'vue'
   import { useStore } from 'vuex'
   import { useRoute, useRouter } from 'vue-router'
+  import CandidateRegistration from '../views/registration/CandidateRegistration.vue'
   
   export default {
-    name: 'Register',
+    name: 'RegisterStudent',
+    components: {
+      CandidateRegistration
+    },
     setup() {
       const store = useStore()
       const route = useRoute()
       const router = useRouter()
       const selectedLanguage = ref('fr')
-      
       const currentStepIndex = computed(() => {
         return route.query.step ? parseInt(route.query.step) - 1 : 0
       })
-  
+      const currentMessageIndex = ref(0)
+      let messageInterval
+
+      const welcomeMessages = [
+        "Prêt à commencer votre aventure académique ?",
+        "Façonnez votre avenir dans les TIC avec nous",
+        "Une formation d'excellence vous attend",
+        "Rejoignez la communauté ESSTIC"
+      ]
+
       const stepMessages = [
         {
           title: 'Informations Personnelles',
@@ -235,7 +223,42 @@
         alert('Votre progression a été sauvegardée. Vous recevrez un e-mail avec un lien pour continuer plus tard.')
         // In a real app, you'd save to localStorage or backend
       }
-  
+      
+      const goToHome = () => {
+        router.push('/')
+      }
+
+      onMounted(() => {
+        console.log('Register component mounted')
+        console.log('Current route:', route.path)
+        console.log('Route query:', route.query)
+        console.log('Route matched components:', route.matched.map(m => m.components.default.name))
+        
+        // Check if the child component should be rendered
+        const shouldRenderChild = route.matched.length > 1
+        console.log('Should render child component:', shouldRenderChild)
+        
+        messageInterval = setInterval(() => {
+          currentMessageIndex.value = (currentMessageIndex.value + 1) % welcomeMessages.length
+        }, 15000)
+      })
+
+      onMounted(() => {
+        messageInterval = setInterval(() => {
+          currentMessageIndex.value = (currentMessageIndex.value + 1) % welcomeMessages.length
+        }, 15000)
+      })
+
+      onUnmounted(() => {
+        if (messageInterval) {
+          clearInterval(messageInterval)
+        }
+      })
+
+      const currentRoute = computed(() => route.fullPath)
+      console.log('Current route:', currentRoute.value)
+      console.log('Route matched:', route.matched)
+
       return {
         themeClasses: computed(() => store.state.themeClasses),
         currentStepIndex,
@@ -245,7 +268,11 @@
         getEstimatedTime,
         goToNextStep,
         goToPrevStep,
-        saveProgress
+        saveProgress,
+        goToHome,
+        currentMessageIndex,
+        welcomeMessages,
+        currentRoute
       }
     }
   }
@@ -363,6 +390,17 @@
   
   .animate-ping {
     animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  
+  /* Fade Transition */
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.5s ease;
+  }
+
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
   }
   
   /* Media Queries */
