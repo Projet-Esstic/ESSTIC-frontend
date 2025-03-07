@@ -1,12 +1,12 @@
 <template>
   <div class="h-screen p-8 overflow-auto">
-    <div class="w-full max-w-6xl mx-auto bg-white/80 backdrop-blur-lg rounded-xl shadow-xl p-8 animate-fade-in">
+    <div class="w-full max-w-6xl mx-auto bg-white/50 backdrop-blur-lgx rounded-xl shadow-xl p-8 animate-fade-in">
       <!-- Page Title -->
       <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold text-gray-800 mb-2 animate-slide-up">
+        <h2 class="text-3xl font-bold text-black mb-2 animate-slide-up">
           Inscription au Concours
         </h2>
-        <p class="text-gray-600 animate-slide-up-delay">
+        <p class="text-black animate-slide-up-delay">
           Remplissez le formulaire ci-dessous pour vous inscrire au concours d'entrée à l'ESSTIC
         </p>
       </div>
@@ -32,9 +32,9 @@
                 :class="[
                   'step-indicator group',
                   {
-                    'bg-blue-600 text-white shadow-lg shadow-blue-500/30': isStepComplete(index + 1),
-                    'bg-primary-600 text-white shadow-lg shadow-primary-500/30': !isStepComplete(index + 1) && currentStep.value === index + 1,
-                    'bg-gray-100 text-gray-400': !isStepComplete(index + 1) && currentStep.value !== index + 1
+                    'bg-blue-600 text-white shadow-lg shadow-blue-500/30': isStepComplete(index + 1) || index + 1 < currentStep,
+                    'bg-blue-500 text-white shadow-lg shadow-blue-500/30': currentStep === index + 1,
+                    'bg-gray-100 text-gray-400': !isStepComplete(index + 1) && currentStep !== index + 1 && index + 1 > currentStep
                   },
                   'relative flex items-center justify-center w-14 h-14 rounded-full text-lg font-semibold transition-all duration-500'
                 ]"
@@ -44,14 +44,14 @@
                 <span :class="[
                   'transition-transform duration-300',
                   {'scale-number': animatedStep === index},
-                  {'text-blue-50': isStepComplete(index + 1)}
+                  {'text-white': isStepComplete(index + 1) || currentStep === index + 1 || index + 1 < currentStep}
                 ]">
                   {{ index + 1 }}
                 </span>
 
                 <!-- Success Icon (when step is complete) -->
                 <span 
-                  v-if="isStepComplete(index + 1)"
+                  v-if="isStepComplete(index + 1) || index + 1 < currentStep"
                   class="absolute inset-0 flex items-center justify-center text-white animate-success"
                 >
                   <i class="material-icons text-2xl">check</i>
@@ -61,7 +61,8 @@
                 <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
                   <div :class="[
                     'text-sm px-4 py-2 rounded-lg shadow-xl whitespace-nowrap',
-                    isStepComplete(index + 1) ? 'bg-blue-700 text-white' : 'bg-gray-800 text-white'
+                    isStepComplete(index + 1) || index + 1 < currentStep ? 'bg-blue-700 text-white' : 
+                    currentStep === index + 1 ? 'bg-blue-700 text-white' : 'bg-gray-800 text-white'
                   ]">
                    Phase {{ step.label }}
                   </div>
@@ -70,11 +71,11 @@
 
               <!-- Pulse Effect for Current Step -->
               <div 
-                v-if="currentStep.value === index + 1"
+                v-if="currentStep === index + 1"
                 class="absolute inset-0 z-0"
               >
-                <div class="absolute inset-0 rounded-full bg-primary-500 animate-ping opacity-20"></div>
-                <div class="absolute inset-0 rounded-full bg-primary-500 animate-pulse opacity-30"></div>
+                <div class="absolute inset-0 rounded-full bg-blue-500 animate-ping opacity-20"></div>
+                <div class="absolute inset-0 rounded-full bg-blue-500 animate-pulse opacity-30"></div>
               </div>
             </div>
 
@@ -88,18 +89,19 @@
                 :class="[
                   'absolute h-full rounded-full transition-all duration-1000 ease-out',
                   {
-                    'bg-gradient-to-r from-blue-500 to-blue-600': isStepComplete(index + 1),
-                    'bg-gradient-to-r from-primary-500 to-primary-600': !isStepComplete(index + 1) && currentStep.value === index + 1,
-                    'bg-gray-200': !isStepComplete(index + 1) && currentStep.value !== index + 1
+                    'bg-gradient-to-r from-blue-500 to-blue-600': isStepComplete(index + 1) || index + 1 < currentStep,
+                    'bg-gradient-to-r from-blue-400 to-blue-500': currentStep === index + 1,
+                    'bg-gray-200': !isStepComplete(index + 1) && currentStep !== index + 1 && index + 1 > currentStep
                   },
-                  isStepComplete(index + 1) ? 'w-full' : 
-                  currentStep.value === index + 1 ? 'w-1/2 animate-progress' : 'w-0'
+                  isStepComplete(index + 1) || index + 1 < currentStep ? 'w-full' : 
+                  currentStep === index + 1 ? 'w-1/2 animate-progress' : 'w-0'
                 ]"
               ></div>
             </div>
           </div>
         </div>
-      </div>      <!-- Form Steps -->
+      </div>     
+       <!-- Form Steps -->
       <component 
         :is="currentStepComponent"
         @next-step="nextStep"
@@ -139,17 +141,32 @@ export default {
     const animatedStep = ref(null)
     const themeClasses = computed(() => store.state.themeClasses)
     
-    const currentStep = computed(() => store.state.candidateRegistration.currentStep)
-    const completedSteps = computed(() => store.state.candidateRegistration.completedSteps || [])
+    // Direct access to currentStep without computed
+    const currentStep = ref(store.state.candidateRegistration.currentStep || 1)
+    const completedSteps = ref(store.state.candidateRegistration.completedSteps || [])
     
+    // Initialize steps if empty
+    if (!store.state.candidateRegistration.completedSteps) {
+      store.commit('initCandidateRegistration')
+    }
+    
+    // Watch for store changes
+    watch(() => store.state.candidateRegistration.currentStep, (newStep) => {
+      currentStep.value = newStep
+    })
+    
+    watch(() => store.state.candidateRegistration.completedSteps, (newCompletedSteps) => {
+      completedSteps.value = newCompletedSteps
+    })
+
     const isStepComplete = (stepNumber) => {
-      console.log('Checking step completion:', stepNumber, completedSteps.value)
       return completedSteps.value.includes(stepNumber)
     }
 
     const markStepComplete = (stepNumber) => {
-      console.log('Marking step complete:', stepNumber)
-      store.commit('completeStep', stepNumber)
+      if (!completedSteps.value.includes(stepNumber)) {
+        store.commit('completeStep', stepNumber)
+      }
     }
 
     const nextStep = () => {
@@ -186,11 +203,17 @@ export default {
       return steps[currentStep.value - 1].component
     })
 
+    // Set initial step from URL if present
     watch(() => route.query.step, (newStep) => {
       if (newStep) {
         const stepNumber = parseInt(newStep)
         if (stepNumber > 0 && stepNumber <= steps.length) {
           store.commit('setCurrentStep', stepNumber)
+          
+          // Mark previous steps as complete when navigating directly
+          for (let i = 1; i < stepNumber; i++) {
+            markStepComplete(i)
+          }
         }
       }
     }, { immediate: true })
@@ -209,7 +232,7 @@ export default {
     return {
       currentStep,
       completedSteps,
-      totalSteps: computed(() => store.state.candidateRegistration.totalSteps),
+      totalSteps: computed(() => store.state.candidateRegistration.totalSteps || steps.length),
       animatedStep,
       animateStep,
       themeClasses,
@@ -274,9 +297,7 @@ export default {
     opacity: .4;
   }
 }
-</style>
 
-<style scoped>
 /* Fade and Slide Animations */
 .animate-fade-in {
   animation: fadeIn 0.6s ease-out;
