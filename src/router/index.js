@@ -31,6 +31,31 @@ const routes = [
         path: 'entrance-exam',
         name: 'EntranceExam',
         component: () => import('../views/entrance-exam/EntranceExam.vue')
+      },
+      {
+        path: 'exam-scheduler',
+        name: 'ExamScheduler',
+        component: () => import('../components/examination/ExamScheduler.vue')
+      },
+      {
+        path: 'exam-calendar',
+        name: 'ExamCalendar', 
+        component: () => import('../components/examination/ExamCalendar.vue')
+      },
+      {
+        path: 'grade-entry',
+        name: 'GradeEntry',
+        component: () => import('../components/examination/GradeEntry.vue')
+      },
+      {
+        path: 'grade-calculator',
+        name: 'GradeCalculator',
+        component: () => import('../components/examination/GradeCalculator.vue')
+      },
+      {
+        path: 'report-card',
+        name: 'ReportCard',
+        component: () => import('../components/examination/ReportCard.vue')
       }
     ]
   },
@@ -67,5 +92,3 @@ const router = createRouter({
 })
 
 export default router
-
-

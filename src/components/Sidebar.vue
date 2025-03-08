@@ -70,7 +70,12 @@ export default {
     const currentRoute = computed(() => route);
     
     const menuItems = [
-      { path: '/entrance-exam', name: 'EntranceExam', meta: { title: 'Entrance Exam', icon: 'school' } }
+      { path: '/dashboard/entrance-exam', name: 'EntranceExam', meta: { title: 'Entrance Exam', icon: 'school' } },
+      { path: '/dashboard/exam-scheduler', name: 'ExamScheduler', meta: { title: 'Exam Scheduler', icon: 'event' } },
+      { path: '/dashboard/exam-calendar', name: 'ExamCalendar', meta: { title: 'Exam Calendar', icon: 'calendar_today' } },
+      { path: '/dashboard/grade-entry', name: 'GradeEntry', meta: { title: 'Grade Entry', icon: 'edit' } },
+      { path: '/dashboard/grade-calculator', name: 'GradeCalculator', meta: { title: 'Grade Calculator', icon: 'calculate' } },
+      { path: '/dashboard/report-card', name: 'ReportCard', meta: { title: 'Report Card', icon: 'description' } }
     ];
 
     const toggleTheme = () => {
