@@ -6,7 +6,6 @@
       class="fixed top-4 left-4 z-50 md:hidden bg-gray-800 text-white p-2 rounded-md"
     >
       <span class="material-icons">{{ collapsed ? 'menu_open' : 'menu' }}</span>
-      <!-- Tooltip for mobile button -->
       <span v-if="collapsed" class="tooltip">Open Menu</span>
     </button>
 
@@ -17,7 +16,6 @@
       :class="collapsed ? 'left-16' : 'left-64'"
     >
       <span class="material-icons">{{ collapsed ? 'chevron_left' : 'chevron_right' }}</span>
-      <!-- Tooltip for desktop button -->
       <span v-if="collapsed" class="tooltip">Toggle Sidebar</span>
     </button>
 
@@ -41,7 +39,6 @@
             :class="[$route.path === '/dashboard' ? 'bg-blue-600' : 'hover:bg-gray-700']">
             <span class="material-icons">dashboard</span>
             <span v-if="!collapsed" class="ml-3">Dashboard</span>
-            <!-- Tooltip for Dashboard -->
             <span v-if="collapsed" class="tooltip">Dashboard</span>
           </router-link>
         </div>
@@ -56,9 +53,8 @@
               class="relative flex items-center py-2 px-2 rounded-lg transition-colors text-sm group"
               :class="[route.name === currentRoute.name ? 'bg-blue-600' : 'hover:bg-gray-700']"
             >
-              <span class="material-icons text-lg">{{ route.meta.icon || 'school' }}</span>
+              <span class="material-icons text-lg">{{ route.meta.icon }}</span>
               <span v-if="!collapsed" class="ml-3">{{ route.meta.title }}</span>
-              <!-- Tooltip for modules -->
               <span v-if="collapsed" class="tooltip">{{ route.meta.title }}</span>
             </router-link>
           </div>
@@ -71,7 +67,6 @@
           >
             <span class="material-icons">logout</span>
             <span v-if="!collapsed" class="ml-3">Log out</span>
-            <!-- Tooltip for logout -->
             <span v-if="collapsed" class="tooltip">Log out</span>
           </button>
         </div>
@@ -106,13 +101,13 @@ export default {
 
     const currentRoute = computed(() => route)
     const menuItems = [
-      { path: '/entrance-exam', name: 'EntranceExam', meta: { title: 'Entrance Exam', icon: 'school' } },
-      { path: '/student-management', name: 'StudentManagement', meta: { title: 'Student Management', icon: 'school' } }
+      { path: '/entrance-exam', name: 'EntranceExam', meta: { title: 'Entrance Exam', icon: 'assignment' } },
+      { path: '/student-management', name: 'StudentManagement', meta: { title: 'Student Management', icon: 'people' } }
     ]
 
     const toggleSidebar = () => {
       emit('toggle')
-      if (isMobileOpen.value) isMobileOpen.value = false // Close mobile sidebar when toggling
+      if (isMobileOpen.value) isMobileOpen.value = false
     }
 
     const closeMobileSidebar = () => {
@@ -130,17 +125,16 @@ export default {
   methods: {
     async logOut() {
       await authService.logout()
-      this.$router.push('/login') // Redirect after logout
+      this.$router.push('/login')
     }
   }
 }
 </script>
 
 <style scoped>
-/* Tooltip Styling */
 .tooltip {
   position: absolute;
-  left: 3.5rem; /* Positioned to the right of icons */
+  left: 3.5rem;
   top: 50%;
   transform: translateY(-50%);
   background-color: rgba(0, 0, 0, 0.8);
@@ -151,11 +145,10 @@ export default {
   font-size: 0.875rem;
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
-  pointer-events: none; /* Prevents unwanted interactions */
+  pointer-events: none;
   z-index: 50;
 }
 
-/* Show tooltip on hover when collapsed */
 .group:hover .tooltip {
   opacity: 1;
 }

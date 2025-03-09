@@ -1,747 +1,607 @@
 <template>
-  <div class="space-y-6">
-    <div class="flex justify-between items-center">
-      <h2 class="text-2xl font-semibold">Candidate Management</h2>
-      <div class="flex gap-4">
-        <button 
-          @click="registerNewCandidate"
-          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 0112 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-          </svg>
-          Register New Candidate
-        </button>
-        <button 
-          @click="showGenerateModal = true"
-          class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center gap-2"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Generate Candidate List
-        </button>
-      </div>
+  <h1 class="text-2xl font-semibold">Student List</h1>
+  <div class="container mx-auto px-4 py-8">
+    <!-- Department Selection -->
+    <div class="mb-6">
+      <label for="department-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Department</label>
+      <select 
+        id="department-select"
+        v-model="selectedDepartmentId" 
+        class="w-full md:w-64 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark bg-white dark:bg-gray-800 text-text-light dark:text-text-dark"
+      >
+        <option value="all">All Departments</option>
+        <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+          {{ dept.name }}
+        </option>
+      </select>
     </div>
 
-    <div class="flex gap-6">
-      <!-- Left Sidebar - Filters -->
-      <div class="w-1/4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-        <h2 class="text-lg font-medium">Filters</h2>
+    <div class="text-left mb-8">
+      <h1 class="text-3xl font-bold text-primary-light dark:text-primary-dark">
+        {{ currentDepartmentName }} Students
+      </h1>
+      <p class="text-text-light dark:text-text-dark mt-2">
+        Total Students: {{ filteredByDepartmentStudents.length }}
+      </p>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="relative w-full md:w-64">
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search students..."
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark bg-white dark:bg-gray-800 text-text-light dark:text-text-dark"
+        />
+        <button 
+          v-if="searchQuery" 
+          @click="searchQuery = ''"
+          class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+        >
+          ✕
+        </button>
+      </div>
+      
+      <div class="flex items-center gap-4">
+        <select 
+          v-model="sortBy" 
+          class="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark"
+        >
+          <option value="name">Sort by Name</option>
+          <option value="id">Sort by ID</option>
+          <option value="level">Sort by Level</option>
+          <option value="departmentName">Sort by Department</option>
+        </select>
         
-        <!-- Search -->
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
-          <input
-            type="text"
-            v-model="searchQuery"
-            placeholder="Search by name or email"
-            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          />
-        </div>
-
-        <!-- Status Filter -->
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-          <select
-            v-model="statusFilter"
-            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          >
-            <option value="">All Statuses</option>
-            <option v-for="status in statusOptions" :key="status.value" :value="status.value">
-              {{ status.label }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Department Filter -->
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Field of Study</label>
-          <select
-            v-model="selectedField"
-            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          >
-            <option value="">All Fields of Study</option>
-            <option 
-              v-for="department in departments"
-              :key="department._id"
-              :value="department._id"
-            >
-              {{ department.name }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Clear Filters -->
-        <button
-          @click="clearFilters"
-          class="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+        <button 
+          @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'"
+          class="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-700"
         >
-          Clear Filters
+          {{ sortOrder === 'asc' ? '↑' : '↓' }}
         </button>
-      </div>
-
-      <!-- Main Content -->
-      <div class="flex-1">
-        <!-- Candidates Table -->
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-800">
-              <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Field</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
-              <tr v-for="candidate in filteredCandidates" :key="candidate._id">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900 dark:text-white">{{ candidate.user ? `${candidate.user.firstName} ${candidate.user.lastName}` : 'N/A' }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-500 dark:text-gray-300">{{ candidate.user ? candidate.user.email : 'N/A' }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-500 dark:text-gray-300">{{ candidate.fieldId?.title || 'Not assigned' }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span :class="[
-                    'px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full',
-                    {
-                      'bg-green-100 text-green-800': candidate.applicationStatus === 'registered',
-                      'bg-yellow-100 text-yellow-800': candidate.applicationStatus === 'pending',
-                      'bg-red-100 text-red-800': candidate.applicationStatus === 'rejected'
-                    }
-                  ]">
-                    {{ candidate.applicationStatus }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex space-x-2">
-                    <button
-                      v-if="['pending', 'rejected'].includes(candidate.applicationStatus)"
-                      @click="updateStatus(candidate._id, 'registered')"
-                      class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold hover:bg-green-200"
-                    >
-                      Register
-                    </button>
-                    <button
-                      v-if="['pending', 'registered'].includes(candidate.applicationStatus)"
-                      @click="updateStatus(candidate._id, 'rejected')"
-                      class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold hover:bg-red-200"
-                    >
-                      Reject
-                    </button>
-                    <button
-                      @click="editCandidate(candidate)"
-                      class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold hover:bg-blue-200"
-                    >
-                      Edit
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
 
-    <!-- Edit Candidate Modal -->
-    <Modal 
-      v-model="showEditModal"
-      @close="closeEditModal"
-      title="Edit Candidate Information"
-    >
-      <template #content>
-        <form @submit.prevent="saveCandidate" class="space-y-4">
-          <!-- Personal Information -->
-          <div class="space-y-4">
-            <h3 class="text-lg font-medium">Personal Information</h3>
-            
-            <!-- High School Information -->
-            <div class="space-y-2">
-              <h4 class="text-sm font-medium">High School</h4>
-              <div>
-                <label class="block text-sm">School Name</label>
-                <input 
-                  v-model="editingCandidate.highSchool.schoolName"
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                />
+    <!-- Student List -->
+    <div v-if="paginatedStudents.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Student ID
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Name
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Department
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Level
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Email
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tr v-for="student in paginatedStudents" :key="student.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+              {{ student.id }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-300">
+                  {{ getInitials(student.name) }}
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    {{ student.name }}
+                  </div>
+                </div>
               </div>
-              <div>
-                <label class="block text-sm">Year Completed</label>
-                <input 
-                  v-model="editingCandidate.highSchool.yearCompleted"
-                  type="number"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                />
-              </div>
-            </div>
-
-            <!-- University Information -->
-            <div class="space-y-2">
-              <h4 class="text-sm font-medium">University</h4>
-              <div>
-                <label class="block text-sm">University Name</label>
-                <input 
-                  v-model="editingCandidate.university.universityName"
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                />
-              </div>
-              <div>
-                <label class="block text-sm">Degree</label>
-                <input 
-                  v-model="editingCandidate.university.degree"
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                />
-              </div>
-              <div>
-                <label class="block text-sm">Year Completed</label>
-                <input 
-                  v-model="editingCandidate.university.yearCompleted"
-                  type="number"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                />
-              </div>
-            </div>
-
-            <!-- Exam Center -->
-            <div>
-              <label class="block text-sm">Exam Center</label>
-              <input 
-                v-model="editingCandidate.examCenter"
-                type="text"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-              />
-            </div>
-
-            <!-- Field of Study -->
-            <div>
-              <label class="block text-sm">Field of Study</label>
-              <select 
-                v-model="editingCandidate.fieldOfStudy"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+              {{ getDepartmentName(student.departmentId) }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+              {{ student.level }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+              {{ student.email }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <button 
+                @click="viewStudent(student)" 
+                class="text-primary-light dark:text-primary-dark hover:underline mr-3"
               >
-                <option v-for="dept in departments" :key="dept._id" :value="dept._id">
-                  {{ dept.name }}
-                </option>
-              </select>
-            </div>
-          </div>
-        </form>
-      </template>
-      <template #footer>
+                View
+              </button>
+              <button 
+                @click="editStudent(student)" 
+                class="text-yellow-600 dark:text-yellow-400 hover:underline mr-3"
+              >
+                Edit
+              </button>
+              <button 
+                @click="confirmDelete(student)" 
+                class="text-red-600 dark:text-red-400 hover:underline"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div v-else class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow">
+      <p class="text-gray-500 dark:text-gray-400">
+        {{ searchQuery ? 'No students match your search criteria' : 'No students in this department yet' }}
+      </p>
+      <button 
+        @click="addNewStudent" 
+        class="mt-4 px-4 py-2 bg-primary-light dark:bg-primary-dark text-white rounded-lg hover:opacity-90"
+      >
+        Add New Student
+      </button>
+    </div>
+
+    <!-- Pagination -->
+    <div v-if="filteredStudents.length > 0" class="mt-6 flex justify-between items-center">
+      <div class="text-sm text-gray-700 dark:text-gray-300">
+        Showing <span class="font-medium">{{ paginationStart }}</span> to <span class="font-medium">{{ paginationEnd }}</span> of <span class="font-medium">{{ filteredStudents.length }}</span> students
+      </div>
+      <div class="flex space-x-2">
+        <button 
+          @click="currentPage = Math.max(1, currentPage - 1)"
+          :disabled="currentPage === 1"
+          class="px-4 py-2 border rounded-md"
+          :class="currentPage === 1 
+            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed' 
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+        >
+          Previous
+        </button>
+        <button 
+          @click="currentPage = Math.min(totalPages, currentPage + 1)"
+          :disabled="currentPage === totalPages"
+          class="px-4 py-2 border rounded-md"
+          :class="currentPage === totalPages 
+            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed' 
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Confirm Delete</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">
+          Are you sure you want to delete {{ studentToDelete ? studentToDelete.name : '' }}? This action cannot be undone.
+        </p>
         <div class="flex justify-end space-x-3">
           <button 
-            @click="closeEditModal"
-            class="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50"
+            @click="showDeleteModal = false" 
+            class="px-4 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             Cancel
           </button>
           <button 
-            @click="saveCandidate"
-            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            @click="deleteStudent" 
+            class="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
           >
-            Save Changes
+            Delete
           </button>
         </div>
-      </template>
-    </Modal>
+      </div>
+    </div>
 
-    <!-- Generate Report Modal -->
-    <div v-if="showGenerateModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
-      <div class="bg-white rounded-lg p-6 max-w-4xl w-full">
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-lg font-medium">Generate Report</h3>
+    <!-- View Student Modal -->
+    <div v-if="showViewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Student Details</h3>
+          <button @click="showViewModal = false" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+            ✕
+          </button>
+        </div>
+        <div v-if="selectedStudent" class="space-y-4">
+          <div class="flex justify-center mb-6">
+            <div class="h-24 w-24 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center text-2xl text-gray-500 dark:text-gray-300">
+              {{ getInitials(selectedStudent.name) }}
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="text-sm text-gray-500 dark:text-gray-400">Student ID</div>
+            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ selectedStudent.id }}</div>
+            
+            <div class="text-sm text-gray-500 dark:text-gray-400">Name</div>
+            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ selectedStudent.name }}</div>
+            
+            <div class="text-sm text-gray-500 dark:text-gray-400">Department</div>
+            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ getDepartmentName(selectedStudent.departmentId) }}</div>
+            
+            <div class="text-sm text-gray-500 dark:text-gray-400">Level</div>
+            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ selectedStudent.level }}</div>
+            
+            <div class="text-sm text-gray-500 dark:text-gray-400">Email</div>
+            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ selectedStudent.email }}</div>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end">
           <button 
-            @click="showGenerateModal = false"
-            class="text-gray-500 hover:text-gray-700"
+            @click="editStudent(selectedStudent)" 
+            class="px-4 py-2 rounded-md bg-primary-light dark:bg-primary-dark text-white hover:opacity-90"
           >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            Edit
           </button>
         </div>
+      </div>
+    </div>
 
-        <!-- Field Selection -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Select Field of Study</label>
-          <select 
-            v-model="selectedReportField"
-            class="w-full px-3 py-2 border rounded-md"
-          >
-            <option value="">All Fields of Study</option>
-            <option 
-              v-for="department in departments"
-              :key="department._id"
-              :value="department._id"
+    <!-- Edit/Add Student Modal -->
+    <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            {{ isEditing ? 'Edit Student' : 'Add New Student' }}
+          </h3>
+          <button @click="showEditModal = false" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+            ✕
+          </button>
+        </div>
+        <form @submit.prevent="saveStudent" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Student ID</label>
+            <input 
+              v-model="editForm.id" 
+              type="text" 
+              :readonly="isEditing"
+              :class="{'bg-gray-100 dark:bg-gray-700': isEditing}"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark bg-white dark:bg-gray-800 text-text-light dark:text-text-dark"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+            <input 
+              v-model="editForm.name" 
+              type="text" 
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark bg-white dark:bg-gray-800 text-text-light dark:text-text-dark"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
+            <select 
+              v-model="editForm.departmentId" 
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark bg-white dark:bg-gray-800 text-text-light dark:text-text-dark"
+              required
             >
-              {{ department.name }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Statistics -->
-        <div class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-blue-50 p-4 rounded-lg">
-              <h4 class="text-sm font-medium text-blue-800 mb-2">Total Candidates</h4>
-              <p class="text-2xl font-bold text-blue-900">{{ getStatistics.totalCandidates }}</p>
-            </div>
-            <div class="bg-green-50 p-4 rounded-lg">
-              <h4 class="text-sm font-medium text-green-800 mb-2">Validated Candidates</h4>
-              <p class="text-2xl font-bold text-green-900">{{ getStatistics.validatedCandidates }}</p>
-            </div>
-            <div class="bg-yellow-50 p-4 rounded-lg">
-              <h4 class="text-sm font-medium text-yellow-800 mb-2">Pending Candidates</h4>
-              <p class="text-2xl font-bold text-yellow-900">{{ getStatistics.pendingCandidates }}</p>
-            </div>
+              <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+                {{ dept.name }}
+              </option>
+            </select>
           </div>
-
-          <!-- Detailed Statistics Table -->
-          <div class="bg-white shadow rounded-lg overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Class</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Students</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status Distribution</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Registration Period</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="stat in getStatistics.classStats" :key="stat.fieldId">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ getFieldName(stat.fieldId) }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ stat.total }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm">
-                    <div class="space-y-1">
-                      <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                        <span>Validated: {{ stat.validated }}</span>
-                      </div>
-                      <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                        <span>Pending: {{ stat.pending }}</span>
-                      </div>
-                      <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 bg-red-500 rounded-full"></span>
-                        <span>Rejected: {{ stat.rejected }}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ stat.dateRange }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Level</label>
+            <select 
+              v-model="editForm.level" 
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark bg-white dark:bg-gray-800 text-text-light dark:text-text-dark"
+              required
+            >
+              <option v-for="level in [1, 2, 3, 4, 5]" :key="level" :value="level">
+                {{ level }}
+              </option>
+            </select>
           </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="mt-6 flex justify-end gap-4">
-          <button
-            @click="showGenerateModal = false"
-            class="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50"
-          >
-            Close
-          </button>
-          <button
-            @click="generateValidatedPDF"
-            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Export as PDF
-          </button>
-        </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+            <input 
+              v-model="editForm.email" 
+              type="email" 
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark bg-white dark:bg-gray-800 text-text-light dark:text-text-dark"
+              required
+            />
+          </div>
+          <div class="flex justify-end space-x-3 pt-4">
+            <button 
+              type="button"
+              @click="showEditModal = false" 
+              class="px-4 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit"
+              class="px-4 py-2 rounded-md bg-primary-light dark:bg-primary-dark text-white hover:opacity-90"
+            >
+              Save
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
-import Modal from '@/components/Modal.vue';
-import {  departmentService } from '@/api/services/index'
-
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import io from 'socket.io-client'; // Import Socket.IO client
-
 export default {
-  name: 'CandidateManagement',
-  components: {
-    Modal
-  },
+  name: 'StudentList',
   props: {
-    fields: {
-      type: Array,
-      required: true
+    // This prop is no longer required since we now manage departments internally
+    defaultDepartmentId: {
+      type: String,
+      default: 'all'
     }
   },
-  setup(props) {
-    const store = useStore();
-    const router = useRouter();
-    const searchQuery = ref('');
-    const selectedField = ref('');
-    const statusFilter = ref('');
-    const showEditModal = ref(false);
-    const showGenerateModal = ref(false);
-    const editingCandidate = ref(null);
-    const departments = ref([])
-    const formError = ref(null)
-    const selectedReportField = ref('');
-    const socket = ref(null); // Reactive reference for Socket.IO connection
-
-    // Status options for filter - only show final statuses
-    const statusOptions = [
-      { value: 'pending', label: 'Pending' },
-      { value: 'registered', label: 'Registered' },
-      { value: 'rejected', label: 'Rejected' }
-    ];
-
-    // Load departments/fields
-    const loadDepartments = async () => {
-      try {
-        const response = await departmentService.getAllDepartments()
-        departments.value = response
-      } catch (err) {
-        console.error('Failed to load departments:', err)
-        formError.value = 'Failed to load departments'
+  data() {
+    return {
+      // Department data
+      departments: [
+        { id: 'DEP001', name: 'Computer Security' },
+        { id: 'DEP002', name: 'Software Engineering' },
+        { id: 'DEP003', name: 'Artificial Intelligence' },
+        { id: 'DEP004', name: 'Data Science' },
+        { id: 'DEP005', name: 'Networks & Telecommunications' }
+      ],
+      selectedDepartmentId: 'all', // Default to showing all departments
+      
+      // Student data
+      students: [
+        // Computer Security students
+        { id: 'ST001', name: 'John Doe', level: 3, email: 'john.doe@esstic.edu', departmentId: 'DEP001' },
+        { id: 'ST002', name: 'Jane Smith', level: 2, email: 'jane.smith@esstic.edu', departmentId: 'DEP001' },
+        { id: 'ST003', name: 'Samuel Johnson', level: 4, email: 'samuel.j@esstic.edu', departmentId: 'DEP001' },
+        { id: 'ST004', name: 'Alice Brown', level: 1, email: 'alice.b@esstic.edu', departmentId: 'DEP001' },
+        
+        // Software Engineering students
+        { id: 'ST005', name: 'Robert Wilson', level: 3, email: 'r.wilson@esstic.edu', departmentId: 'DEP002' },
+        { id: 'ST006', name: 'Emily Davis', level: 2, email: 'emily.d@esstic.edu', departmentId: 'DEP002' },
+        { id: 'ST007', name: 'Michael Clark', level: 4, email: 'michael.c@esstic.edu', departmentId: 'DEP002' },
+        { id: 'ST008', name: 'Sophia Martinez', level: 1, email: 'sophia.m@esstic.edu', departmentId: 'DEP002' },
+        
+        // Artificial Intelligence students
+        { id: 'ST009', name: 'David Anderson', level: 5, email: 'david.a@esstic.edu', departmentId: 'DEP003' },
+        { id: 'ST010', name: 'Olivia Taylor', level: 3, email: 'olivia.t@esstic.edu', departmentId: 'DEP003' },
+        { id: 'ST011', name: 'James Wilson', level: 2, email: 'james.w@esstic.edu', departmentId: 'DEP003' },
+        { id: 'ST012', name: 'Emma Garcia', level: 4, email: 'emma.g@esstic.edu', departmentId: 'DEP003' },
+        
+        // Data Science students
+        { id: 'ST013', name: 'Benjamin Lee', level: 1, email: 'benjamin.l@esstic.edu', departmentId: 'DEP004' },
+        { id: 'ST014', name: 'Ava Hernandez', level: 3, email: 'ava.h@esstic.edu', departmentId: 'DEP004' },
+        { id: 'ST015', name: 'Lucas Moore', level: 5, email: 'lucas.m@esstic.edu', departmentId: 'DEP004' },
+        { id: 'ST016', name: 'Mia Robinson', level: 2, email: 'mia.r@esstic.edu', departmentId: 'DEP004' },
+        
+        // Networks & Telecommunications students
+        { id: 'ST017', name: 'Alexander White', level: 4, email: 'alexander.w@esstic.edu', departmentId: 'DEP005' },
+        { id: 'ST018', name: 'Charlotte Lewis', level: 1, email: 'charlotte.l@esstic.edu', departmentId: 'DEP005' },
+        { id: 'ST019', name: 'Ethan Scott', level: 3, email: 'ethan.s@esstic.edu', departmentId: 'DEP005' },
+        { id: 'ST020', name: 'Amelia Green', level: 2, email: 'amelia.g@esstic.edu', departmentId: 'DEP005' }
+      ],
+      searchQuery: '',
+      sortBy: 'name',
+      sortOrder: 'asc',
+      currentPage: 1,
+      itemsPerPage: 10,
+      
+      // Delete modal state
+      showDeleteModal: false,
+      studentToDelete: null,
+      
+      // View modal state
+      showViewModal: false,
+      selectedStudent: null,
+      
+      // Edit/Add modal state
+      showEditModal: false,
+      isEditing: false,
+      editForm: {
+        id: '',
+        name: '',
+        email: '',
+        level: 1,
+        departmentId: ''
       }
     }
-
-    // Establish Socket.IO connection
-    const connectSocket = () => {
-      // Replace 'http://localhost:3000' with your actual Socket.IO server URL
-      socket.value = io('http://localhost:5000');
-
-      // Log connection status
-      socket.value.on('connect', () => {
-        console.log('Connected to Socket.IO server');
-      });
-
-      socket.value.on('disconnect', () => {
-        console.log('Disconnected from Socket.IO server');
-      });
-
-      // Listen for candidate updates from the server
-      socket.value.on('candidates', (change) => {
-        console.log('Received candidate change:', change);
-        // Refresh the candidates list when an update is received
-        store.dispatch('candidates/fetchCandidates');
-      });
-    };
-
-    // Lifecycle hooks
-    onMounted(() => {
-      loadDepartments();
-      connectSocket(); // Initialize Socket.IO connection when component mounts
-      store.dispatch('candidates/fetchCandidates'); // Fetch initial candidates
-    });
-
-    onUnmounted(() => {
-      if (socket.value) {
-        socket.value.disconnect(); // Cleanup: Disconnect socket when component unmounts
-        console.log('Socket.IO connection closed');
+  },
+  computed: {
+    currentDepartmentName() {
+      if (this.selectedDepartmentId === 'all') {
+        return 'All';
       }
-    });
-
-    const updateStatus = async (candidateId, newStatus) => {
-      try {
-        await store.dispatch('candidates/updateCandidateStatus', {
-          id: candidateId,
-          applicationStatus: newStatus
-        });
-        // Refresh candidates list
-        await store.dispatch('candidates/fetchCandidates');
-      } catch (error) {
-        console.error('Failed to update status:', error);
-      }
-    };
-
-    const editCandidate = (candidate) => {
-      editingCandidate.value = {
-        ...candidate,
-        highSchool: {
-          schoolName: candidate.highSchool?.schoolName || '',
-          yearCompleted: candidate.highSchool?.yearCompleted || null,
-          majorSubjects: candidate.highSchool?.majorSubjects || []
-        },
-        university: {
-          universityName: candidate.university?.universityName || '',
-          degree: candidate.university?.degree || '',
-          yearCompleted: candidate.university?.yearCompleted || null
-        },
-        examCenter: candidate.examCenter || '',
-        fieldOfStudy: candidate.fieldOfStudy || ''
-      };
-      showEditModal.value = true;
-    };
-
-    const saveCandidate = async () => {
-      try {
-        await store.dispatch('candidates/updateCandidate', {
-          id: editingCandidate.value._id,
-          data: {
-            highSchool: editingCandidate.value.highSchool,
-            university: editingCandidate.value.university,
-            examCenter: editingCandidate.value.examCenter,
-            fieldOfStudy: editingCandidate.value.fieldOfStudy
-          }
-        });
-        showEditModal.value = false;
-        // Refresh candidates list
-        await store.dispatch('candidates/fetchCandidates');
-      } catch (error) {
-        console.error('Failed to save candidate:', error);
-      }
-    };
-
-    const closeEditModal = () => {
-      showEditModal.value = false;
-      editingCandidate.value = null;
-    };
-
-    // Get candidates from Vuex store
-    const candidates = computed(() => store.getters['candidates/getAllCandidates']);
-
-    const getStatistics = computed(() => {
-      const filteredCands = selectedReportField.value
-        ? candidates.value.filter(c => c.fieldOfStudy === selectedReportField.value)
-        : candidates.value;
-
-      const stats = {
-        totalCandidates: filteredCands.length,
-        validatedCandidates: filteredCands.filter(c => c.applicationStatus === 'registered').length,
-        pendingCandidates: filteredCands.filter(c => c.applicationStatus === 'pending').length,
-        classStats: []
-      };
-
-      // Group by field
-      const fieldGroups = departments.value.reduce((acc, department) => {
-        const departmentCandidates = filteredCands.filter(c => c.fieldOfStudy === department._id);
-        if (departmentCandidates.length > 0) {
-          acc.push({
-            fieldId: department._id,
-            total: departmentCandidates.length,
-            validated: departmentCandidates.filter(c => c.applicationStatus === 'registered').length,
-            pending: departmentCandidates.filter(c => c.applicationStatus === 'pending').length,
-            rejected: departmentCandidates.filter(c => c.applicationStatus === 'rejected').length,
-            dateRange: getDateRange(departmentCandidates)
-          });
-        }
-        return acc;
-      }, []);
-
-      stats.classStats = fieldGroups;
-      return stats;
-    });
-
-    const filteredCandidates = computed(() => {
-      let filtered = [...candidates.value];
-
-      // Apply search filter
-      if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase();
-        filtered = filtered.filter(candidate => {
-          if (!candidate.user) return false;
-          return candidate.user.firstName.toLowerCase().includes(query) ||
-                 candidate.user.lastName.toLowerCase().includes(query) ||
-                 candidate.user.email.toLowerCase().includes(query);
-        });
-      }
-
-      // Apply status filter
-      if (statusFilter.value) {
-        filtered = filtered.filter(candidate => 
-          candidate.applicationStatus === statusFilter.value
-        );
-      }
-
-      // Apply field of study filter
-      if (selectedField.value) {
-        filtered = filtered.filter(candidate => 
-          candidate.fieldOfStudy === selectedField.value
-        );
-      }
-
-      return filtered;
-    });
-
-    const getFieldName = (fieldId) => {
-      const field = props.fields.find(f => f.id === fieldId);
-      return field ? field.name : 'Unknown';
-    };
-
-    const formatDate = (date) => {
-      return new Date(date).toLocaleDateString();
-    };
-
-    const getDateRange = (candidates) => {
-      if (!candidates.length) return 'N/A';
-      const dates = candidates.map(c => new Date(c.registrationDate));
-      const earliest = new Date(Math.min(...dates));
-      const latest = new Date(Math.max(...dates));
-      return `${formatDate(earliest)} - ${formatDate(latest)}`;
-    };
-
-    const addHeader = (doc, pageTitle = '') => {
-      const logoPath = require('@/assets/images/esstic-logo.png');
-      doc.addImage(logoPath, 'PNG', 15, 10, 25, 25);
-      const textStartX = 50;
-      doc.setFontSize(14);
-      doc.setTextColor(41, 128, 185);
-      const pageWidth = doc.internal.pageSize.width;
-      const textWidth = pageWidth - (textStartX + 15);
-      const centerX = textStartX + (textWidth / 2);
-      doc.text('ÉCOLE SUPÉRIEURE DES SCIENCES ET TECHNOLOGIES', centerX, 15, { align: 'center' });
-      doc.text('DE L\'INFORMATION ET DE LA COMMUNICATION', centerX, 22, { align: 'center' });
-      doc.setFontSize(12);
-      doc.text('ADVANCED SCHOOL OF MASS COMMUNICATION', centerX, 29, { align: 'center' });
-      doc.setDrawColor(41, 128, 185);
-      doc.setLineWidth(0.5);
-      doc.line(15, 35, doc.internal.pageSize.width - 15, 35);
-      if (pageTitle) {
-        doc.setFontSize(14);
-        doc.text(pageTitle, doc.internal.pageSize.width / 2, 45, { align: 'center' });
-      }
-    };
-
-    const generateValidatedPDF = () => {
-      const doc = new jsPDF();
-      const stats = getStatistics.value;
       
-      addHeader(doc);
-      doc.setFontSize(22);
-      doc.setTextColor(0);
-      doc.text('ENTRANCE EXAMINATION 2024', doc.internal.pageSize.width / 2, 60, { align: 'center' });
-      doc.setFontSize(18);
-      doc.text('List of Eligible Candidates', doc.internal.pageSize.width / 2, 75, { align: 'center' });
-      doc.setFontSize(12);
-      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, doc.internal.pageSize.width / 2, 90, { align: 'center' });
-      doc.setDrawColor(41, 128, 185);
-      doc.setLineWidth(0.5);
-      doc.line(50, 80, doc.internal.pageSize.width - 50, 80);
-      const pageHeight = doc.internal.pageSize.height;
-      doc.setFontSize(10);
-      doc.text('ESSTIC - Excellence in Information and Communication Technology Education', 
-        doc.internal.pageSize.width / 2, pageHeight - 20, { align: 'center' });
-
-      stats.classStats.forEach(stat => {
-        if (stat.validated > 0) {
-          doc.addPage();
-          addHeader(doc, getFieldName(stat.fieldId));
-          const fieldCandidates = candidates.value
-            .filter(c => c.fieldId === stat.fieldId && c.applicationStatus === 'registered')
-            .sort((a, b) => a.name.localeCompare(b.name));
-          const tableData = fieldCandidates.map((candidate, idx) => [
-            (idx + 1).toString(),
-            candidate.registrationNumber,
-            candidate.user.firstName + ' ' + candidate.user.lastName,
-            formatDate(candidate.registrationDate)
-          ]);
-
-          doc.autoTable({
-            startY: 55,
-            head: [['Site No.', 'Registration No.', 'Candidate Name', 'Registration Date']],
-            body: tableData,
-            theme: 'grid',
-            headStyles: { 
-              fillColor: [41, 128, 185], 
-              textColor: 255,
-              fontSize: 11,
-              halign: 'center',
-              fontStyle: 'bold'
-            },
-            styles: { 
-              fontSize: 10,
-              cellPadding: 6,
-              lineColor: [200, 200, 200],
-              lineWidth: 0.1
-            },
-            alternateRowStyles: {
-              fillColor: [245, 250, 254]
-            },
-            columnStyles: {
-              0: { cellWidth: 20 },
-              1: { cellWidth: 40 },
-              2: { cellWidth: 80 },
-              3: { cellWidth: 40 }
-            }
-          });
-
-          const pageHeight = doc.internal.pageSize.height;
-          doc.setDrawColor(41, 128, 185);
-          doc.setLineWidth(0.5);
-          doc.line(15, pageHeight - 25, doc.internal.pageSize.width - 15, pageHeight - 25);
-          doc.setFontSize(10);
-          doc.setTextColor(100);
-          doc.text('ESSTIC Entrance Examination 2024', 15, pageHeight - 15);
-          doc.text(
-            `Total Eligible Candidates: ${fieldCandidates.length}`,
-            doc.internal.pageSize.width / 2,
-            pageHeight - 15,
-            { align: 'center' }
-          );
-          doc.text(
-            `Page ${doc.internal.getCurrentPageInfo().pageNumber}`,
-            doc.internal.pageSize.width - 15,
-            pageHeight - 15,
-            { align: 'right' }
-          );
+      const department = this.departments.find(dept => dept.id === this.selectedDepartmentId);
+      return department ? department.name : '';
+    },
+    
+    filteredByDepartmentStudents() {
+      if (this.selectedDepartmentId === 'all') {
+        return this.students;
+      }
+      
+      return this.students.filter(student => student.departmentId === this.selectedDepartmentId);
+    },
+    
+    sortedStudents() {
+      return [...this.filteredByDepartmentStudents].sort((a, b) => {
+        let aValue, bValue;
+        
+        if (this.sortBy === 'departmentName') {
+          aValue = this.getDepartmentName(a.departmentId).toLowerCase();
+          bValue = this.getDepartmentName(b.departmentId).toLowerCase();
+        } else {
+          aValue = a[this.sortBy];
+          bValue = b[this.sortBy];
+          
+          if (typeof aValue === 'string' && typeof bValue === 'string') {
+            aValue = aValue.toLowerCase();
+            bValue = bValue.toLowerCase();
+          }
+        }
+        
+        if (this.sortOrder === 'asc') {
+          return aValue > bValue ? 1 : -1;
+        } else {
+          return aValue < bValue ? 1 : -1;
         }
       });
-
-      doc.save('entrance-exam-candidates.pdf');
-    };
-
-    const registerNewCandidate = () => {
-      router.push('/candidate-registration?source=admin');
-    };
-
-    const clearFilters = () => {
-      searchQuery.value = '';
-      selectedField.value = '';
-      statusFilter.value = '';
-    };
-
-    return {
-      searchQuery,
-      selectedField,
-      statusFilter,
-      statusOptions,
-      showEditModal,
-      showGenerateModal,
-      editingCandidate,
-      departments,
-      filteredCandidates,
-      updateStatus,
-      editCandidate,
-      saveCandidate,
-      closeEditModal,
-      getStatistics,
-      getFieldName,
-      formatDate,
-      registerNewCandidate,
-      clearFilters,
-      generateValidatedPDF,
-      selectedReportField
-    };
+    },
+    
+    filteredStudents() {
+      if (!this.searchQuery) {
+        return this.sortedStudents;
+      }
+      
+      const query = this.searchQuery.toLowerCase();
+      return this.sortedStudents.filter(student => {
+        const departmentName = this.getDepartmentName(student.departmentId).toLowerCase();
+        return student.name.toLowerCase().includes(query) || 
+               student.id.toLowerCase().includes(query) || 
+               student.email.toLowerCase().includes(query) ||
+               student.level.toString().includes(query) ||
+               departmentName.includes(query);
+      });
+    },
+    
+    paginatedStudents() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredStudents.slice(start, end);
+    },
+    
+    totalPages() {
+      return Math.max(1, Math.ceil(this.filteredStudents.length / this.itemsPerPage));
+    },
+    
+    paginationStart() {
+      return this.filteredStudents.length ? (this.currentPage - 1) * this.itemsPerPage + 1 : 0;
+    },
+    
+    paginationEnd() {
+      return Math.min(this.currentPage * this.itemsPerPage, this.filteredStudents.length);
+    }
+  },
+  methods: {
+    getDepartmentName(departmentId) {
+      const department = this.departments.find(dept => dept.id === departmentId);
+      return department ? department.name : 'Unknown Department';
+    },
+    
+    getInitials(name) {
+      if (!name) return '';
+      return name
+        .split(' ')
+        .map(part => part.charAt(0).toUpperCase())
+        .join('')
+        .slice(0, 2);
+    },
+    
+    // View student details
+    viewStudent(student) {
+      this.selectedStudent = { ...student };
+      this.showViewModal = true;
+    },
+    
+    // Edit student
+    editStudent(student) {
+      this.isEditing = true;
+      this.editForm = { ...student };
+      this.showViewModal = false;
+      this.showEditModal = true;
+    },
+    
+    // Delete student
+    confirmDelete(student) {
+      this.studentToDelete = student;
+      this.showDeleteModal = true;
+    },
+    
+    deleteStudent() {
+      if (this.studentToDelete) {
+        this.students = this.students.filter(s => s.id !== this.studentToDelete.id);
+      }
+      this.showDeleteModal = false;
+      this.studentToDelete = null;
+      
+      // Reset to first page if current page is now empty
+      if (this.paginatedStudents.length === 0 && this.currentPage > 1) {
+        this.currentPage = Math.max(1, this.currentPage - 1);
+      }
+    },
+    
+    // Add new student
+    addNewStudent() {
+      this.isEditing = false;
+      
+      // Generate new ID based on the highest existing ID
+      const highestId = this.students.reduce((max, student) => {
+        const idNum = parseInt(student.id.replace('ST', ''));
+        return idNum > max ? idNum : max;
+      }, 0);
+      
+      const newId = `ST${String(highestId + 1).padStart(3, '0')}`;
+      
+      this.editForm = {
+        id: newId,
+        name: '',
+        email: '',
+        level: 1,
+        // Set default department to the currently selected one (if not 'all')
+        departmentId: this.selectedDepartmentId !== 'all' ? this.selectedDepartmentId : this.departments[0].id
+      };
+      
+      this.showEditModal = true;
+    },
+    
+    // Save student (add or update)
+    saveStudent() {
+      if (this.isEditing) {
+        // Update existing student
+        const index = this.students.findIndex(s => s.id === this.editForm.id);
+        if (index !== -1) {
+          this.students[index] = { ...this.editForm };
+        }
+      } else {
+        // Add new student
+        this.students.push({ ...this.editForm });
+      }
+      
+      this.showEditModal = false;
+      this.editForm = {
+        id: '',
+        name: '',
+        email: '',
+        level: 1,
+        departmentId: ''
+      };
+    }
+  },
+  watch: {
+    // Reset to first page when search query or department changes
+    searchQuery() {
+      this.currentPage = 1;
+    },
+    selectedDepartmentId() {
+      this.currentPage = 1;
+    }
+  },
+  created() {
+    // Initialize with default department if provided
+    if (this.defaultDepartmentId && 
+        (this.defaultDepartmentId === 'all' || 
+         this.departments.some(dept => dept.id === this.defaultDepartmentId))) {
+      this.selectedDepartmentId = this.defaultDepartmentId;
+    }
   }
-};
+}
 </script>

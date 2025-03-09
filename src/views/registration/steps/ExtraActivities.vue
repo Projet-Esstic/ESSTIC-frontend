@@ -1,8 +1,8 @@
 <template>
   <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-    <div class="bg-gradient-to-r from-purple-600 to-purple-800 p-6">
+    <div class="bg-gradient-to-r from-primary-light to-primary-light p-6">
       <h2 class="text-2xl font-bold text-white mb-2">Activités Extra</h2>
-      <p class="text-purple-100">Partagez vos activités extrascolaires et expériences</p>
+      <p class="text-white">Partagez vos activités extrascolaires et expériences</p>
     </div>
 
     <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
@@ -48,7 +48,7 @@
       <button 
         type="button"
         @click="addActivity"
-        class="w-full py-3 px-4 border-2 border-dashed border-purple-300 dark:border-purple-700 rounded-lg text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors duration-200 flex items-center justify-center gap-2"
+        class="w-full py-3 px-4 border-2 border-dashed border-blue-500 dark:border-blue-500 rounded-lg text-blue-600 dark:text-blue-300  hover:bg-blue-100 dark:hover:bg-blue-200 transition-colors duration-200 flex items-center justify-center gap-2"
       >
         <span class="material-icons">add_circle_outline</span>
         Ajouter une activité
@@ -66,7 +66,7 @@
         </button>
         <button 
           type="submit"
-          class="flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors duration-200"
+          class="flex items-center px-6 py-3 bg-primary-light hover:bg-primary-dark text-white rounded-lg transition-colors duration-200"
         >
           Suivant
           <span class="material-icons ml-2">arrow_forward</span>

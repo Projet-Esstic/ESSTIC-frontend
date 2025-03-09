@@ -136,7 +136,7 @@
         </button>
         <button 
           type="submit"
-          class="flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors duration-200"
+          class="flex items-center px-6 py-3 bg-primary-light hover:bg-primary-dark text-white rounded-lg transition-colors duration-200"
         >
         Suivant
         <span class="material-icons mr-2">arrow_forward</span>

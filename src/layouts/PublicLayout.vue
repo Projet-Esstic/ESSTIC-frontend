@@ -1,47 +1,21 @@
 <template>
-  <div :class="[themeClasses.app, 'min-h-screen flex flex-col md:flex-row']">
-    <!-- Left Section with Logo - Now responsive -->
-    <div :class="[
-      'md:w-1/3 w-full flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden transition-colors duration-1000',
+  <div :class="[themeClasses.app, 'h-screen flex flex-col md:flex-row']">
+  <!-- Left Section with Logo - Now responsive -->
+  <div :class="[
+      'md:w-1/3 w-full p-4 flex flex-col items-center justify-center h-screen bg-blue-500',
       `bg-gradient-to-br ${getGradientClass()}`
     ]" aria-label="ESSTIC welcome section">
-      <!-- Progress Bar for multi-step process -->
-      <div class="absolute top-4 left-4 right-4 z-20">
-        <div class="w-full bg-black/20 rounded-full h-2 mb-1">
-          <div class="bg-black h-2 rounded-full transition-all duration-500"
-               :style="{width: `${(currentStepIndex + 1) * 25}%`}"
-               :aria-valuenow="currentStepIndex + 1"
-               aria-valuemin="1"
-               aria-valuemax="4"
-               aria-label="Progress through application steps"></div>
-        </div>
-        <div class="flex justify-between text-xs text-black/70">
-          <span>Étape {{ currentStepIndex + 1 }} / 4</span>
-          <span>{{ getEstimatedTime() }} min restantes</span>
-        </div>
-      </div>
 
+      <!-- Progress Bar for multi-step process -->
       <!-- Welcome Message Above Logo -->
       <div class="relative z-10 mb-3 md:mb-8 text-center w-full max-w-md">
         <div class="bg-white/10 backdrop-blur-md rounded-lg p-4 shadow-lg border border-white/20">
-          <h2 class="text-black text-xl md:text-2xl font-semibold mb-2 typing-animation">
+          <h2 class="text-white text-xl md:text-2xl font-semibold mb-2 typing-animation">
             Bienvenue à l'ESSTIC
           </h2>
-          <p class="text-black/90 typing-animation-delay-1">
+          <p class="text-white/90 typing-animation-delay-1">
             Prêt à commencer votre aventure académique ?
           </p>
-        </div>
-        
-        <!-- Language Selector -->
-        <div class="mt-4 text-right">
-          <select 
-            class="bg-black/10 border border-black/20 text-black rounded-md px-2 py-1 text-sm" 
-            aria-label="Sélecteur de langue"
-            v-model="selectedLanguage"
-          >
-            <option value="fr">Français</option>
-            <option value="en">English</option>
-          </select>
         </div>
       </div>
       
@@ -50,20 +24,11 @@
       
       <!-- Logo and School Name -->
       <div class="relative z-10 text-center mb-3 md:mb-8 w-full max-w-md">
-        <div class="logo-container relative inline-block mb-6">
-          <img
-            src="@/assets/images/esstic-logo.png"
-            alt="ESSTIC Logo"
-            class="w-24 h-24 md:w-32 md:h-32 object-contain animate-pulse-subtle"
-            loading="lazy"
-          />
-          <div class="absolute inset-0 bg-white/10 rounded-full animate-ping opacity-75"></div>
-        </div>
         <div class="bg-white/10 backdrop-blur-md rounded-lg p-4 shadow-lg border border-white/20">
-          <h1 class="text-black text-2xl md:text-3xl font-bold mb-3 md:mb-4 animate-fade-in">
+          <h1 class="text-white text-2xl md:text-3xl font-bold mb-3 md:mb-4 animate-fade-in">
             ESSTIC
           </h1>
-          <p class="text-black/90 text-base md:text-lg animate-fade-in-delay">
+          <p class="text-white/90 text-base md:text-lg animate-fade-in-delay">
             École Supérieure des Sciences et Technologies de l'Information et de la Communication
           </p>
         </div>
@@ -73,19 +38,22 @@
       <div class="relative z-10 mt-2 md:mt-2 w-full max-w-md">
         <transition-group name="fade-slide" mode="out-in">
           <div 
-            v-for="(message, index) in stepMessages" 
-            :key="message.title"
-            v-show="currentStepIndex === index"
+            v-if="stepMessages[currentStepIndex]"
+            :key="currentStepIndex"
             class="bg-white/10 backdrop-blur-md rounded-lg p-5 md:p-6 shadow-lg typing-animation-delay-2 border border-white/20"
             tabindex="0"
-            :aria-label="`Étape ${index + 1}: ${message.title}`"
+            :aria-label="`Étape ${currentStepIndex + 1}: ${stepMessages[currentStepIndex].title}`"
           >
-            <h3 class="text-black text-xl font-semibold mb-2 typing-text">{{ message.title }}</h3>
-            <p class="text-black/90 typing-text-delay">{{ message.description }}</p>
+            <h3 class="text-white text-xl font-semibold mb-2 typing-text">
+              {{ stepMessages[currentStepIndex].title }}
+            </h3>
+            <p class="text-white/90 typing-text-delay">
+              {{ stepMessages[currentStepIndex].description }}
+            </p>
             
             <!-- Save Progress Button -->
             <button 
-              class="mt-4 bg-white/20 hover:bg-white/30 focus:bg-white/30 text-black py-2 px-4 rounded-md transition-colors text-sm flex items-center focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-primary-700"
+              class="mt-4 bg-white/20 hover:bg-white/30 focus:bg-white/30 text-white py-2 px-4 rounded-md transition-colors text-sm flex items-center focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-primary-700"
               @click="saveProgress"
               aria-label="Sauvegarder et continuer plus tard"
             >
@@ -100,10 +68,25 @@
     <div class="w-full md:w-2/3 overflow-auto bg-white dark:bg-gray-900 flex flex-col">
       <!-- Header with help and support -->
       <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+        <div class="logo-container relative inline-block mb-0">
+          <img
+            src="@/assets/images/esstic-logo.png"
+            alt="ESSTIC Logo"
+            class="w-24 h-24 md:w-20 md:h-10 object-contain animate-pulse-subtle"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-white/10 rounded-full animate-ping opacity-75"></div>
+        </div>
         <h2 class="text-primary-900 dark:text-white font-medium">
           {{ stepMessages[currentStepIndex]?.title || 'Inscription' }}
         </h2>
         <div class="flex items-center space-x-4">
+          <select
+            class="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-primary-900 dark:text-white rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+            aria-label="Sélecteur de langue" v-model="selectedLanguage">
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+          </select>
           <button 
             class="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md p-1"
             aria-label="Obtenir de l'aide"
@@ -126,7 +109,7 @@
       </div>
       
       <!-- Footer with navigation buttons -->
-      <div class="p-4 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
+      <!-- <div class="p-4 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
         <button 
           v-if="currentStepIndex > 0"
           class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
@@ -144,7 +127,7 @@
         >
           {{ currentStepIndex < 3 ? 'Continuer' : 'Soumettre' }}
         </button>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>

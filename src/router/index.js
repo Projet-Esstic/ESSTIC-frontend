@@ -10,27 +10,6 @@ const routes = [
     path: '/', 
     component: LandingPage 
   },
-  // {
-  //   path: '/register-student',
-  //   component: () => import('../layouts/RegisterStudent.vue'),
-  //   children: [
-  //     {
-  //       path: '',
-  //       name: 'CandidateRegistration',
-  //       component: () => import('../views/registration/CandidateRegistration.vue'),
-  //       meta: {
-  //         title: 'Inscription au Concours ESSTIC'
-  //       },
-  //       beforeEnter: (to, from, next) => {
-  //         if (to.query.source === 'admin') {
-  //           to.meta.isAdmin = true;
-  //         }
-  //         next();
-  //       }
-  //     }
-  //   ]
-  // },
-
 
   {
     path: '/register-student',
