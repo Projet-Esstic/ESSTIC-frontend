@@ -31,7 +31,7 @@
         v-if="currentTab === 'list'" 
         :departments="departments"
       />
-      <CourseRegistration 
+      <StudentCourses
         v-if="currentTab === 'courses'" 
         :departments="departments"
       />
@@ -66,6 +66,7 @@ import GradeManagement from './GradeManagement.vue'
 import AcademicProgress from './AcademicProgress.vue'
 import Graduation from './Graduation.vue'
 import { departmentService } from '@/api/services/index'
+import StudentCourses from './StudentCourses.vue'
 
 export default {
   name: 'StudentManagement',
@@ -77,7 +78,8 @@ export default {
     Attendance,
     GradeManagement,
     AcademicProgress,
-    Graduation
+    Graduation,
+    StudentCourses
   },
 
   setup() {

@@ -363,19 +363,15 @@ export default {
 }
 
 /* Highlight fields with errors */
-input:invalid,
-select:invalid,
-textarea:invalid {
+input:user-invalid,
+select:user-invalid,
+textarea:user-invalid {
   @apply border-red-500 bg-red-50 dark:bg-red-900/20;
 }
-input:valid,
-select:valid,
-textarea:valid {
+input:user-valid,
+select:user-valid,
+textarea:user-valid {
   @apply border-green-500 bg-green-50 dark:bg-green-900/20;
 }
 
-/* Style the required asterisk */
-/* .text-red-500 {
-  @apply text-red-500 dark:text-red-400;
-} */
 </style>
