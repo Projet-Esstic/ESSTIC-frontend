@@ -115,25 +115,28 @@
               {{ student.email }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm">
-              <button 
-                @click="viewStudent(student)" 
-                class="text-primary-light dark:text-primary-dark hover:underline mr-3"
-              >
-                View
-              </button>
-              <button 
-                @click="editStudent(student)" 
-                class="text-yellow-600 dark:text-yellow-400 hover:underline mr-3"
-              >
-                Edit
-              </button>
-              <button 
-                @click="confirmDelete(student)" 
-                class="text-red-600 dark:text-red-400 hover:underline"
-              >
-                Delete
-              </button>
-            </td>
+  <button 
+    @click="viewStudent(student)" 
+    class="text-primary-light dark:text-primary-dark hover:opacity-75 mr-3"
+    title="View Student"
+  >
+    <font-awesome-icon :icon="['fas', 'eye']" />
+  </button>
+  <button 
+    @click="editStudent(student)" 
+    class="text-yellow-600 dark:text-yellow-400 hover:opacity-75 mr-3"
+    title="Edit Student"
+  >
+    <font-awesome-icon :icon="['fas', 'edit']" />
+  </button>
+  <button 
+    @click="confirmDelete(student)" 
+    class="text-red-600 dark:text-red-400 hover:opacity-75"
+    title="Delete Student"
+  >
+    <font-awesome-icon :icon="['fas', 'trash']" />
+  </button>
+</td>
           </tr>
         </tbody>
       </table>
@@ -605,3 +608,25 @@ export default {
   }
 }
 </script>
+
+<style>
+/* Add this to your global styles or component styles */
+button[title] {
+  position: relative;
+}
+
+button[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background-color: rgba(0, 0, 0, 0.75);
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+}
+</style>
