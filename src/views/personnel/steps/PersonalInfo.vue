@@ -122,6 +122,7 @@ export default {
     }
 
     const handleSubmit = async () => {
+      console.log("in submit personal");
       if (validateForm()) {
         const formData = {
           firstName: form.value.firstName,

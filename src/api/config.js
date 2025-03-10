@@ -35,4 +35,8 @@ export const ENDPOINTS = {
   LOGIN: `${API_URL}/auth/login`,
   REGISTER: `${API_URL}/auth/register`,
 
+  PERSONNEL: `${API_URL}/personnel`,
+  PERSONNEL_REGISTER: `${API_URL}/personnel/register`,
+
+  DEPARTMENT: `${API_URL}/departments`,
 }
