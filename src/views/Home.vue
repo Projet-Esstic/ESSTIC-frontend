@@ -201,9 +201,9 @@ export default {
       studentPageSize: 4,
       keyStatistics: [
         { label: 'Total Students', value: '1,245', trend: 12, iconBg: 'bg-blue-500', iconClasses: 'h-8 w-8 text-white' },
-        { label: 'Faculty Members', value: '86', trend: 3, iconBg: 'bg-green-500', iconClasses: 'h-8 w-8 text-white' },
+        { label: 'Faculty Members', value: '86', trend: 50, iconBg: 'bg-green-500', iconClasses: 'h-8 w-8 text-white' },
         { label: 'Research Projects', value: '24', trend: 8, iconBg: 'bg-purple-500', iconClasses: 'h-8 w-8 text-white' },
-        { label: 'Departments', value: '7', trend: 0, iconBg: 'bg-red-500', iconClasses: 'h-8 w-8 text-white' }
+        { label: 'Departments', value: '7', trend: 25, iconBg: 'bg-red-500', iconClasses: 'h-8 w-8 text-white' }
       ],
       topStudents: [
         { name: 'John Doe', class: 'Computer Science', gpa: '3.9', profileImage: 'https://randomuser.me/api/portraits/men/32.jpg' },
