@@ -299,6 +299,8 @@ export default {
       try {
         const response = await departmentService.getAllDepartments();
         departments.value = response;
+        console.log(response);
+        
       } catch (err) {
         console.error('Failed to load departments:', err);
       }
@@ -370,13 +372,20 @@ export default {
     // Filtered students based on department and search
     const filteredStudents = computed(() => {
       return students.value.filter(student => {
+        // First check for registered status
+        if (student.applicationStatus !== 'registered') return false;
+
+        // Then apply department filter
         const matchesDepartment = selectedDepartment.value 
           ? student.fieldOfStudy === selectedDepartment.value 
           : true;
+
+        // Finally apply search filter
         const matchesSearch = searchQuery.value 
           ? (student.user.firstName.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
              student.user.lastName.toLowerCase().includes(searchQuery.value.toLowerCase())) 
           : true;
+
         return matchesDepartment && matchesSearch;
       });
     });

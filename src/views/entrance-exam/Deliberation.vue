@@ -17,14 +17,12 @@
             class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           >
             <option value="">All Departments</option>
-            <!-- Add debug output -->
-            <!-- {{ console.log('Departments in template:', departments) }} -->
             <option 
-              v-for="department in departments" 
-              :key="department._id" 
-              :value="department._id"
+              v-for="dept in departments" 
+              :key="dept._id" 
+              :value="dept._id"
             >
-              {{ department.name }}
+              {{ dept.name }}
             </option>
           </select>
         </div>
@@ -151,9 +149,11 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, watch, onBeforeUnmount, markRaw } from 'vue'
 import { io } from 'socket.io-client'
-import { departmentService, candidateService, courseService } from '@/api/services'
+import { departmentService } from '@/api/services/index';
+import { candidateService, courseService } from '@/api/services'
+import { debounce } from 'lodash'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -198,14 +198,21 @@ export default {
     const distributionChartInstance = ref(null)
     const fieldChartInstance = ref(null)
 
-    // Replace store getters with direct API data
+    // Computed properties
     const filteredCandidates = computed(() => {
       return candidates.value.filter(candidate => {
-        return !selectedDepartment.value || candidate.fieldOfStudy === selectedDepartment.value
-      })
+        // First filter for registered status
+        if (candidate.applicationStatus !== 'registered') return false;
+        
+        // Then apply department filter if selected
+        const matchesDepartment = selectedDepartment.value 
+          ? candidate.fieldOfStudy === selectedDepartment.value 
+          : true;
+        
+        return matchesDepartment;
+      });
     })
 
-    // Statistics computeds
     const totalCandidates = computed(() => filteredCandidates.value.length)
 
     const passedCandidates = computed(() => 
@@ -221,49 +228,31 @@ export default {
       return ((passedCandidates.value.length / totalCandidates.value) * 100).toFixed(1)
     })
 
-    // Socket connection setup
-    onMounted(async () => {
-      socket.value = io(process.env.VUE_APP_SOCKET_ENDPOINT)
-      
-      socket.value.on('candidateUpdated', (updatedCandidate) => {
-        const index = candidates.value.findIndex(c => c._id === updatedCandidate._id)
-        if (index !== -1) {
-          candidates.value[index] = updatedCandidate
-        }
+    // Lifecycle hooks
+    onMounted(() => {
+      initializeChartsWithEmptyData()
+      loadData().then(() => {
+        updateCharts()
       })
-
-      socket.value.on('candidateAdded', (newCandidate) => {
-        candidates.value.push(newCandidate)
-      })
-
-      socket.value.on('candidateDeleted', (deletedId) => {
-        candidates.value = candidates.value.filter(c => c._id !== deletedId)
-      })
-
-      // Load data sequentially to ensure departments are loaded first
-      await loadDepartments()
-      await Promise.all([
-        loadCourses(),
-        loadCandidates()
-      ])
-      initializeCharts()
     })
 
     onBeforeUnmount(() => {
       if (socket.value) {
         socket.value.disconnect()
       }
+      if (distributionChartInstance.value) {
+        distributionChartInstance.value.destroy()
+      }
+      if (fieldChartInstance.value) {
+        fieldChartInstance.value.destroy()
+      }
     })
 
+    // Data loading functions
     const loadDepartments = async () => {
       try {
         const response = await departmentService.getAllDepartments()
-        console.log('Departments loaded:', response) // Debug log
-        if (Array.isArray(response)) {
-          departments.value = response
-        } else {
-          console.error('Unexpected departments response format:', response)
-        }
+        departments.value = response
       } catch (err) {
         console.error('Failed to load departments:', err)
       }
@@ -287,13 +276,82 @@ export default {
       }
     }
 
-    // Calculate average for a candidate
+    const loadData = async () => {
+      await loadDepartments()
+      await Promise.all([loadCourses(), loadCandidates()])
+
+      // Socket setup after data is loaded
+      socket.value = io(process.env.VUE_APP_SOCKET_ENDPOINT)
+      socket.value.on('candidateUpdated', (updatedCandidate) => {
+        const index = candidates.value.findIndex(c => c._id === updatedCandidate._id)
+        if (index !== -1) {
+          candidates.value[index] = updatedCandidate
+        }
+      })
+      socket.value.on('candidateAdded', (newCandidate) => {
+        candidates.value.push(newCandidate)
+      })
+      socket.value.on('candidateDeleted', (deletedId) => {
+        candidates.value = candidates.value.filter(c => c._id !== deletedId)
+      })
+    }
+
+    // Chart initialization with empty data
+    const initializeChartsWithEmptyData = () => {
+      const emptyData = {
+        labels: [],
+        datasets: []
+      }
+      if (distributionChart.value) {
+        const chart = new ChartJS(
+          distributionChart.value.getContext('2d'),
+          {
+            type: 'bar',
+            data: emptyData,
+            options: barChartOptions
+          }
+        )
+        distributionChartInstance.value = markRaw(chart) // Prevent reactivity
+      }
+      if (fieldChart.value) {
+        const chart = new ChartJS(
+          fieldChart.value.getContext('2d'),
+          {
+            type: 'doughnut',
+            data: emptyData,
+            options: doughnutOptions
+          }
+        )
+        fieldChartInstance.value = markRaw(chart) // Prevent reactivity
+      }
+    }
+
+    // Chart update function
+    const updateCharts = () => {
+      if (!distributionChartInstance.value || !fieldChartInstance.value) {
+        console.log('Charts not initialized yet')
+        return
+      }
+      const distData = getDistributionData()
+      const fieldData = getFieldData()
+      distributionChartInstance.value.data = distData
+      fieldChartInstance.value.data = fieldData
+      distributionChartInstance.value.update('none')
+      fieldChartInstance.value.update('none')
+    }
+
+    const debouncedUpdateCharts = debounce(updateCharts, 300)
+
+    // Watchers for reactive updates
+    watch(() => selectedDepartment.value, debouncedUpdateCharts)
+    watch(() => passingAverage.value, debouncedUpdateCharts)
+    watch(() => candidates.value, debouncedUpdateCharts, { deep: true })
+
+    // Helper functions
     const calculateAverage = (candidate) => {
       if (!candidate.Marks?.length) return 0
-
       let totalWeightedMarks = 0
       let totalCoefficients = 0
-
       candidate.Marks.forEach(mark => {
         const course = courses.value.find(c => c._id === mark.courseId)
         if (course) {
@@ -305,20 +363,16 @@ export default {
           totalCoefficients += coefficient
         }
       })
-
       return totalCoefficients > 0 ? totalWeightedMarks / totalCoefficients : 0
     }
 
-    // Check if candidate passed
     const isPassed = (candidate) => {
       return calculateAverage(candidate) >= passingAverage.value
     }
 
-    // Chart data
-    const distributionData = computed(() => {
+    const getDistributionData = () => {
       const ranges = ['0-5', '5-10', '10-15', '15-20']
-      const data = new Array(4).fill(0)
-
+      const data = [0, 0, 0, 0]
       filteredCandidates.value.forEach(candidate => {
         const average = calculateAverage(candidate)
         if (average < 5) data[0]++
@@ -326,12 +380,11 @@ export default {
         else if (average < 15) data[2]++
         else data[3]++
       })
-
       return {
         labels: ranges,
         datasets: [{
           label: 'Number of Students',
-          data,
+          data: [...data],
           backgroundColor: [
             'rgba(255, 99, 132, 0.5)',
             'rgba(255, 159, 64, 0.5)',
@@ -347,52 +400,51 @@ export default {
           borderWidth: 1
         }]
       }
-    })
+    }
 
-    const fieldData = computed(() => {
+    const getFieldData = () => {
       const departmentResults = {}
       departments.value.forEach(dept => {
         departmentResults[dept._id] = { passed: 0, failed: 0 }
       })
-
       filteredCandidates.value.forEach(candidate => {
-        if (departmentResults[candidate.fieldOfStudy]) {
-          const status = isPassed(candidate) ? 'passed' : 'failed'
-          departmentResults[candidate.fieldOfStudy][status]++
+        if (candidate.fieldOfStudy && departmentResults[candidate.fieldOfStudy]) {
+          if (isPassed(candidate)) {
+            departmentResults[candidate.fieldOfStudy].passed++
+          } else {
+            departmentResults[candidate.fieldOfStudy].failed++
+          }
         }
       })
-
       return {
         labels: departments.value.map(dept => dept.name),
-        datasets: [{
-          data: departments.value.map(dept => departmentResults[dept._id]?.passed || 0),
-          backgroundColor: 'rgba(75, 192, 192, 0.5)',
-          borderColor: 'rgb(75, 192, 192)',
-          label: 'Passed'
-        }, {
-          data: departments.value.map(dept => departmentResults[dept._id]?.failed || 0),
-          backgroundColor: 'rgba(255, 99, 132, 0.5)',
-          borderColor: 'rgb(255, 99, 132)',
-          label: 'Failed'
-        }]
+        datasets: [
+          {
+            label: 'Passed',
+            data: departments.value.map(dept => departmentResults[dept._id]?.passed || 0),
+            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+            borderColor: 'rgb(75, 192, 192)'
+          }, 
+          {
+            label: 'Failed',
+            data: departments.value.map(dept => departmentResults[dept._id]?.failed || 0),
+            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            borderColor: 'rgb(255, 99, 132)'
+          }
+        ]
       }
-    })
+    }
 
-    // Chart options
     const barChartOptions = {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false
-        }
+        legend: { display: false }
       },
       scales: {
         y: {
           beginAtZero: true,
-          ticks: {
-            stepSize: 1
-          }
+          ticks: { stepSize: 1 }
         }
       }
     }
@@ -401,61 +453,14 @@ export default {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          position: 'bottom'
-        }
+        legend: { position: 'bottom' }
       }
     }
 
-    // Initialize charts
-    const initializeCharts = () => {
-      // Clean up existing charts
-      if (distributionChartInstance.value) {
-        distributionChartInstance.value.destroy()
-        distributionChartInstance.value = null
-      }
-      if (fieldChartInstance.value) {
-        fieldChartInstance.value.destroy()
-        fieldChartInstance.value = null
-      }
-
-      // Create new charts
-      if (distributionChart.value) {
-        const ctx = distributionChart.value.getContext('2d')
-        distributionChartInstance.value = new ChartJS(ctx, {
-          type: 'bar',
-          data: distributionData.value,
-          options: barChartOptions
-        })
-      }
-
-      if (fieldChart.value) {
-        const ctx = fieldChart.value.getContext('2d')
-        fieldChartInstance.value = new ChartJS(ctx, {
-          type: 'doughnut',
-          data: fieldData.value,
-          options: doughnutOptions
-        })
-      }
-    }
-
-    // Handle passing average changes
     const handlePassingAverageInput = (event) => {
       const value = parseFloat(event.target.value)
       passingAverage.value = Math.min(Math.max(value, 0), 20)
     }
-
-    // Watch for data changes
-    watch([distributionData, fieldData], () => {
-      if (distributionChartInstance.value) {
-        distributionChartInstance.value.data = distributionData.value
-        distributionChartInstance.value.update('none')
-      }
-      if (fieldChartInstance.value) {
-        fieldChartInstance.value.data = fieldData.value
-        fieldChartInstance.value.update('none')
-      }
-    })
 
     const generateRegistrationNumber = (id) => {
       if (!id) return 'N/A'
@@ -469,41 +474,30 @@ export default {
       return dept ? dept.name : 'Unknown Field'
     }
 
-    // Export results to PDF
     const exportResults = () => {
       const doc = new jsPDF()
-      
       doc.setFontSize(16)
       doc.text('Entrance Exam Results', 14, 15)
-      
       doc.setFontSize(12)
       doc.text(`Passing Average: ${passingAverage.value}`, 14, 25)
       doc.text(`Total Candidates: ${totalCandidates.value}`, 14, 32)
       doc.text(`Passed: ${passedCandidates.value.length}`, 14, 39)
       doc.text(`Failed: ${failedCandidates.value.length}`, 14, 46)
       doc.text(`Pass Rate: ${passRate.value}%`, 14, 53)
-
       const tableData = filteredCandidates.value.map(candidate => [
         generateRegistrationNumber(candidate._id),
-        `${candidate.user?.firstName} ${candidate.user?.lastName}`,
+        `${candidate.user?.firstName || ''} ${candidate.user?.lastName || ''}`,
         getFieldName(candidate.fieldOfStudy),
         calculateAverage(candidate).toFixed(2),
         isPassed(candidate) ? 'PASSED' : 'FAILED'
       ])
-
       doc.autoTable({
         startY: 60,
         head: [['Reg. No.', 'Name', 'Field', 'Average', 'Status']],
         body: tableData
       })
-
       doc.save('entrance-exam-results.pdf')
     }
-
-    // Add a watcher for departments to debug updates
-    watch(departments, (newVal) => {
-      console.log('Departments updated:', newVal)
-    })
 
     return {
       departments,
