@@ -104,7 +104,7 @@
                   <div class="text-sm text-gray-500 dark:text-gray-300">{{ candidate.user ? candidate.user.email : 'N/A' }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-500 dark:text-gray-300">{{ candidate.fieldId?.title || 'Not assigned' }}</div>
+                  <div class="text-sm text-gray-500 dark:text-gray-300">{{ getFieldName(candidate.fieldOfStudy) || 'Not assigned' }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span :class="[
@@ -121,24 +121,10 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex space-x-2">
                     <button
-                      v-if="['pending', 'rejected'].includes(candidate.applicationStatus)"
-                      @click="updateStatus(candidate._id, 'registered')"
-                      class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold hover:bg-green-200"
-                    >
-                      Register
-                    </button>
-                    <button
-                      v-if="['pending', 'registered'].includes(candidate.applicationStatus)"
-                      @click="updateStatus(candidate._id, 'rejected')"
-                      class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold hover:bg-red-200"
-                    >
-                      Reject
-                    </button>
-                    <button
                       @click="editCandidate(candidate)"
                       class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold hover:bg-blue-200"
                     >
-                      Edit
+                      View Details
                     </button>
                   </div>
                 </td>
@@ -149,110 +135,178 @@
       </div>
     </div>
 
-    <!-- Edit Candidate Modal -->
-    <Modal 
-      v-model="showEditModal"
-      @close="closeEditModal"
-      title="Edit Candidate Information"
-    >
-      <template #content>
-        <form @submit.prevent="saveCandidate" class="space-y-4">
-          <!-- Personal Information -->
-          <div class="space-y-4">
-            <h3 class="text-lg font-medium">Personal Information</h3>
-            
-            <!-- High School Information -->
-            <div class="space-y-2">
-              <h4 class="text-sm font-medium">High School</h4>
-              <div>
-                <label class="block text-sm">School Name</label>
-                <input 
-                  v-model="editingCandidate.highSchool.schoolName"
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                />
-              </div>
-              <div>
-                <label class="block text-sm">Year Completed</label>
-                <input 
-                  v-model="editingCandidate.highSchool.yearCompleted"
-                  type="number"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                />
-              </div>
-            </div>
+    <!-- Custom Candidate Details Modal -->
+    <div v-if="showEditModal" class="fixed inset-0 z-50 overflow-y-auto">
+      <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
 
-            <!-- University Information -->
-            <div class="space-y-2">
-              <h4 class="text-sm font-medium">University</h4>
-              <div>
-                <label class="block text-sm">University Name</label>
-                <input 
-                  v-model="editingCandidate.university.universityName"
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                />
-              </div>
-              <div>
-                <label class="block text-sm">Degree</label>
-                <input 
-                  v-model="editingCandidate.university.degree"
-                  type="text"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                />
-              </div>
-              <div>
-                <label class="block text-sm">Year Completed</label>
-                <input 
-                  v-model="editingCandidate.university.yearCompleted"
-                  type="number"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                />
-              </div>
-            </div>
+        <div class="relative inline-block w-full max-w-4xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg">
+          <!-- Header -->
+          <div class="flex justify-between items-center pb-3 border-b">
+            <h3 class="text-lg font-medium leading-6 text-gray-900">
+              Candidate Details
+            </h3>
+            <button
+              @click="closeEditModal"
+              class="text-gray-400 hover:text-gray-500"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
 
-            <!-- Exam Center -->
-            <div>
-              <label class="block text-sm">Exam Center</label>
-              <input 
-                v-model="editingCandidate.examCenter"
-                type="text"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-              />
-            </div>
+          <!-- Content -->
+          <div class="mt-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+            <div class="space-y-6">
+              <!-- Candidate Status -->
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Current Status</h3>
+                <span :class="[
+                  'px-3 py-1 inline-flex text-sm font-semibold rounded-full',
+                  {
+                    'bg-green-100 text-green-800': editingCandidate?.applicationStatus === 'registered',
+                    'bg-yellow-100 text-yellow-800': editingCandidate?.applicationStatus === 'pending',
+                    'bg-red-100 text-red-800': editingCandidate?.applicationStatus === 'rejected'
+                  }
+                ]">
+                  {{ editingCandidate?.applicationStatus }}
+                </span>
+              </div>
 
-            <!-- Field of Study -->
-            <div>
-              <label class="block text-sm">Field of Study</label>
-              <select 
-                v-model="editingCandidate.fieldOfStudy"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-              >
-                <option v-for="dept in departments" :key="dept._id" :value="dept._id">
-                  {{ dept.name }}
-                </option>
-              </select>
+              <!-- Personal Information -->
+              <div class="space-y-4">
+                <h3 class="text-lg font-medium">Personal Information</h3>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <p class="mt-1 text-sm text-gray-900">
+                      {{ editingCandidate?.user ? `${editingCandidate.user.firstName} ${editingCandidate.user.lastName}` : 'N/A' }}
+                    </p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ editingCandidate?.user?.email || 'N/A' }}</p>
+                  </div>
+                </div>
+                
+                <!-- High School Information -->
+                <div class="space-y-2">
+                  <h4 class="text-sm font-medium">High School</h4>
+                  <div>
+                    <label class="block text-sm">School Name</label>
+                    <input 
+                      v-model="editingCandidate.highSchool.schoolName"
+                      type="text"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm">Year Completed</label>
+                    <input 
+                      v-model="editingCandidate.highSchool.yearCompleted"
+                      type="number"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <!-- University Information -->
+                <div class="space-y-2">
+                  <h4 class="text-sm font-medium">University</h4>
+                  <div>
+                    <label class="block text-sm">University Name</label>
+                    <input 
+                      v-model="editingCandidate.university.universityName"
+                      type="text"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm">Degree</label>
+                    <input 
+                      v-model="editingCandidate.university.degree"
+                      type="text"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm">Year Completed</label>
+                    <input 
+                      v-model="editingCandidate.university.yearCompleted"
+                      type="number"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <!-- Exam Center -->
+                <div>
+                  <label class="block text-sm">Exam Center</label>
+                  <input 
+                    v-model="editingCandidate.examCenter"
+                    type="text"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </div>
+
+                <!-- Field of Study -->
+                <div>
+                  <label class="block text-sm">Field of Study</label>
+                  <select 
+                    v-model="editingCandidate.fieldOfStudy"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  >
+                    <option v-for="dept in departments" :key="dept._id" :value="dept._id">
+                      {{ dept.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
-        </form>
-      </template>
-      <template #footer>
-        <div class="flex justify-end space-x-3">
-          <button 
-            @click="closeEditModal"
-            class="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button 
-            @click="saveCandidate"
-            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Save Changes
-          </button>
+
+          <!-- Footer -->
+          <div class="mt-6 pt-3 border-t flex justify-between items-center">
+            <!-- Status Update Buttons -->
+            <div class="flex gap-2">
+              <button
+                v-if="['pending', 'rejected'].includes(editingCandidate?.applicationStatus)"
+                @click="updateStatus(editingCandidate._id, 'registered')"
+                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              >
+                Register
+              </button>
+              <button
+                v-if="['pending', 'registered'].includes(editingCandidate?.applicationStatus)"
+                @click="updateStatus(editingCandidate._id, 'rejected')"
+                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Reject
+              </button>
+            </div>
+
+            <!-- Save/Cancel Buttons -->
+            <div class="flex gap-2">
+              <button 
+                @click="closeEditModal"
+                class="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Close
+              </button>
+              <button 
+                @click="saveCandidate"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
         </div>
-      </template>
-    </Modal>
+      </div>
+    </div>
 
     <!-- Generate Report Modal -->
     <div v-if="showGenerateModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
@@ -375,25 +429,14 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import Modal from '@/components/Modal.vue';
-import {  departmentService } from '@/api/services/index'
-
+import { departmentService } from '@/api/services/index';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import io from 'socket.io-client'; // Import Socket.IO client
+import io from 'socket.io-client';
 
 export default {
   name: 'CandidateManagement',
-  components: {
-    Modal
-  },
-  props: {
-    fields: {
-      type: Array,
-      required: true
-    }
-  },
-  setup(props) {
+  setup() {
     const store = useStore();
     const router = useRouter();
     const searchQuery = ref('');
@@ -402,61 +445,50 @@ export default {
     const showEditModal = ref(false);
     const showGenerateModal = ref(false);
     const editingCandidate = ref(null);
-    const departments = ref([])
-    const formError = ref(null)
+    const departments = ref([]);
+    const formError = ref(null);
     const selectedReportField = ref('');
-    const socket = ref(null); // Reactive reference for Socket.IO connection
+    const socket = ref(null);
 
-    // Status options for filter - only show final statuses
     const statusOptions = [
       { value: 'pending', label: 'Pending' },
       { value: 'registered', label: 'Registered' },
       { value: 'rejected', label: 'Rejected' }
     ];
 
-    // Load departments/fields
     const loadDepartments = async () => {
       try {
-        const response = await departmentService.getAllDepartments()
-        departments.value = response
+        const response = await departmentService.getAllDepartments();
+        departments.value = response;
       } catch (err) {
-        console.error('Failed to load departments:', err)
-        formError.value = 'Failed to load departments'
+        console.error('Failed to load departments:', err);
+        formError.value = 'Failed to load departments';
       }
-    }
+    };
 
-    // Establish Socket.IO connection
     const connectSocket = () => {
-      // Replace 'http://localhost:3000' with your actual Socket.IO server URL
       socket.value = io('http://localhost:5000');
-
-      // Log connection status
       socket.value.on('connect', () => {
         console.log('Connected to Socket.IO server');
       });
-
       socket.value.on('disconnect', () => {
         console.log('Disconnected from Socket.IO server');
       });
-
-      // Listen for candidate updates from the server
       socket.value.on('candidates', (change) => {
         console.log('Received candidate change:', change);
-        // Refresh the candidates list when an update is received
         store.dispatch('candidates/fetchCandidates');
       });
     };
 
-    // Lifecycle hooks
     onMounted(() => {
       loadDepartments();
-      connectSocket(); // Initialize Socket.IO connection when component mounts
-      store.dispatch('candidates/fetchCandidates'); // Fetch initial candidates
+      connectSocket();
+      store.dispatch('candidates/fetchCandidates');
     });
 
     onUnmounted(() => {
       if (socket.value) {
-        socket.value.disconnect(); // Cleanup: Disconnect socket when component unmounts
+        socket.value.disconnect();
         console.log('Socket.IO connection closed');
       }
     });
@@ -467,8 +499,8 @@ export default {
           id: candidateId,
           applicationStatus: newStatus
         });
-        // Refresh candidates list
         await store.dispatch('candidates/fetchCandidates');
+        closeEditModal();
       } catch (error) {
         console.error('Failed to update status:', error);
       }
@@ -476,11 +508,12 @@ export default {
 
     const editCandidate = (candidate) => {
       editingCandidate.value = {
-        ...candidate,
+        _id: candidate._id,
+        applicationStatus: candidate.applicationStatus,
+        user: candidate.user,
         highSchool: {
           schoolName: candidate.highSchool?.schoolName || '',
           yearCompleted: candidate.highSchool?.yearCompleted || null,
-          majorSubjects: candidate.highSchool?.majorSubjects || []
         },
         university: {
           universityName: candidate.university?.universityName || '',
@@ -504,8 +537,7 @@ export default {
             fieldOfStudy: editingCandidate.value.fieldOfStudy
           }
         });
-        showEditModal.value = false;
-        // Refresh candidates list
+        closeEditModal();
         await store.dispatch('candidates/fetchCandidates');
       } catch (error) {
         console.error('Failed to save candidate:', error);
@@ -517,7 +549,6 @@ export default {
       editingCandidate.value = null;
     };
 
-    // Get candidates from Vuex store
     const candidates = computed(() => store.getters['candidates/getAllCandidates']);
 
     const getStatistics = computed(() => {
@@ -532,7 +563,6 @@ export default {
         classStats: []
       };
 
-      // Group by field
       const fieldGroups = departments.value.reduce((acc, department) => {
         const departmentCandidates = filteredCands.filter(c => c.fieldOfStudy === department._id);
         if (departmentCandidates.length > 0) {
@@ -555,7 +585,6 @@ export default {
     const filteredCandidates = computed(() => {
       let filtered = [...candidates.value];
 
-      // Apply search filter
       if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase();
         filtered = filtered.filter(candidate => {
@@ -566,14 +595,12 @@ export default {
         });
       }
 
-      // Apply status filter
       if (statusFilter.value) {
         filtered = filtered.filter(candidate => 
           candidate.applicationStatus === statusFilter.value
         );
       }
 
-      // Apply field of study filter
       if (selectedField.value) {
         filtered = filtered.filter(candidate => 
           candidate.fieldOfStudy === selectedField.value
@@ -584,7 +611,7 @@ export default {
     });
 
     const getFieldName = (fieldId) => {
-      const field = props.fields.find(f => f.id === fieldId);
+      const field = departments.value.find(f => f._id === fieldId);
       return field ? field.name : 'Unknown';
     };
 
@@ -647,12 +674,12 @@ export default {
           doc.addPage();
           addHeader(doc, getFieldName(stat.fieldId));
           const fieldCandidates = candidates.value
-            .filter(c => c.fieldId === stat.fieldId && c.applicationStatus === 'registered')
-            .sort((a, b) => a.name.localeCompare(b.name));
+            .filter(c => c.fieldOfStudy === stat.fieldId && c.applicationStatus === 'registered')
+            .sort((a, b) => a.user.firstName.localeCompare(b.user.firstName));
           const tableData = fieldCandidates.map((candidate, idx) => [
             (idx + 1).toString(),
             candidate.registrationNumber,
-            candidate.user.firstName + ' ' + candidate.user.lastName,
+            `${candidate.user.firstName} ${candidate.user.lastName}`,
             formatDate(candidate.registrationDate)
           ]);
 

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
+import Unauthorized from '../views/error/Unauthorized.vue'
 import ExamResults from '@/views/entrance-exam/ExamResults.vue'
 import LoginView from '@/views/LoginView.vue';
 import {authService} from '@/api/services/index';
@@ -9,6 +10,10 @@ const routes = [
   { 
     path: '/', 
     component: LandingPage 
+  },
+  {
+    path: '/unauthorized',
+    component: Unauthorized
   },
 
   {

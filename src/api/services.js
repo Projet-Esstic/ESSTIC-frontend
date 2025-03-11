@@ -205,13 +205,16 @@ export const candidateService = {
       // Add transformed data as JSON
       data.append('formData', JSON.stringify(transformedData));
 
-      // Handle document uploads
-      if (formData.profileImageFile) {
-        data.append('profile', formData.profileImageFile);
+      // Handle profile image upload
+      if (formData.civilStatus?.profilePicture?.file) {
+        console.log('Adding profile image to FormData');
+        data.append('profile', formData.civilStatus.profilePicture.file);
+      } else {
+        console.log('No profile image file found in:', formData.civilStatus?.profilePicture);
       }
 
       // Handle other documents
-      const documentTypes = ['resume', 'transcript', 'recommendation', 'portfolio', 'other'];
+      const documentTypes = ['resume', 'transcript', 'recommendation', 'cv', 'other','diploma'];
       documentTypes.forEach(type => {
         if (formData.documents?.[type]) {
           data.append(type, formData.documents[type]);
@@ -284,7 +287,7 @@ export const candidateService = {
         data.append('profile', formData.profileImageFile);
       }
 
-      const documentTypes = ['resume', 'transcript', 'recommendation', 'portfolio', 'other'];
+      const documentTypes = ['resume', 'transcript', 'recommendation', 'cv', 'other','diploma'];
       documentTypes.forEach(type => {
         if (formData.documents?.[type]) {
           data.append(type, formData.documents[type]);
@@ -590,10 +593,18 @@ const submitPayment = async (data) => {
       throw new Error('Invalid input data');
     }
 
+    // Log incoming data structure
+    console.log('Incoming data structure:', {
+      hasCivilStatus: !!data.civilStatus,
+      hasProfilePicture: !!data.civilStatus?.profilePicture,
+      hasEducation: !!data.education,
+      hasPayment: !!data.paymentData
+    });
+
     // Construct form data object
     const formDataObj = {
       email: data.civilStatus.email,
-      password: 'defaultPassword123', // Replace with actual password input
+      password: 'defaultPassword123',
       firstName: data.civilStatus.firstName,
       lastName: data.civilStatus.lastName,
       dateOfBirth: data.civilStatus.dateOfBirth,
@@ -614,42 +625,51 @@ const submitPayment = async (data) => {
     // Create FormData
     const formData = new FormData();
 
-    // Important: stringify the object and append as 'formData'
-    console.log('Appending formData:', JSON.stringify(formDataObj));
-    formData.append('formData', JSON.stringify(formDataObj));
+    // First, verify the formDataObj is valid
+    console.log('FormDataObj before stringify:', formDataObj);
+    const jsonString = JSON.stringify(formDataObj);
+    console.log('JSON string created successfully');
 
-    // Handle files
-    const files = {
-      profileImage: data.civilStatus.documents.profilePicture,
-      transcript: data.education.documents.transcript,
-      diploma: data.education.documents.diploma,
-      cv: data.education.documents.cv,
-      other: data.education.documents.other,
-      receipt: data.paymentData.receiptFile,
-    };
+    // Add the JSON data
+    formData.append('formData', jsonString);
 
-    Object.entries(files).forEach(([key, file]) => {
-      if (file instanceof File) {
-        console.log(`Appending file: ${key}`, file.name, file.size);
-        formData.append(key, file);
-      } else {
-        console.log(`Skipping ${key}: not a File object`, file);
-      }
-    });
-
-    // Log FormData contents for debugging
-    for (let pair of formData.entries()) {
-      console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
+    // Handle files with explicit error checking
+    if (data.civilStatus?.profilePicture?.file instanceof File) {
+      console.log('Adding profile image:', data.civilStatus.profilePicture.file.name);
+      formData.append('profileImage', data.civilStatus.profilePicture.file);
     }
 
-    // Send request
+    // Handle other documents with explicit checks
+    if (data.education?.documents?.transcript instanceof File) {
+      formData.append('transcript', data.education.documents.transcript);
+    }
+    if (data.education?.documents?.diploma instanceof File) {
+      formData.append('diploma', data.education.documents.diploma);
+    }
+    if (data.education?.documents?.cv instanceof File) {
+      formData.append('cv', data.education.documents.cv);
+    }
+    if (data.education?.documents?.other instanceof File) {
+      formData.append('other', data.education.documents.other);
+    }
+    if (data.paymentData?.receiptFile instanceof File) {
+      formData.append('receipt', data.paymentData.receiptFile);
+    }
+
+    // Verify FormData contents before sending
+    console.log('FormData contents:');
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ':', pair[1] instanceof File ? `File: ${pair[1].name}` : 'JSON data');
+    }
+
+    // Send request with explicit content type
     const response = await axios.post(
       'http://localhost:5000/api/candidates/register',
       formData,
       {
         headers: {
-          'Content-Type': 'multipart/form-data', // Can actually be omitted, axios will handle it
-        },
+          'Content-Type': 'multipart/form-data'
+        }
       }
     );
 
@@ -660,6 +680,7 @@ const submitPayment = async (data) => {
       message: error.message,
       response: error.response?.data,
       status: error.response?.status,
+      data: error.response?.data
     });
     throw error;
   }

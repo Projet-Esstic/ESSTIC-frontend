@@ -69,7 +69,7 @@
     </div>
 
     <!-- Login Form Section -->
-    <div class="md:w-1/2 bg-gray-0 dark:bg-gray-0 flex items-center justify-center p-4 md:p-12 relative" >
+    <div class="md:w-1/2 bg-gray-0 dark:bg-gray-0 flex items-center justify-center p-4 md:p-12 relative">
       <!-- Dark Mode Toggle -->
       <button @click="toggleDarkMode"
         class="absolute top-4 right-4 p-2 rounded-full bg-gray-200 dark:hover:bg-gray-700 transition-colors">
@@ -203,8 +203,28 @@ export default {
   methods: {
     async login() {
       try {
-        await authService.login(this.email, this.password);
-        this.$router.push('/'); // Redirect after successful login
+        let user = await authService.login(this.email, this.password);
+
+        if (user && user.user && user.user.roles) {
+          console.log(user.user.roles); // Check roles
+
+          let roles = user.user.roles;
+
+          if (roles.includes('admin')) {
+            this.$router.push('/dashboard'); // Redirect for admin
+          } else if (roles.includes('teacher')) {
+            this.$router.push('/dashboard'); // Redirect for teacher
+          } else if (roles.includes('student')) {
+            this.$router.push('/student'); // Redirect for teacher
+          } else {
+            alert("You do not have permission to access this application.");
+            console.error("Unauthorized access: No valid role found");
+            this.$router.push('/unauthorized'); // Redirect to an error page
+          }
+        } else {
+          console.error("Login failed or roles not found");
+        }
+
       } catch (error) {
         this.errorMessage = error.message || 'Login failed. Please try again';
       }
@@ -241,7 +261,7 @@ export default {
 </script>
 
 <style scoped>
-#bgimage{
+#bgimage {
   background-image: linear-gradient(rgba(0, 0, 0, 0.219), rgba(0, 0, 0, 0.192)), url('@/assets/images/bgimage.avif');
   background-size: cover;
   background-repeat: no-repeat;
