@@ -1,7 +1,7 @@
 <template>
-  <div class="bg-blue-100 min-h-screen p-6">
-    <div class="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-6 relative">
-      <h1 class="text-2xl font-semibold text-gray-800 mb-4">Liste du Personnel</h1>
+  <div class="min-h-screen p-6 bg-white dark:bg-gray-900">
+    <div class="max-w-6xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 relative">
+      <h1 class="text-2xl font-semibold text-gray-800 dark:text-white mb-4">Liste du Personnel</h1>
 
       <router-link to="/personnel/create" class="inline-block mb-4">
         <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
@@ -10,7 +10,7 @@
       </router-link>
 
       <div class="overflow-x-auto">
-        <table class="w-full border border-gray-300 rounded-lg bg-white shadow-sm">
+        <table class="w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
           <thead>
             <tr class="bg-blue-500 text-white text-left">
               <th class="px-4 py-2">Utilisateur</th>
@@ -21,15 +21,14 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="personnel in paginatedPersonnel" :key="personnel._id" class="border-b">
-              <td class="px-4 py-2 bg-black text-white">{{ personnel.user.firstName }}</td>
-              <td class="px-4 py-2 bg-black text-white">{{ personnel.employmentStatus }}</td>
-              <td class="px-4 py-2 bg-black text-white">{{ personnel.department }}</td>
-              <td class="px-4 py-2 bg-black text-white">{{ formatDate(personnel.hireDate) }}</td>
-              <td class="px-4 py-2 bg-black text-white text-center">
-                <!-- Eye Icon for Viewing Details -->
-                <button @click="viewDetails(personnel._id)" class="text-gray-200 hover:text-gray-400">
-                  &#128065; <!-- Eye icon (Unicode for eye) -->
+            <tr v-for="personnel in paginatedPersonnel" :key="personnel._id" class="border-b dark:border-gray-700">
+              <td class="px-4 py-2 text-gray-800 dark:text-white">{{ personnel.user.firstName }}</td>
+              <td class="px-4 py-2 text-gray-800 dark:text-white">{{ personnel.employmentStatus }}</td>
+              <td class="px-4 py-2 text-gray-800 dark:text-white">{{ personnel.department }}</td>
+              <td class="px-4 py-2 text-gray-800 dark:text-white">{{ formatDate(personnel.hireDate) }}</td>
+              <td class="px-4 py-2 text-gray-800 dark:text-white text-center">
+                <button @click="viewDetails(personnel._id)" class="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-400">
+                  &#128065;
                 </button>
               </td>
             </tr>
@@ -37,13 +36,14 @@
         </table>
       </div>
 
-      <!-- Pagination Controls -->
       <div class="mt-4 flex justify-center space-x-4">
-        <button @click="prevPage" :disabled="currentPage === 1" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 disabled:opacity-50">
+        <button @click="prevPage" :disabled="currentPage === 1" 
+                class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 disabled:opacity-50">
           Précédent
         </button>
-        <span class="text-gray-700">Page {{ currentPage }} sur {{ totalPages }}</span>
-        <button @click="nextPage" :disabled="currentPage === totalPages" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 disabled:opacity-50">
+        <span class="text-gray-700 dark:text-gray-300">Page {{ currentPage }} sur {{ totalPages }}</span>
+        <button @click="nextPage" :disabled="currentPage === totalPages" 
+                class="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 disabled:opacity-50">
           Suivant
         </button>
       </div>
@@ -59,7 +59,7 @@ export default {
     return {
       personnelList: [],
       currentPage: 1,
-      perPage: 5, // Number of personnel per page
+      perPage: 5, 
     };
   },
   computed: {
