@@ -1,31 +1,32 @@
 <template>
-  <div class="student-attendance">
+  <div class="student-attendance ">
     <!-- Main Container -->
     <div class="container mx-auto px-4 py-6">
-      <h1 class="text-2xl font-bold mb-6">Student Attendance System</h1>
+          
+      <h1 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Student Attendance System</h1>
       
       <!-- Attendance Taking Section -->
-      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-xl font-semibold mb-4">Take Attendance</h2>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Take Attendance</h2>
         
         <!-- Class, Date and Course Selection -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Select Class</label>
-            <select v-model="selectedClass" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Select Class</label>
+            <select v-model="selectedClass" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
               <option :value="null">-- Select Class --</option>
               <option v-for="cls in classes" :key="cls.id" :value="cls.id">{{ cls.name }}</option>
             </select>
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Select Date</label>
-            <input type="date" v-model="selectedDate" class="w-full rounded-md p-2 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" :max="currentDate">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Select Date</label>
+            <input type="date" v-model="selectedDate" class="w-full rounded-md p-2 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" :max="currentDate">
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Select Course</label>
-            <select v-model="selectedCourse" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" :disabled="!selectedClass">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Select Course</label>
+            <select v-model="selectedCourse" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" :disabled="!selectedClass">
               <option :value="null">-- Select Course --</option>
               <option v-for="course in classCoursesOptions" :key="course.id" :value="course.id">{{ course.name }}</option>
             </select>
@@ -35,17 +36,17 @@
         <!-- Attendance Form -->
         <div v-if="attendanceStatus !== 'notTaken' && currentAttendance.length > 0">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-medium">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
               {{ attendanceStatus === 'new' ? 'New Attendance' : (attendanceStatus === 'edit' ? 'Edit Attendance' : 'Attendance Saved') }}
             </h3>
             <div class="flex space-x-2">
-              <button @click="markAll('present')" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+              <button @click="markAll('present')" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800">
                 Mark All Present
               </button>
-              <button @click="markAll('absent')" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">
+              <button @click="markAll('absent')" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800">
                 Mark All Absent
               </button>
-              <button @click="markAll('late')" class="px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700">
+              <button @click="markAll('late')" class="px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700 dark:bg-yellow-700 dark:hover:bg-yellow-800">
                 Mark All Late
               </button>
             </div>
@@ -53,47 +54,47 @@
           
           <!-- Students Attendance Table -->
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Roll</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Gender</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Notes</th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="student in currentAttendance" :key="student.studentId">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ student.rollNumber }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ student.name }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ student.gender }}</td>
+              <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                <tr v-for="student in currentAttendance" :key="student.studentId" class="dark:hover:bg-gray-700">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ student.rollNumber }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ student.name }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ student.gender }}</td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center space-x-2">
                       <button 
                         @click="student.status = 'present'" 
                         class="px-2 py-1 rounded text-xs font-medium"
-                        :class="student.status === 'present' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'">
+                        :class="student.status === 'present' ? 'bg-green-600 text-white dark:bg-green-700' : 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200'">
                         Present
                       </button>
                       <button 
                         @click="student.status = 'absent'" 
                         class="px-2 py-1 rounded text-xs font-medium"
-                        :class="student.status === 'absent' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'">
+                        :class="student.status === 'absent' ? 'bg-red-600 text-white dark:bg-red-700' : 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200'">
                         Absent
                       </button>
                       <button 
                         @click="student.status = 'late'" 
                         class="px-2 py-1 rounded text-xs font-medium"
-                        :class="student.status === 'late' ? 'bg-yellow-600 text-white' : 'bg-gray-200 text-gray-700'">
+                        :class="student.status === 'late' ? 'bg-yellow-600 text-white dark:bg-yellow-700' : 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200'">
                         Late
                       </button>
                     </div>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                     <div class="flex items-center">
                       <span class="mr-2 truncate max-w-xs">{{ student.notes }}</span>
-                      <button @click="startEditingNotes(student.studentId, student.notes)" class="text-indigo-600 hover:text-indigo-900">
+                      <button @click="startEditingNotes(student.studentId, student.notes)" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
@@ -109,7 +110,7 @@
           <div class="mt-6 flex justify-end">
             <button 
               @click="saveAttendance" 
-              class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-indigo-700 dark:hover:bg-indigo-800">
               {{ attendanceStatus === 'edit' ? 'Update Attendance' : 'Save Attendance' }}
             </button>
           </div>
@@ -117,25 +118,25 @@
         
         <!-- No students message -->
         <div v-else-if="selectedClass && selectedCourse && !currentAttendance.length" class="text-center py-8">
-          <p class="text-gray-500">No students found in this class.</p>
+          <p class="text-gray-500 dark:text-gray-400">No students found in this class.</p>
         </div>
         
         <!-- Select class and course prompt -->
         <div v-else-if="!selectedClass || !selectedCourse" class="text-center py-8">
-          <p class="text-gray-500">Please select a class and course to take attendance.</p>
+          <p class="text-gray-500 dark:text-gray-400">Please select a class and course to take attendance.</p>
         </div>
       </div>
       
       <!-- Edit Notes Modal -->
       <div v-if="editingNotes" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md">
-          <h3 class="text-lg font-medium mb-4">Edit Notes</h3>
-          <textarea v-model="editNoteText" rows="4" class="w-full border rounded-md p-2 mb-4"></textarea>
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+          <h3 class="text-lg font-medium mb-4 text-gray-900 dark:text-white">Edit Notes</h3>
+          <textarea v-model="editNoteText" rows="4" class="w-full border rounded-md p-2 mb-4 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
           <div class="flex justify-end space-x-2">
-            <button @click="cancelEditNotes" class="px-4 py-2 border rounded-md hover:bg-gray-100">
+            <button @click="cancelEditNotes" class="px-4 py-2 border rounded-md hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
               Cancel
             </button>
-            <button @click="saveNotes" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+            <button @click="saveNotes" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800">
               Save
             </button>
           </div>
@@ -143,43 +144,45 @@
       </div>
       
       <!-- Attendance Reports & Analysis Section -->
-      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-xl font-semibold mb-6">Attendance Reports & Analysis</h2>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-xl font-semibold mb-6 text-gray-900 dark:text-white">Attendance Reports & Analysis</h2>
         
         <!-- Filters -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date Range</label>
             <div class="flex flex-col space-y-2">
-              Start<input type="date" v-model="dateRange.start" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-              End<input type="date" v-model="dateRange.end" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+              <div class="dark:text-gray-300">Start</div>
+              <input type="date" v-model="dateRange.start" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+              <div class="dark:text-gray-300">End</div>
+              <input type="date" v-model="dateRange.end" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
             </div>
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
-            <select v-model="filterDepartment" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
+            <select v-model="filterDepartment" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
               <option value="all">All Departments</option>
               <option v-for="dept in departments" :key="dept.id" :value="dept.id">{{ dept.name }}</option>
             </select>
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Course</label>
-            <select v-model="filterCourse" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Course</label>
+            <select v-model="filterCourse" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
               <option value="all">All Courses</option>
               <option v-for="course in courseOptions" :key="course.id" :value="course.id">{{ course.name }}</option>
             </select>
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Student</label>
-            <input type="text" v-model="filterStudent" placeholder="Search by name" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Student</label>
+            <input type="text" v-model="filterStudent" placeholder="Search by name" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Attendance Status</label>
-            <select v-model="filterAttendanceStatus" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Attendance Status</label>
+            <select v-model="filterAttendanceStatus" class="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
               <option value="all">All Statuses</option>
               <option value="present">Present</option>
               <option value="absent">Absent</option>
@@ -190,68 +193,68 @@
         
         <!-- Filter Actions -->
         <div class="flex justify-between items-center mb-6">
-          <button @click="clearFilters" class="px-3 py-1 border rounded hover:bg-gray-100">
+          <button @click="clearFilters" class="px-3 py-1 border rounded hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
             Clear Filters
           </button>
-          <button @click="exportToCSV" class="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+          <button @click="exportToCSV" class="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-800">
             Export to CSV
           </button>
         </div>
         
         <!-- Statistics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <h4 class="text-sm font-medium text-gray-500">Total Students</h4>
-            <p class="text-2xl font-bold">{{ attendanceStats.totalStudents }}</p>
+          <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <h4 class="text-sm font-medium text-gray-500 dark:text-gray-300">Total Students</h4>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ attendanceStats.totalStudents }}</p>
           </div>
           
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <h4 class="text-sm font-medium text-gray-500">Total Classes</h4>
-            <p class="text-2xl font-bold">{{ attendanceStats.totalClasses }}</p>
+          <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <h4 class="text-sm font-medium text-gray-500 dark:text-gray-300">Total Classes</h4>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ attendanceStats.totalClasses }}</p>
           </div>
           
-          <div class="bg-green-50 p-4 rounded-lg">
-            <h4 class="text-sm font-medium text-green-700">Present</h4>
-            <p class="text-2xl font-bold text-green-700">{{ attendanceStats.presentPercentage }}%</p>
+          <div class="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 p-4 rounded-lg">
+            <h4 class="text-sm font-medium text-green-700 dark:text-green-400">Present</h4>
+            <p class="text-2xl font-bold text-green-700 dark:text-green-400">{{ attendanceStats.presentPercentage }}%</p>
           </div>
           
-          <div class="bg-red-50 p-4 rounded-lg">
-            <h4 class="text-sm font-medium text-red-700">Absent</h4>
-            <p class="text-2xl font-bold text-red-700">{{ attendanceStats.absentPercentage }}%</p>
+          <div class="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 p-4 rounded-lg">
+            <h4 class="text-sm font-medium text-red-700 dark:text-red-400">Absent</h4>
+            <p class="text-2xl font-bold text-red-700 dark:text-red-400">{{ attendanceStats.absentPercentage }}%</p>
           </div>
           
-          <div class="bg-yellow-50 p-4 rounded-lg">
-            <h4 class="text-sm font-medium text-yellow-700">Late</h4>
-            <p class="text-2xl font-bold text-yellow-700">{{ attendanceStats.latePercentage }}%</p>
+          <div class="bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20 p-4 rounded-lg">
+            <h4 class="text-sm font-medium text-yellow-700 dark:text-yellow-400">Late</h4>
+            <p class="text-2xl font-bold text-yellow-700 dark:text-yellow-400">{{ attendanceStats.latePercentage }}%</p>
           </div>
         </div>
         
         <!-- Attendance Records Table -->
         <div v-if="paginatedAttendanceData.records.length > 0">
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Class</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Course</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Student</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Notes</th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="record in paginatedAttendanceData.records" :key="`${record.date}-${record.courseId}-${record.studentId}`">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ formatDate(record.date) }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ record.class }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ record.course }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ record.studentName }}</td>
+              <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                <tr v-for="record in paginatedAttendanceData.records" :key="`${record.date}-${record.courseId}-${record.studentId}`" class="dark:hover:bg-gray-700">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ formatDate(record.date) }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ record.class }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ record.course }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ record.studentName }}</td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span class="px-2 py-1 text-xs font-medium rounded" :class="getStatusClass(record.status)">
                       {{ record.status.charAt(0).toUpperCase() + record.status.slice(1) }}
                     </span>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                     {{ record.notes }}
                   </td>
                 </tr>
@@ -260,9 +263,9 @@
           </div>
           
           <!-- Pagination -->
-          <div class="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6 mt-4">
+          <div class="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 sm:px-6 mt-4">
             <div class="flex justify-between w-full">
-              <div class="text-sm text-gray-700">
+              <div class="text-sm text-gray-700 dark:text-gray-300">
                 Showing <span class="font-medium">{{ ((currentPage - 1) * itemsPerPage) + 1 }}</span> to <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, paginatedAttendanceData.totalRecords) }}</span> of <span class="font-medium">{{ paginatedAttendanceData.totalRecords }}</span> results
               </div>
               <div>
@@ -270,17 +273,17 @@
                   <button 
                     @click="currentPage > 1 ? currentPage-- : null" 
                     :disabled="currentPage === 1"
-                    class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                    class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
                     :class="{ 'opacity-50 cursor-not-allowed': currentPage === 1 }">
                     Previous
                   </button>
-                  <div class="px-4 py-2 border-t border-b border-gray-300 bg-white text-sm">
+                  <div class="px-4 py-2 border-t border-b border-gray-300 bg-white text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300">
                     {{ currentPage }} / {{ totalPages }}
                   </div>
                   <button 
                     @click="currentPage < totalPages ? currentPage++ : null" 
                     :disabled="currentPage === totalPages"
-                    class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                    class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
                     :class="{ 'opacity-50 cursor-not-allowed': currentPage === totalPages }">
                     Next
                   </button>
@@ -292,20 +295,19 @@
         
         <!-- No records message -->
         <div v-else class="text-center py-8">
-          <p class="text-gray-500">No attendance records found for the selected filters.</p>
+          <p class="text-gray-500 dark:text-gray-400">No attendance records found for the selected filters.</p>
         </div>
       </div>
       
       <!-- Individual Student Report (Modal-like section that could be expanded) -->
-      <div v-if="false" class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-xl font-semibold mb-4">Student Attendance Report</h2>
+      <div v-if="false" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Student Attendance Report</h2>
         <!-- This section would be implemented when clicking on a student -->
         <!-- For now, it's commented out as it would be triggered by a user action -->
       </div>
     </div>
   </div>
 </template>
-  
   <script>
 export default {
   name: 'StudentAttendance',

@@ -55,7 +55,7 @@
           {
             label: 'Mention générale',
             value: bulletinData[0].grades.menGen_std,
-            percentage: 0, // Mention générale n'a pas de pourcentage
+            percentage: 0,
           },
         ],
       };
@@ -64,5 +64,5 @@
   </script>
   
   <style scoped>
-  /* Vos styles CSS personnalisés peuvent être ajoutés ici */
+
   </style>

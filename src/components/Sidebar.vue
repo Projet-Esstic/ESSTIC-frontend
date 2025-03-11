@@ -1,32 +1,24 @@
 <template>
   <div>
     <!-- Toggle button for mobile -->
-    <button 
-      @click="toggleSidebar" 
-      class="fixed top-4 left-4 z-50 md:hidden bg-gray-800 text-white p-2 rounded-md"
-    >
+    <button @click="toggleSidebar" class="fixed top-4 left-4 z-50 md:hidden bg-gray-800 text-white p-2 rounded-md">
       <span class="material-icons">{{ collapsed ? 'menu_open' : 'menu' }}</span>
       <span v-if="collapsed" class="tooltip">Open Menu</span>
     </button>
 
     <!-- Toggle button for desktop -->
-    <button 
-      @click="toggleSidebar" 
+    <button @click="toggleSidebar"
       class="top-0 fixed z-40 hidden md:block bg-blue-600 text-white p-1 rounded-r-md transition-all"
-      :class="collapsed ? 'left-16' : 'left-64'"
-    >
+      :class="collapsed ? 'left-16' : 'left-64'">
       <span class="material-icons">{{ collapsed ? 'chevron_left' : 'chevron_right' }}</span>
       <span v-if="collapsed" class="tooltip">Toggle Sidebar</span>
     </button>
 
     <!-- Sidebar -->
-    <div 
-      class="h-screen bg-gray-800 text-white fixed left-0 top-0 transition-all duration-300 z-30"
-      :class="[
-        collapsed ? 'w-16' : 'w-64', 
-        isMobileOpen ? 'translate-x-0' : 'md:translate-x-0 -translate-x-full'
-      ]"
-    >
+    <div class="h-screen bg-gray-800 text-white fixed left-0 top-0 transition-all duration-300 z-30" :class="[
+      collapsed ? 'w-16' : 'w-64',
+      isMobileOpen ? 'translate-x-0' : 'md:translate-x-0 -translate-x-full'
+    ]">
       <!-- Logo/Header -->
       <div class="p-1 border-b border-gray-700 flex items-center bg-white">
         <img src="@/assets/images/logo.png" alt="" width="100%">
@@ -46,13 +38,9 @@
         <div class="mt-4">
           <div v-if="!collapsed" class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase">Modules</div>
           <div class="space-y-1 px-2">
-            <router-link 
-              v-for="route in menuItems"
-              :key="route.path"
-              :to="route.path"
+            <router-link v-for="route in menuItems" :key="route.path" :to="route.path"
               class="relative flex items-center py-2 px-2 rounded-lg transition-colors text-sm group"
-              :class="[route.name === currentRoute.name ? 'bg-blue-600' : 'hover:bg-gray-700']"
-            >
+              :class="[route.name === currentRoute.name ? 'bg-blue-600' : 'hover:bg-gray-700']">
               <span class="material-icons text-lg">{{ route.meta.icon }}</span>
               <span v-if="!collapsed" class="ml-3">{{ route.meta.title }}</span>
               <span v-if="collapsed" class="tooltip">{{ route.meta.title }}</span>
@@ -61,10 +49,8 @@
         </div>
 
         <div class="px-2 py-2 mt-4">
-          <button 
-            @click="logOut" 
-            class="relative flex items-center py-2 px-2 rounded-lg hover:bg-gray-700 w-full transition-colors group"
-          >
+          <button @click="logOut"
+            class="relative flex items-center py-2 px-2 rounded-lg hover:bg-gray-700 w-full transition-colors group">
             <span class="material-icons">logout</span>
             <span v-if="!collapsed" class="ml-3">Log out</span>
             <span v-if="collapsed" class="tooltip">Log out</span>
@@ -74,11 +60,8 @@
     </div>
 
     <!-- Overlay for mobile -->
-    <div 
-      v-if="isMobileOpen" 
-      class="fixed inset-0 bg-black bg-opacity-50 md:hidden z-20"
-      @click="closeMobileSidebar"
-    ></div>
+    <div v-if="isMobileOpen" class="fixed inset-0 bg-black bg-opacity-50 md:hidden z-20" @click="closeMobileSidebar">
+    </div>
   </div>
 </template>
 
@@ -102,7 +85,8 @@ export default {
     const currentRoute = computed(() => route)
     const menuItems = [
       { path: '/entrance-exam', name: 'EntranceExam', meta: { title: 'Entrance Exam', icon: 'assignment' } },
-      { path: '/student-management', name: 'StudentManagement', meta: { title: 'Student Management', icon: 'people' } }
+      { path: '/student-management', name: 'StudentManagement', meta: { title: 'Student Management', icon: 'people' } },
+      { path: '/personnel', name: 'PersonnelManagement', meta: { title: 'Gestion du Personnel', icon: 'people' } }
     ]
 
     const toggleSidebar = () => {

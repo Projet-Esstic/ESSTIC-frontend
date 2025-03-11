@@ -76,6 +76,45 @@ const routes = [
       }
     ]
   },
+  {
+    path: '/personnel',
+    component: () => import('../layouts/DefaultLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'PersonnelRegistration',
+        component: () => import('../views/personnel/PersonnelList.vue'),
+        meta: {
+          title: 'Register Personnel'
+        },
+        beforeEnter: (to, from, next) => {
+          if (to.query.source === 'admin') {
+            to.meta.isAdmin = true;
+          }
+          next();
+        }
+      },
+      {
+        path: '/personnel/create',
+        name: 'CreatePersonnel',
+        component: () => import('../views/personnel/CreatePersonnel.vue'),
+        meta: {
+          title: 'Create Personnel'
+        },
+        beforeEnter: (to, from, next) => {
+          if (to.query.source === 'admin') {
+            to.meta.isAdmin = true;
+          }
+          next();
+        }
+      },
+      {
+        path: '/personnel/detail/:id',
+        name: 'PersonnelDetail',
+        component:import('../views/personnel/PersonnelDetail.vue'),
+      }
+    ]
+  },
   { 
     path: '/login', 
     component: LoginView 
@@ -128,26 +167,7 @@ const routes = [
       }
     ]
   },
-  {
-    path: '/personnel-registration',
-    component: () => import('../layouts/PublicLayout.vue'),
-    children: [
-      {
-        path: '',
-        name: 'PersonnelRegistration',
-        component: () => import('../views/personnel/PersonnelRegistration.vue'),
-        meta: {
-          title: 'Register Personnel'
-        },
-        beforeEnter: (to, from, next) => {
-          if (to.query.source === 'admin') {
-            to.meta.isAdmin = true;
-          }
-          next();
-        }
-      }
-    ]
-  }
+ 
 ]
 
 const router = createRouter({
