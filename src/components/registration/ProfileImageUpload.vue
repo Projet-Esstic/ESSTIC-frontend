@@ -45,27 +45,33 @@
 
 <script>
 import { ref, watch } from 'vue'
-import { useStore } from 'vuex'
 
 export default {
   name: 'ProfileImageUpload',
   
-  setup() {
-    const store = useStore()
+  props: {
+    modelValue: {
+      type: Object,
+      default: () => ({
+        preview: '',
+        file: null
+      })
+    }
+  },
+
+  emits: ['update:modelValue'],
+  
+  setup(props, { emit }) {
     const imagePreview = ref('')
     const loading = ref(false)
     const error = ref('')
     
-    // Watch for existing profile image in store
-    watch(
-      () => store.state.candidateRegistration.formSteps.civilStatus.profileImage,
-      (newValue) => {
-        if (newValue) {
-          imagePreview.value = newValue
-        }
-      },
-      { immediate: true }
-    )
+    // Watch for prop changes
+    watch(() => props.modelValue?.preview, (newValue) => {
+      if (newValue) {
+        imagePreview.value = newValue
+      }
+    }, { immediate: true })
     
     const handleImageUpload = async (event) => {
       const file = event.target.files[0]
@@ -89,11 +95,14 @@ export default {
         // Create preview
         const reader = new FileReader()
         reader.onload = (e) => {
-          imagePreview.value = e.target.result
-          // Store in Vuex
-          store.commit('candidateRegistration/updateCivilStatus', {
-            profileImage: e.target.result
+          const preview = e.target.result
+          imagePreview.value = preview
+          // Emit both preview and file
+          emit('update:modelValue', {
+            preview: preview,
+            file: file
           })
+          console.log('Image uploaded and emitted with file object')
         }
         reader.readAsDataURL(file)
       } catch (err) {

@@ -9,7 +9,13 @@
     <!-- Profile Image -->
     <div class="form-section">
       <h3 class="section-title">Photo de profil <span class="text-red-500">*</span></h3>
-      <ProfileImageUpload required />
+      <ProfileImageUpload 
+        v-model="form.profilePicture" 
+        @update:modelValue="handleProfilePictureUpdate"
+        @change="handleProfileChange"
+        @input="handleProfileInput"
+        required 
+      />
     </div>
 
     <!-- Informations de base -->
@@ -159,12 +165,23 @@
         </div>
         <div class="form-group">
           <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Région <span class="text-red-500">*</span></label>
-          <input 
+          <select 
             v-model="form.address.state" 
-            type="text" 
             class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
             required
-          />
+          >
+            <option value="">Sélectionnez une région</option>
+            <option value="Adamaoua">Adamaoua</option>
+            <option value="Centre">Centre</option>
+            <option value="Est">Est</option>
+            <option value="Extrême-Nord">Extrême-Nord</option>
+            <option value="Littoral">Littoral</option>
+            <option value="Nord">Nord</option>
+            <option value="Nord-Ouest">Nord-Ouest</option>
+            <option value="Ouest">Ouest</option>
+            <option value="Sud">Sud</option>
+            <option value="Sud-Ouest">Sud-Ouest</option>
+          </select>
         </div>
         <div class="form-group">
           <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Pays <span class="text-red-500">*</span></label>
@@ -269,7 +286,10 @@ export default {
       dateOfBirth: '',
       gender: '',
       phoneNumber: '',
-      profilePicture: null,
+      profilePicture: {
+        preview: '',
+        file: null
+      },
       address: {
         street: '',
         city: '',
@@ -314,22 +334,43 @@ export default {
       return true
     }
 
+    const handleProfilePictureUpdate = (imageData) => {
+      form.value.profilePicture = imageData;
+      form.value.profileImageFile = imageData.file;
+      console.log('Profile picture updated:', {
+        hasPreview: !!imageData.preview,
+        hasFile: !!imageData.file
+      });
+    }
+
+    const handleProfileChange = (event) => {
+      console.log('Change event received:', event);
+    }
+
+    const handleProfileInput = (event) => {
+      console.log('Input event received:', event);
+    }
+
     // Handle form submission
     const handleSubmit = async () => {
       if (!validateForm()) return
       
       loading.value = true
       try {
-        // Submit the entire form object, which contains only user-entered data
-        console.log('Submitting user-entered data:', form.value) // For debugging
+        console.log('Form submission - Profile picture status:', {
+          exists: !!form.value.profilePicture.file,
+          type: typeof form.value.profilePicture.file,
+          value: form.value.profilePicture.file
+        });
+        
         await store.dispatch('candidateRegistration/updateStepData', {
           step: 'civilStatus',
           data: form.value
         })
+        console.log('Civil status data saved successfully');
         emit('next-step')
       } catch (error) {
         console.error('Error updating civil status:', error)
-        // Add error handling/notification here
       } finally {
         loading.value = false
       }
@@ -339,6 +380,9 @@ export default {
       form,
       loading,
       handleSubmit,
+      handleProfilePictureUpdate,
+      handleProfileChange,
+      handleProfileInput,
       Theme
     }
   }

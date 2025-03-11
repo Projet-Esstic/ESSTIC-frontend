@@ -12,8 +12,8 @@
         <div class="relative">
           <div class="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
             <img
-              v-if="formSteps.civilStatus.profileImage"
-              :src="formSteps.civilStatus.profileImage"
+              v-if="formSteps.civilStatus.profilePicture?.preview"
+              :src="formSteps.civilStatus.profilePicture.preview"
               class="w-full h-full object-cover"
               alt="Photo de profil"
             />
