@@ -11,14 +11,20 @@
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Field of Study</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
           <select 
-            v-model="selectedField"
+            v-model="selectedDepartment"
             class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           >
-            <option value="">All Fields</option>
-            <option v-for="field in fields" :key="field.id" :value="field.id">
-              {{ field.name }}
+            <option value="">All Departments</option>
+            <!-- Add debug output -->
+            <!-- {{ console.log('Departments in template:', departments) }} -->
+            <option 
+              v-for="department in departments" 
+              :key="department._id" 
+              :value="department._id"
+            >
+              {{ department.name }}
             </option>
           </select>
         </div>
@@ -113,15 +119,15 @@
           </tr>
         </thead>
         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-          <tr v-for="candidate in filteredCandidates" :key="candidate.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+          <tr v-for="candidate in filteredCandidates" :key="candidate._id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-              {{ candidate.registrationNumber }}
+              {{ generateRegistrationNumber(candidate._id) }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-              {{ candidate.name }}
+              {{ candidate.user ? `${candidate.user.firstName} ${candidate.user.lastName}` : 'N/A' }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-              {{ getFieldName(candidate.fieldId) }}
+              {{ getFieldName(candidate.fieldOfStudy) }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               {{ calculateAverage(candidate).toFixed(2) }}
@@ -146,7 +152,8 @@
 
 <script>
 import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
-import { useStore } from 'vuex'
+import { io } from 'socket.io-client'
+import { departmentService, candidateService, courseService } from '@/api/services'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -179,70 +186,133 @@ ChartJS.register(
 export default {
   name: 'Deliberation',
 
-  props: {
-    fields: {
-      type: Array,
-      required: true
-    }
-  },
-
-  setup(props) {
-    const store = useStore()
-    const selectedField = ref('')
+  setup() {
+    const socket = ref(null)
+    const departments = ref([])
+    const candidates = ref([])
+    const courses = ref([])
+    const selectedDepartment = ref('')
     const passingAverage = ref(10)
     const distributionChart = ref(null)
     const fieldChart = ref(null)
     const distributionChartInstance = ref(null)
     const fieldChartInstance = ref(null)
 
-    // Get data from store
-    const subjects = computed(() => store.getters['entranceExam/getSubjects'] || [])
-    const allCandidates = computed(() => store.getters['entranceExam/getCandidates'] || [])
-
-    // Filter candidates by field
+    // Replace store getters with direct API data
     const filteredCandidates = computed(() => {
-      return allCandidates.value.filter(candidate => {
-        return !selectedField.value || candidate.fieldId === selectedField.value
+      return candidates.value.filter(candidate => {
+        return !selectedDepartment.value || candidate.fieldOfStudy === selectedDepartment.value
       })
     })
 
-    // Calculate total coefficient
-    const totalCoefficient = computed(() => {
-      return subjects.value.reduce((sum, subject) => sum + subject.coefficient, 0) || 1
+    // Statistics computeds
+    const totalCandidates = computed(() => filteredCandidates.value.length)
+
+    const passedCandidates = computed(() => 
+      filteredCandidates.value.filter(candidate => isPassed(candidate))
+    )
+
+    const failedCandidates = computed(() => 
+      filteredCandidates.value.filter(candidate => !isPassed(candidate))
+    )
+
+    const passRate = computed(() => {
+      if (totalCandidates.value === 0) return 0
+      return ((passedCandidates.value.length / totalCandidates.value) * 100).toFixed(1)
     })
+
+    // Socket connection setup
+    onMounted(async () => {
+      socket.value = io(process.env.VUE_APP_SOCKET_ENDPOINT)
+      
+      socket.value.on('candidateUpdated', (updatedCandidate) => {
+        const index = candidates.value.findIndex(c => c._id === updatedCandidate._id)
+        if (index !== -1) {
+          candidates.value[index] = updatedCandidate
+        }
+      })
+
+      socket.value.on('candidateAdded', (newCandidate) => {
+        candidates.value.push(newCandidate)
+      })
+
+      socket.value.on('candidateDeleted', (deletedId) => {
+        candidates.value = candidates.value.filter(c => c._id !== deletedId)
+      })
+
+      // Load data sequentially to ensure departments are loaded first
+      await loadDepartments()
+      await Promise.all([
+        loadCourses(),
+        loadCandidates()
+      ])
+      initializeCharts()
+    })
+
+    onBeforeUnmount(() => {
+      if (socket.value) {
+        socket.value.disconnect()
+      }
+    })
+
+    const loadDepartments = async () => {
+      try {
+        const response = await departmentService.getAllDepartments()
+        console.log('Departments loaded:', response) // Debug log
+        if (Array.isArray(response)) {
+          departments.value = response
+        } else {
+          console.error('Unexpected departments response format:', response)
+        }
+      } catch (err) {
+        console.error('Failed to load departments:', err)
+      }
+    }
+
+    const loadCourses = async () => {
+      try {
+        const response = await courseService.getAllCourses()
+        courses.value = response
+      } catch (err) {
+        console.error('Failed to load courses:', err)
+      }
+    }
+
+    const loadCandidates = async () => {
+      try {
+        const response = await candidateService.getAllCandidates()
+        candidates.value = response
+      } catch (err) {
+        console.error('Failed to load candidates:', err)
+      }
+    }
 
     // Calculate average for a candidate
     const calculateAverage = (candidate) => {
+      if (!candidate.Marks?.length) return 0
+
       let totalWeightedMarks = 0
-      
-      subjects.value.forEach(subject => {
-        const mark = store.getters['entranceExam/getMarksByCandidateAndSubject'](
-          candidate.id,
-          subject.id
-        ) || 0
-        totalWeightedMarks += mark * subject.coefficient
+      let totalCoefficients = 0
+
+      candidate.Marks.forEach(mark => {
+        const course = courses.value.find(c => c._id === mark.courseId)
+        if (course) {
+          const deptCoefficient = course.department.find(
+            dept => dept.departmentInfo === candidate.fieldOfStudy
+          )
+          const coefficient = deptCoefficient ? deptCoefficient.coefficient : 1
+          totalWeightedMarks += mark.mark.currentMark * coefficient
+          totalCoefficients += coefficient
+        }
       })
 
-      return totalWeightedMarks / totalCoefficient.value
+      return totalCoefficients > 0 ? totalWeightedMarks / totalCoefficients : 0
     }
 
     // Check if candidate passed
     const isPassed = (candidate) => {
       return calculateAverage(candidate) >= passingAverage.value
     }
-
-    // Statistics
-    const totalCandidates = computed(() => filteredCandidates.value.length)
-    const passedCandidates = computed(() => 
-      filteredCandidates.value.filter(candidate => isPassed(candidate))
-    )
-    const failedCandidates = computed(() => 
-      filteredCandidates.value.filter(candidate => !isPassed(candidate))
-    )
-    const passRate = computed(() => {
-      if (totalCandidates.value === 0) return 0
-      return ((passedCandidates.value.length / totalCandidates.value) * 100).toFixed(1)
-    })
 
     // Chart data
     const distributionData = computed(() => {
@@ -280,27 +350,27 @@ export default {
     })
 
     const fieldData = computed(() => {
-      const fieldResults = {}
-      props.fields.forEach(field => {
-        fieldResults[field.id] = { passed: 0, failed: 0 }
+      const departmentResults = {}
+      departments.value.forEach(dept => {
+        departmentResults[dept._id] = { passed: 0, failed: 0 }
       })
 
       filteredCandidates.value.forEach(candidate => {
-        if (fieldResults[candidate.fieldId]) {
+        if (departmentResults[candidate.fieldOfStudy]) {
           const status = isPassed(candidate) ? 'passed' : 'failed'
-          fieldResults[candidate.fieldId][status]++
+          departmentResults[candidate.fieldOfStudy][status]++
         }
       })
 
       return {
-        labels: props.fields.map(field => field.name),
+        labels: departments.value.map(dept => dept.name),
         datasets: [{
-          data: props.fields.map(field => fieldResults[field.id]?.passed || 0),
+          data: departments.value.map(dept => departmentResults[dept._id]?.passed || 0),
           backgroundColor: 'rgba(75, 192, 192, 0.5)',
           borderColor: 'rgb(75, 192, 192)',
           label: 'Passed'
         }, {
-          data: props.fields.map(field => fieldResults[field.id]?.failed || 0),
+          data: departments.value.map(dept => departmentResults[dept._id]?.failed || 0),
           backgroundColor: 'rgba(255, 99, 132, 0.5)',
           borderColor: 'rgb(255, 99, 132)',
           label: 'Failed'
@@ -387,23 +457,16 @@ export default {
       }
     })
 
-    // Lifecycle hooks
-    onMounted(() => {
-      initializeCharts()
-    })
-
-    onBeforeUnmount(() => {
-      if (distributionChartInstance.value) {
-        distributionChartInstance.value.destroy()
-      }
-      if (fieldChartInstance.value) {
-        fieldChartInstance.value.destroy()
-      }
-    })
+    const generateRegistrationNumber = (id) => {
+      if (!id) return 'N/A'
+      const shortId = id.slice(-6).toUpperCase()
+      const year = new Date().getFullYear()
+      return `${year}/${shortId}`
+    }
 
     const getFieldName = (fieldId) => {
-      const field = props.fields.find(f => f.id === fieldId)
-      return field ? field.name : ''
+      const dept = departments.value.find(d => d._id === fieldId)
+      return dept ? dept.name : 'Unknown Field'
     }
 
     // Export results to PDF
@@ -421,9 +484,9 @@ export default {
       doc.text(`Pass Rate: ${passRate.value}%`, 14, 53)
 
       const tableData = filteredCandidates.value.map(candidate => [
-        candidate.registrationNumber,
-        candidate.name,
-        getFieldName(candidate.fieldId),
+        generateRegistrationNumber(candidate._id),
+        `${candidate.user?.firstName} ${candidate.user?.lastName}`,
+        getFieldName(candidate.fieldOfStudy),
         calculateAverage(candidate).toFixed(2),
         isPassed(candidate) ? 'PASSED' : 'FAILED'
       ])
@@ -437,8 +500,16 @@ export default {
       doc.save('entrance-exam-results.pdf')
     }
 
+    // Add a watcher for departments to debug updates
+    watch(departments, (newVal) => {
+      console.log('Departments updated:', newVal)
+    })
+
     return {
-      selectedField,
+      departments,
+      candidates,
+      courses,
+      selectedDepartment,
       passingAverage,
       filteredCandidates,
       totalCandidates,
@@ -451,7 +522,8 @@ export default {
       isPassed,
       getFieldName,
       exportResults,
-      handlePassingAverageInput
+      handlePassingAverageInput,
+      generateRegistrationNumber
     }
   }
 }

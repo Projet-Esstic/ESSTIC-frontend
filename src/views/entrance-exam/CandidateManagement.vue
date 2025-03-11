@@ -176,93 +176,102 @@
                 </span>
               </div>
 
-              <!-- Personal Information -->
+              <!-- Documents Section -->
               <div class="space-y-4">
-                <h3 class="text-lg font-medium">Personal Information</h3>
+                <h3 class="text-lg font-medium">Documents</h3>
                 <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">Full Name</label>
-                    <p class="mt-1 text-sm text-gray-900">
-                      {{ editingCandidate?.user ? `${editingCandidate.user.firstName} ${editingCandidate.user.lastName}` : 'N/A' }}
-                    </p>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700">Email</label>
-                    <p class="mt-1 text-sm text-gray-900">{{ editingCandidate?.user?.email || 'N/A' }}</p>
-                  </div>
-                </div>
-                
-                <!-- High School Information -->
-                <div class="space-y-2">
-                  <h4 class="text-sm font-medium">High School</h4>
-                  <div>
-                    <label class="block text-sm">School Name</label>
-                    <input 
-                      v-model="editingCandidate.highSchool.schoolName"
-                      type="text"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-sm">Year Completed</label>
-                    <input 
-                      v-model="editingCandidate.highSchool.yearCompleted"
-                      type="number"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <!-- University Information -->
-                <div class="space-y-2">
-                  <h4 class="text-sm font-medium">University</h4>
-                  <div>
-                    <label class="block text-sm">University Name</label>
-                    <input 
-                      v-model="editingCandidate.university.universityName"
-                      type="text"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-sm">Degree</label>
-                    <input 
-                      v-model="editingCandidate.university.degree"
-                      type="text"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-sm">Year Completed</label>
-                    <input 
-                      v-model="editingCandidate.university.yearCompleted"
-                      type="number"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <!-- Exam Center -->
-                <div>
-                  <label class="block text-sm">Exam Center</label>
-                  <input 
-                    v-model="editingCandidate.examCenter"
-                    type="text"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
-
-                <!-- Field of Study -->
-                <div>
-                  <label class="block text-sm">Field of Study</label>
-                  <select 
-                    v-model="editingCandidate.fieldOfStudy"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  <!-- Document Preview Cards -->
+                  <div v-for="(doc, type) in candidateDocuments" 
+                    :key="type" 
+                    class="p-4 border rounded-lg hover:shadow-md transition-shadow"
                   >
-                    <option v-for="dept in departments" :key="dept._id" :value="dept._id">
-                      {{ dept.name }}
-                    </option>
-                  </select>
+                    <div class="flex justify-between items-start mb-2">
+                      <h4 class="text-sm font-medium capitalize">{{ type }}</h4>
+                      <span class="text-xs text-gray-500">
+                        {{ new Date(doc.uploadedAt).toLocaleDateString() }}
+                      </span>
+                    </div>
+                    
+                    <!-- PDF Preview -->
+                    <div class="relative h-32 bg-gray-50 rounded-lg overflow-hidden">
+                      <embed
+                        :src="doc.path"
+                        type="application/pdf"
+                        class="w-full h-full"
+                      />
+                      <div class="absolute inset-0 flex items-center justify-center">
+                        <button
+                          @click="openDocument(doc.path)"
+                          class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+                        >
+                          View Full Document
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <!-- Document Info -->
+                    <div class="mt-2 space-y-1">
+                      <p class="text-xs text-gray-600">
+                        Original name: {{ doc.originalName }}
+                      </p>
+                      <p class="text-xs text-gray-600">
+                        Size: {{ (doc.size / 1024).toFixed(2) }} KB
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Professional Experience Section -->
+              <div class="space-y-4">
+                <h3 class="text-lg font-medium">Professional Experience</h3>
+                <div class="space-y-3">
+                  <div v-for="exp in editingCandidate?.professionalExperience" 
+                    :key="exp._id"
+                    class="p-4 bg-gray-50 rounded-lg"
+                  >
+                    <h4 class="font-medium">{{ exp.company }}</h4>
+                    <p class="text-sm text-gray-600">{{ exp.position }}</p>
+                    <p class="text-sm text-gray-500">{{ exp.yearsOfExperience }} years</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Extra Activities Section -->
+              <div class="space-y-4">
+                <h3 class="text-lg font-medium">Extra Activities</h3>
+                <div class="space-y-3">
+                  <div v-for="activity in editingCandidate?.extraActivities" 
+                    :key="activity._id"
+                    class="p-4 bg-gray-50 rounded-lg"
+                  >
+                    <h4 class="font-medium">{{ activity.activity }}</h4>
+                    <p class="text-sm text-gray-600">{{ activity.description }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payment Information -->
+              <div class="space-y-4">
+                <h3 class="text-lg font-medium">Payment Information</h3>
+                <div class="space-y-3">
+                  <div v-for="payment in editingCandidate?.payment" 
+                    :key="payment._id"
+                    class="p-4 bg-gray-50 rounded-lg"
+                  >
+                    <div class="flex justify-between">
+                      <span class="font-medium">Amount Paid:</span>
+                      <span>{{ payment.amountPaid }} FCFA</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-600">
+                      <span>Date:</span>
+                      <span>{{ new Date(payment.paidDate).toLocaleDateString() }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-600">
+                      <span>Method:</span>
+                      <span class="capitalize">{{ payment.paymentMethod }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -508,18 +517,16 @@ export default {
 
     const editCandidate = (candidate) => {
       editingCandidate.value = {
+        ...candidate,
         _id: candidate._id,
         applicationStatus: candidate.applicationStatus,
         user: candidate.user,
-        highSchool: {
-          schoolName: candidate.highSchool?.schoolName || '',
-          yearCompleted: candidate.highSchool?.yearCompleted || null,
-        },
-        university: {
-          universityName: candidate.university?.universityName || '',
-          degree: candidate.university?.degree || '',
-          yearCompleted: candidate.university?.yearCompleted || null
-        },
+        documents: candidate.documents || {},
+        highSchool: candidate.highSchool || {},
+        university: candidate.university || {},
+        professionalExperience: candidate.professionalExperience || [],
+        extraActivities: candidate.extraActivities || [],
+        payment: candidate.payment || [],
         examCenter: candidate.examCenter || '',
         fieldOfStudy: candidate.fieldOfStudy || ''
       };
@@ -747,6 +754,21 @@ export default {
       statusFilter.value = '';
     };
 
+    const openDocument = (path) => {
+      window.open(path, '_blank');
+    };
+
+    const candidateDocuments = computed(() => {
+      if (!editingCandidate.value?.documents) return {};
+      return Object.entries(editingCandidate.value.documents)
+        .reduce((acc, [type, doc]) => {
+          if (doc.path) {
+            acc[type] = doc;
+          }
+          return acc;
+        }, {});
+    });
+
     return {
       searchQuery,
       selectedField,
@@ -767,7 +789,9 @@ export default {
       registerNewCandidate,
       clearFilters,
       generateValidatedPDF,
-      selectedReportField
+      selectedReportField,
+      openDocument,
+      candidateDocuments
     };
   }
 };
