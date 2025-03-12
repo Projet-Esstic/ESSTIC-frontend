@@ -1,5 +1,5 @@
 <template>
-  <div :class="[themeClasses.app, 'min-h-screen flex flex-col md:flex-row']" id="bgimage">
+  <div :class="[themeClasses.app, 'min-h-screen flex flex-col md:flex-row', darkMode ? 'dark' : '']" id="bgimage">
     <!-- Left Section with Logo - Now responsive and fixed -->
     <div :class="[
         'md:w-1/3 w-full flex flex-col items-center fixed left-0 top-0 h-full bg-blue-0',
@@ -79,6 +79,16 @@
           {{ stepMessages[currentStepIndex]?.title || 'Inscription' }}
         </h2>
         <div class="flex items-center space-x-4">
+          <!-- Dark Mode Toggle Button -->
+          <button
+            @click="toggleDarkMode"
+            class="flex items-center justify-center p-2 rounded-md bg-gray-100 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+            :aria-label="darkMode ? 'Activer le mode clair' : 'Activer le mode sombre'"
+          >
+            <span v-if="darkMode" class="text-sm flex items-center"><span class="mr-1">☀️</span> Clair</span>
+            <span v-else class="text-sm flex items-center"><span class="mr-1">🌙</span> Sombre</span>
+          </button>
+          
           <select
             class="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-black dark:text-white rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
             aria-label="Sélecteur de langue" v-model="selectedLanguage">
@@ -94,7 +104,7 @@
       </div>
 
       <!-- Main Content Area - With proper overflow handling -->
-      <div class="flex-grow p-4 md:p-6 overflow-y-auto">
+      <div class="flex-grow p-4 md:p-6 overflow-y-auto  text-black dark:text-white">
         <!-- For testing: -->
         <candidate-registration></candidate-registration>
 
@@ -105,23 +115,6 @@
           </transition>
         </router-view>
       </div>
-
-      <!-- Footer with navigation buttons - Optional -->
-      <!-- <div class="p-4 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
-        <button v-if="currentStepIndex > 0"
-          class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
-          @click="goToPrevStep" aria-label="Retour à l'étape précédente">
-          Précédent
-        </button>
-        <div v-else></div>
-
-        <button
-          class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
-          @click="goToNextStep"
-          :aria-label="currentStepIndex < 3 ? 'Continuer à l\'étape suivante' : 'Soumettre votre candidature'">
-          {{ currentStepIndex < 3 ? 'Continuer' : 'Soumettre' }}
-        </button>
-      </div> -->
     </div>
   </div>
 </template>
@@ -142,6 +135,7 @@ export default {
     const route = useRoute()
     const router = useRouter()
     const selectedLanguage = ref('fr')
+    const darkMode = ref(false)
     const currentStepIndex = computed(() => {
       return route.query.step ? parseInt(route.query.step) - 1 : 0
     })
@@ -228,11 +222,28 @@ export default {
     const goToHome = () => {
       router.push('/')
     }
+    
+    // Dark mode toggle function
+    const toggleDarkMode = () => {
+      darkMode.value = !darkMode.value
+      // Save preference to localStorage
+      localStorage.setItem('darkMode', darkMode.value ? 'dark' : 'light')
+    }
 
     onMounted(() => {
       messageInterval = setInterval(() => {
         currentMessageIndex.value = (currentMessageIndex.value + 1) % welcomeMessages.length
       }, 15000)
+      
+      // Check for saved dark mode preference
+      const savedDarkMode = localStorage.getItem('darkMode')
+      if (savedDarkMode) {
+        darkMode.value = savedDarkMode === 'dark'
+      } else {
+        // Check for system preference
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        darkMode.value = prefersDark
+      }
     })
 
     onUnmounted(() => {
@@ -246,12 +257,14 @@ export default {
       currentStepIndex,
       stepMessages,
       selectedLanguage,
+      darkMode,
       getGradientClass,
       getEstimatedTime,
       goToNextStep,
       goToPrevStep,
       saveProgress,
       goToHome,
+      toggleDarkMode,
       currentMessageIndex,
       welcomeMessages
     }
@@ -265,6 +278,11 @@ export default {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+/* Dark mode transition */
+.dark {
+  color-scheme: dark;
 }
 
 /* Transition Animations */

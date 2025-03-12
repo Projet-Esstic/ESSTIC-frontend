@@ -30,10 +30,6 @@
         v-if="currentTab === 'courses'" 
         :fields="fields"
       />
-      <FieldsOfStudy 
-        v-if="currentTab === 'fields'" 
-        v-model:fields="fields"
-      />
       <CandidateManagement
         v-if="currentTab === 'candidates'"
         :fields="fields"
@@ -57,7 +53,6 @@
 <script>
 import { ref } from 'vue';
 import CourseManagement from './CourseManagement.vue';
-import FieldsOfStudy from './FieldsOfStudy.vue';
 import CandidateManagement from './CandidateManagement.vue';
 import EntranceExamManagement from './EntranceExamManagement.vue';
 import MarksManagement from './MarksManagement.vue';
@@ -68,7 +63,6 @@ export default {
   name: 'EntranceExam',
   components: {
     CourseManagement,
-    FieldsOfStudy,
     CandidateManagement,
     EntranceExamManagement,
     MarksManagement,
@@ -79,7 +73,6 @@ export default {
     const tabs = [
       { id: 'exams', name: 'Create Exam' },
       { id: 'courses', name: 'Course Management' },
-      { id: 'fields', name: 'Fields of Study' },
       { id: 'candidates', name: 'Candidate Management' },
       { id: 'marks', name: 'Marks Management' },
       { id: 'deliberation', name: 'Deliberation' },

@@ -1,37 +1,35 @@
 <template>
-  <h1 class="text-2xl font-bold mb-3">
+  <h1 class="text-2xl font-bold mb-3 dark:text-white text-black">
     Student Grade Management System
   </h1>
   <div class="p-6">
-    
     <!-- Filters Section -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-       
       <div>
-        <label class="block text-sm font-medium mb-1">Department</label>
-        <select v-model="selectedDepartment" class="w-full p-2 border rounded-md shadow-sm">
+        <label class="block text-sm font-medium mb-1 dark:text-white text-black">Department</label>
+        <select v-model="selectedDepartment" class="w-full p-2 border rounded-md shadow-sm dark:text-black text-black">
           <option value="">All Departments</option>
           <option v-for="dept in departments" :key="dept" :value="dept">{{ dept }}</option>
         </select>
       </div>
       
       <div>
-        <label class="block text-sm font-medium mb-1">Class</label>
-        <select v-model="selectedClass" class="w-full p-2 border rounded-md shadow-sm">
+        <label class="block text-sm font-medium mb-1 dark:text-white text-black">Class</label>
+        <select v-model="selectedClass" class="w-full p-2 border rounded-md shadow-sm dark:text-black text-black">
           <option value="">All Classes</option>
           <option v-for="classOption in classes" :key="classOption" :value="classOption">{{ classOption }}</option>
         </select>
       </div>
      
       <div>
-  <label class="block text-sm font-medium mb-1">Subject</label>
-  <select v-model="selectedSubject" class="w-full p-2 border rounded-md shadow-sm">
-    <option value="">All Subjects</option>
-    <option v-for="subject in filteredSubjects" :key="subject.id" :value="subject.id">
-      {{ subject.name }}
-    </option>
-  </select>
-</div>
+        <label class="block text-sm font-medium mb-1 dark:text-white text-black">Subject</label>
+        <select v-model="selectedSubject" class="w-full p-2 border rounded-md shadow-sm dark:text-black text-black">
+          <option value="">All Subjects</option>
+          <option v-for="subject in filteredSubjects" :key="subject.id" :value="subject.id">
+            {{ subject.name }}
+          </option>
+        </select>
+      </div>
     </div>
     
     <!-- Excel-like Table -->
@@ -39,22 +37,22 @@
       <table class="min-w-full divide-y divide-blue-200 border border-blue-200">
         <thead class="bg-blue-100 dark:bg-blue-800">
           <tr>
-            <th class="sticky left-0 z-10 bg-blue-100 dark:bg-blue-800 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-blue-200">
+            <th class="sticky left-0 z-10 bg-blue-100 dark:bg-blue-800 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-blue-200 dark:text-white text-black">
               Student Name
             </th>
             
             <template v-if="selectedSubject">
               <!-- Single Subject View -->
-              <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200" colspan="3">
+              <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200 dark:text-white text-black" colspan="3">
                 {{ getSubjectName(selectedSubject) }} - CA
               </th>
-              <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200" colspan="3">
+              <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200 dark:text-white text-black" colspan="3">
                 {{ getSubjectName(selectedSubject) }} - SN
               </th>
-              <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200" colspan="3">
+              <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200 dark:text-white text-black" colspan="3">
                 {{ getSubjectName(selectedSubject) }} - RESIT
               </th>
-              <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+              <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider dark:text-white text-black">
                 Final Grade
               </th>
             </template>
@@ -62,7 +60,7 @@
             <template v-else>
               <!-- All Subjects View -->
               <template v-for="subject in subjects" :key="subject.id">
-                <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200" colspan="3">
+                <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200 dark:text-white text-black" colspan="3">
                   {{ subject.name }}
                 </th>
               </template>
@@ -70,33 +68,33 @@
           </tr>
           
           <tr>
-            <th class="sticky left-0 z-10 bg-blue-50 dark:bg-blue-700 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-blue-200">
+            <th class="sticky left-0 z-10 bg-blue-50 dark:bg-blue-700 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-blue-200 dark:text-white text-black">
               &nbsp;
             </th>
             
             <template v-if="selectedSubject">
               <!-- Single Subject Detailed View -->
-              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700">Mark</th>
-              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700">Out of</th>
-              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200 bg-blue-50 dark:bg-blue-700">%</th>
+              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700 dark:text-white text-black">Mark</th>
+              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700 dark:text-white text-black">Out of</th>
+              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200 bg-blue-50 dark:bg-blue-700 dark:text-white text-black">%</th>
               
-              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700">Mark</th>
-              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700">Out of</th>
-              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200 bg-blue-50 dark:bg-blue-700">%</th>
+              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700 dark:text-white text-black">Mark</th>
+              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700 dark:text-white text-black">Out of</th>
+              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200 bg-blue-50 dark:bg-blue-700 dark:text-white text-black">%</th>
               
-              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700">Mark</th>
-              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700">Out of</th>
-              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200 bg-blue-50 dark:bg-blue-700">%</th>
+              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700 dark:text-white text-black">Mark</th>
+              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700 dark:text-white text-black">Out of</th>
+              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200 bg-blue-50 dark:bg-blue-700 dark:text-white text-black">%</th>
               
-              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700">Letter</th>
+              <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700 dark:text-white text-black">Letter</th>
             </template>
             
             <template v-else>
               <!-- All Subjects Summary View -->
               <template v-for="subject in subjects" :key="subject.id">
-                <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700">CA</th>
-                <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700">SN</th>
-                <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200 bg-blue-50 dark:bg-blue-700">Grade</th>
+                <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700 dark:text-white text-black">CA</th>
+                <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider bg-blue-50 dark:bg-blue-700 dark:text-white text-black">SN</th>
+                <th class="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider border-r border-blue-200 bg-blue-50 dark:bg-blue-700 dark:text-white text-black">Grade</th>
               </template>
             </template>
           </tr>
@@ -104,7 +102,7 @@
         
         <tbody class="bg-white dark:bg-gray-800 divide-y divide-blue-200">
           <tr v-for="(student, index) in filteredStudents" :key="student.id" :class="index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-blue-50 dark:bg-blue-900'">
-            <td class="sticky left-0 z-10 px-6 py-3 whitespace-nowrap border-r border-blue-200 font-medium" :class="index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-blue-50 dark:bg-blue-900'">
+            <td class="sticky left-0 z-10 px-6 py-3 whitespace-nowrap border-r border-blue-200 font-medium dark:text-white text-black" :class="index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-blue-50 dark:bg-blue-900'">
               {{ student.firstName }} {{ student.lastName }}
             </td>
             
@@ -117,7 +115,7 @@
                   type="number" 
                   min="0" 
                   :max="getStudentSubjectMarks(student, selectedSubject).CA.outOf" 
-                  class="w-16 p-1 border border-blue-300 rounded text-center focus:ring-blue-500 focus:border-blue-500"
+                  class="w-16 p-1 border border-blue-300 rounded text-center focus:ring-blue-500 focus:border-blue-500 dark:text-black text-black"
                   @change="calculatePercentage(student, selectedSubject, 'CA')"
                 >
               </td>
@@ -126,11 +124,11 @@
                   v-model="getStudentSubjectMarks(student, selectedSubject).CA.outOf" 
                   type="number" 
                   min="1" 
-                  class="w-16 p-1 border border-blue-300 rounded text-center focus:ring-blue-500 focus:border-blue-500"
+                  class="w-16 p-1 border border-blue-300 rounded text-center focus:ring-blue-500 focus:border-blue-500 dark:text-black text-black"
                   @change="calculatePercentage(student, selectedSubject, 'CA')"
                 >
               </td>
-              <td class="px-2 py-2 whitespace-nowrap text-center border-r border-blue-200">
+              <td class="px-2 py-2 whitespace-nowrap text-center border-r border-blue-200 dark:text-white text-black">
                 {{ getStudentSubjectMarks(student, selectedSubject).CA.percentage.toFixed(1) }}%
               </td>
               
@@ -141,7 +139,7 @@
                   type="number" 
                   min="0" 
                   :max="getStudentSubjectMarks(student, selectedSubject).SN.outOf" 
-                  class="w-16 p-1 border border-blue-300 rounded text-center focus:ring-blue-500 focus:border-blue-500"
+                  class="w-16 p-1 border border-blue-300 rounded text-center focus:ring-blue-500 focus:border-blue-500 dark:text-black text-black"
                   @change="calculatePercentage(student, selectedSubject, 'SN')"
                 >
               </td>
@@ -150,11 +148,11 @@
                   v-model="getStudentSubjectMarks(student, selectedSubject).SN.outOf" 
                   type="number" 
                   min="1" 
-                  class="w-16 p-1 border border-blue-300 rounded text-center focus:ring-blue-500 focus:border-blue-500"
+                  class="w-16 p-1 border border-blue-300 rounded text-center focus:ring-blue-500 focus:border-blue-500 dark:text-black text-black"
                   @change="calculatePercentage(student, selectedSubject, 'SN')"
                 >
               </td>
-              <td class="px-2 py-2 whitespace-nowrap text-center border-r border-blue-200">
+              <td class="px-2 py-2 whitespace-nowrap text-center border-r border-blue-200 dark:text-white text-black">
                 {{ getStudentSubjectMarks(student, selectedSubject).SN.percentage.toFixed(1) }}%
               </td>
               
@@ -165,7 +163,7 @@
                   type="number" 
                   min="0" 
                   :max="getStudentSubjectMarks(student, selectedSubject).RESIT.outOf" 
-                  class="w-16 p-1 border border-blue-300 rounded text-center focus:ring-blue-500 focus:border-blue-500"
+                  class="w-16 p-1 border border-blue-300 rounded text-center focus:ring-blue-500 focus:border-blue-500 dark:text-black text-black"
                   @change="calculatePercentage(student, selectedSubject, 'RESIT')"
                 >
               </td>
@@ -174,16 +172,16 @@
                   v-model="getStudentSubjectMarks(student, selectedSubject).RESIT.outOf" 
                   type="number" 
                   min="1" 
-                  class="w-16 p-1 border border-blue-300 rounded text-center focus:ring-blue-500 focus:border-blue-500"
+                  class="w-16 p-1 border border-blue-300 rounded text-center focus:ring-blue-500 focus:border-blue-500 dark:text-black text-black"
                   @change="calculatePercentage(student, selectedSubject, 'RESIT')"
                 >
               </td>
-              <td class="px-2 py-2 whitespace-nowrap text-center border-r border-blue-200">
+              <td class="px-2 py-2 whitespace-nowrap text-center border-r border-blue-200 dark:text-white text-black">
                 {{ getStudentSubjectMarks(student, selectedSubject).RESIT.percentage.toFixed(1) }}%
               </td>
               
               <!-- Final Grade -->
-              <td class="px-2 py-2 whitespace-nowrap text-center font-medium" :class="gradeColorClass(getStudentSubjectMarks(student, selectedSubject).finalGrade)">
+              <td class="px-2 py-2 whitespace-nowrap text-center font-medium dark:text-white text-black" :class="gradeColorClass(getStudentSubjectMarks(student, selectedSubject).finalGrade)">
                 {{ getStudentSubjectMarks(student, selectedSubject).finalGrade }}
               </td>
             </template>
@@ -191,13 +189,13 @@
             <template v-else>
               <!-- Summary View for All Subjects -->
               <template v-for="subject in subjects" :key="subject.id">
-                <td class="px-2 py-2 whitespace-nowrap text-center">
+                <td class="px-2 py-2 whitespace-nowrap text-center dark:text-white text-black">
                   {{ getStudentSubjectMarks(student, subject.id).CA.percentage.toFixed(1) }}%
                 </td>
-                <td class="px-2 py-2 whitespace-nowrap text-center">
+                <td class="px-2 py-2 whitespace-nowrap text-center dark:text-white text-black">
                   {{ getStudentSubjectMarks(student, subject.id).SN.percentage.toFixed(1) }}%
                 </td>
-                <td class="px-2 py-2 whitespace-nowrap text-center border-r border-blue-200 font-medium" :class="gradeColorClass(getStudentSubjectMarks(student, subject.id).finalGrade)">
+                <td class="px-2 py-2 whitespace-nowrap text-center border-r border-blue-200 font-medium dark:text-white text-black" :class="gradeColorClass(getStudentSubjectMarks(student, subject.id).finalGrade)">
                   {{ getStudentSubjectMarks(student, subject.id).finalGrade }}
                 </td>
               </template>
