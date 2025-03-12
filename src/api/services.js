@@ -686,6 +686,22 @@ const submitPayment = async (data) => {
   }
 };
 
+const studentService = {
+  async createStudents(students) {
+    try {
+      console.log('Creating students:', students)
+      const response = await axios.post('http://localhost:3000/student/add', students)
+      console.log('API Response:', response)
+      return response.data
+    } catch (error) {
+      console.error('Error in createStudents:', error)
+      throw new Error(error.response?.data?.message || error.message || 'Failed to create students')
+    }
+  }
+}
+
+
 export const paymentService = {
-  submitPayment
+  submitPayment,
+  studentService
 }
