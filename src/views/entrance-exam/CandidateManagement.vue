@@ -72,6 +72,33 @@
           </select>
         </div>
 
+        <!-- Region Filter -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Region</label>
+          <select
+            v-model="selectedRegion"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          >
+            <option value="">All Regions</option>
+            <option v-for="region in regions" :key="region" :value="region">
+              {{ region }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Gender Filter -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gender</label>
+          <select
+            v-model="selectedGender"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          >
+            <option value="">All Genders</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+
         <!-- Clear Filters -->
         <button
           @click="clearFilters"
@@ -451,6 +478,8 @@ export default {
     const searchQuery = ref('');
     const selectedField = ref('');
     const statusFilter = ref('');
+    const selectedRegion = ref('');
+    const selectedGender = ref('');
     const showEditModal = ref(false);
     const showGenerateModal = ref(false);
     const editingCandidate = ref(null);
@@ -614,6 +643,18 @@ export default {
         );
       }
 
+      if (selectedRegion.value) {
+        filtered = filtered.filter(candidate => 
+          candidate.user?.region === selectedRegion.value
+        );
+      }
+
+      if (selectedGender.value) {
+        filtered = filtered.filter(candidate => 
+          candidate.user?.gender === selectedGender.value
+        );
+      }
+
       return filtered;
     });
 
@@ -752,6 +793,8 @@ export default {
       searchQuery.value = '';
       selectedField.value = '';
       statusFilter.value = '';
+      selectedRegion.value = '';
+      selectedGender.value = '';
     };
 
     const openDocument = (path) => {
@@ -773,6 +816,8 @@ export default {
       searchQuery,
       selectedField,
       statusFilter,
+      selectedRegion,
+      selectedGender,
       statusOptions,
       showEditModal,
       showGenerateModal,
@@ -791,7 +836,8 @@ export default {
       generateValidatedPDF,
       selectedReportField,
       openDocument,
-      candidateDocuments
+      candidateDocuments,
+      regions: ['Centre', 'Littoral', 'North West', 'South West', 'West', 'Adamawa', 'East', 'Far North', 'North', 'South']
     };
   }
 };

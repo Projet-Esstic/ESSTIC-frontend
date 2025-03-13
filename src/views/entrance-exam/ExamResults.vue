@@ -5,12 +5,54 @@
       <h2 class="text-2xl font-semibold">Entrance Exam Results</h2>
       <button 
         @click="publishResults"
-        :disabled="!selectedCandidates.length"
+        :disabled="!selectedCandidates.length || publishing"
         class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <i class="material-icons text-sm">publish</i>
-        Publish Selected Results
+        <span v-if="publishing" class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
+        <i v-else class="material-icons text-sm">publish</i>
+        {{ publishing ? 'Publishing...' : 'Publish Selected Results' }}
       </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="p-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 grid grid-cols-3 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Field of Study</label>
+        <select 
+          v-model="selectedField"
+          class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+        >
+          <option value="">All Departments</option>
+          <option 
+            v-for="department in departments" 
+            :key="department._id" 
+            :value="department._id"
+          >
+            {{ department.name }}
+          </option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Region</label>
+        <select 
+          v-model="selectedRegion"
+          class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+        >
+          <option value="">All Regions</option>
+          <option v-for="region in regions" :key="region" :value="region">
+            {{ region }}
+          </option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
+        <input 
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search by name or registration number"
+          class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+        >
+      </div>
     </div>
 
     <!-- Results Table -->
@@ -35,35 +77,6 @@
 
       <!-- Data Table -->
       <div v-else>
-        <!-- Filters -->
-        <div class="p-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700 grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Field of Study</label>
-            <select 
-              v-model="selectedField"
-              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            >
-              <option value="">All Departments</option>
-              <option 
-                v-for="department in departments" 
-                :key="department._id" 
-                :value="department._id"
-              >
-                {{ department.name }}
-              </option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
-            <input 
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search by name or registration number"
-              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            >
-          </div>
-        </div>
-
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-700">
             <tr>
@@ -155,10 +168,13 @@ export default {
     const candidates = ref([])
     const departments = ref([])
     const selectedField = ref('')
+    const selectedRegion = ref('')
     const searchQuery = ref('')
     const selectedCandidates = ref([])
     const socket = ref(null)
     const courses = ref([])
+    const publishing = ref(false)
+    const regions = ['Centre', 'Littoral', 'North West', 'South West', 'West', 'Adamawa', 'East', 'Far North', 'North', 'South']
 
     // Load departments
     const loadDepartments = async () => {
@@ -245,14 +261,19 @@ export default {
           ? candidate.fieldOfStudy === selectedField.value 
           : true;
 
+        // Apply region filter
+        const matchesRegion = selectedRegion.value
+          ? candidate.user?.region === selectedRegion.value
+          : true;
+
         // Finally apply search filter
-        if (!searchQuery.value) return matchesDepartment;
+        if (!searchQuery.value) return matchesDepartment && matchesRegion;
         
         const query = searchQuery.value.toLowerCase();
         const userName = `${candidate.user?.firstName} ${candidate.user?.lastName}`.toLowerCase();
         const regNumber = candidate.registrationNumber?.toLowerCase() || '';
         
-        return matchesDepartment && (userName.includes(query) || regNumber.includes(query));
+        return matchesDepartment && matchesRegion && (userName.includes(query) || regNumber.includes(query));
       });
 
       return filtered;
@@ -292,11 +313,20 @@ export default {
     };
 
     const publishResults = async () => {
+      if (publishing.value) return;
+      
+      publishing.value = true;
+      const loadingToast = toast.info('Publishing results...', {
+        duration: 0, // Toast will not auto-close
+        position: 'top'
+      });
+
       try {
         const selectedStudents = candidates.value
           .filter(c => selectedCandidates.value.includes(c._id))
+          .filter(candidate => candidate && candidate.user)
           .map(candidate => ({
-            user: candidate.user._id,
+            user: candidate.user?._id,
             candidate: candidate._id,
             academicInfo: [{
               level: "level_1",
@@ -306,19 +336,50 @@ export default {
           }));
 
         if (selectedStudents.length === 0) {
-          toast.error('No candidates selected');
+          loadingToast.dismiss();
+          toast.error('No valid candidates selected', {
+            duration: 3000,
+            position: 'top'
+          });
+          return;
+        }
+
+        // Check if any selected candidates are missing required data
+        const invalidCandidates = candidates.value
+          .filter(c => selectedCandidates.value.includes(c._id))
+          .filter(c => !c.user?._id);
+
+        if (invalidCandidates.length > 0) {
+          console.error('Invalid candidates:', invalidCandidates);
+          loadingToast.dismiss();
+          toast.error(`${invalidCandidates.length} selected candidates are missing required data`, {
+            duration: 5000,
+            position: 'top'
+          });
           return;
         }
 
         await studentService.createStudents(selectedStudents);
-        toast.success('Students successfully published!');
+        
+        loadingToast.dismiss();
+        toast.success(`Successfully published ${selectedStudents.length} student${selectedStudents.length > 1 ? 's' : ''}!`, {
+          duration: 5000,
+          position: 'top'
+        });
+        
         selectedCandidates.value = [];
         await loadCandidates();
 
       } catch (err) {
         console.error('Failed to publish results:', err);
-        toast.error(err.message || 'Failed to publish results');
+        loadingToast.dismiss();
+        toast.error(err.message || 'Failed to publish results. Please try again.', {
+          duration: 5000,
+          position: 'top'
+        });
         error.value = err.message || 'Failed to publish results';
+      } finally {
+        publishing.value = false;
       }
     };
 
@@ -345,6 +406,7 @@ export default {
       candidates,
       departments,
       selectedField,
+      selectedRegion,
       searchQuery,
       selectedCandidates,
       filteredCandidates,
@@ -355,8 +417,38 @@ export default {
       toggleSelectAll,
       courses,
       generateRegistrationNumber,
-      toast
+      toast,
+      publishing,
+      regions
     }
   }
 }
 </script>
+
+<style>
+/* Add these styles if you haven't already */
+.v-toast {
+  z-index: 9999;
+}
+
+.v-toast__item {
+  min-width: 250px;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+.v-toast__item--success {
+  background-color: #10B981;
+  color: white;
+}
+
+.v-toast__item--error {
+  background-color: #EF4444;
+  color: white;
+}
+
+.v-toast__item--info {
+  background-color: #3B82F6;
+  color: white;
+}
+</style>
