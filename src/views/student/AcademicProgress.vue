@@ -130,7 +130,7 @@
                 </div>
               </div>
               <div class="mr-4">
-                <img src="@/assets/images/logo.png" alt="ESSTIC Logo" class="w-50 h-20 bg-white p-1 mb-1" />
+                <img src="@/assets/images/logo1.png" alt="ESSTIC Logo" class="w-50 h-20 bg-white p-1 mb-1" />
                 </div>
               <div class="flex items-center mt-4 md:mt-0">
                 <div class="text-center">

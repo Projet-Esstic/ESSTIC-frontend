@@ -328,8 +328,27 @@ export const candidateService = {
       console.error('Error updating candidate result:', error)
       throw new Error(error.response?.data?.message || 'Failed to update candidate result')
     }
+  },
+    // Graduate candidates
+  async graduateCandidates(graduationData) {
+    try {
+      console.log('Calling graduateCandidates API with data:', graduationData);
+      const response = await axios.post('/api/candidates/graduate', graduationData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('API Response:', response);
+      return response.data;
+    } catch (error) {
+      console.error('Error in graduateCandidates:', error);
+      // Provide detailed error information
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to graduate candidates';
+      throw new Error(errorMessage);
+    }
   }
 }
+
 
 export const marksService = {
   // Get marks for a candidate
