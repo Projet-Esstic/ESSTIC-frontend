@@ -44,4 +44,14 @@ export const ENDPOINTS = {
   PERSONNEL_REGISTER: `${API_URL}/personnel/register`,
 
   DEPARTMENT: `${API_URL}/departments`,
+
+  // Settings
+  PERMISSIONS:`${API_URL}/settings/permissions`,
+  PERMISSIONS_ACTIVE:`${API_URL}/settings/permissions/active`,
+  PERMISSIONS_STATUS:`${API_URL}/settings/permissions/update-status`,
+  ROLES:`${API_URL}/settings/roles`,
+  ROLES_ACTIVE:`${API_URL}/settings/roles/active`,
+  ROLES_PERMISSION:`${API_URL}/settings/roles/permissions`,
+  ROLES_STATUS:`${API_URL}/settings/roles/update-status`,
+
 }

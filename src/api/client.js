@@ -8,11 +8,22 @@ const apiClient = axios.create({
   },
 });
 
-// Add response interceptor for error handling
+// Request interceptor to add Authorization token
+apiClient.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  error => Promise.reject(error)
+);
+
+// Response interceptor for error handling
 apiClient.interceptors.response.use(
   response => response,
   error => {
-    // Handle errors globally
     console.error('API Error:', error);
     return Promise.reject(error);
   }

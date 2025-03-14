@@ -4,7 +4,8 @@ import entranceExam from './modules/entrance-exam'
 import candidates from './modules/candidates'
 import candidateRegistration from './modules/candidate-registration'
 import courses from './modules/courses'
-
+import axios from '../api/client.js'
+import { ENDPOINTS } from '../api/config.js'
 export default createStore({
   state: {
     theme: localStorage.getItem('theme') || Theme.THEMES.LIGHT,
@@ -20,7 +21,10 @@ export default createStore({
     isDarkMode: state => state.theme === Theme.THEMES.DARK,
     getThemeClasses: state => state.themeClasses,
     getTextStyle: () => style => Theme.applyTextStyle(style),
-    getSpacing: () => size => Theme.getSpacing(size)
+    getSpacing: () => size => Theme.getSpacing(size),
+    getPermissions: state => state.permissions,
+    hasPermission: state => permission => state.permissions.includes(permission)
+  
   },
   mutations: {
     toggleTheme(state) {
@@ -80,12 +84,25 @@ export default createStore({
     },
     resetStepCompletion(state) {
       state.candidateRegistration.completedSteps = []
+    },
+    setPermissions(state, permissions) {
+      state.permissions = permissions
+      localStorage.setItem('permissions', JSON.stringify(permissions)) // Store in localStorage for persistence
     }
   },
   actions: {
     initializeTheme({ commit, state }) {
       // Set initial theme on app load
       commit('setTheme', state.theme)
+    },
+    async fetchPermissions({ commit }) {
+      try {
+        const response = await axios(ENDPOINTS.ROLES_PERMISSION) // Replace with actual API endpoint
+        const data = await response.json()
+        commit('setPermissions', data.permissions)
+      } catch (error) {
+        console.error('Failed to fetch permissions:', error)
+      }
     }
   },
   modules: {
