@@ -138,7 +138,11 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 // import { useStore } from 'vuex'
-import { candidateService, studentService } from '@/api/services/index'
+import { studentService } from '@/api/services/index'
+import { 
+  candidateService, 
+   
+} from '@/api/services'
 
 export default {
   name: 'EnrollmentList',

@@ -1,5 +1,5 @@
 import axios from "../client";
-import jwtDecode from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 
 import { ENDPOINTS } from "../config";
 

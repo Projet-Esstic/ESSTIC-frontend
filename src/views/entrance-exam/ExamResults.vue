@@ -151,12 +151,12 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { 
   candidateService, 
   courseService, 
-  departmentService,
    
 } from '@/api/services'
 import { io } from 'socket.io-client'
 import { useToast } from 'vue-toast-notification'
 import{studentService} from '@/api/services/index.js'
+import{departmentService} from '@/api/services/index.js'
 
 export default {
   name: 'ExamResults',
