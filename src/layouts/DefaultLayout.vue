@@ -63,7 +63,7 @@ export default {
       { sender: 'Jane Doe', content: 'Meeting scheduled for tomorrow.', time: '5h ago', read: false, showReply: false, replyText: '' },
       { sender: 'Admin', content: 'System maintenance planned.', time: '1d ago', read: true, showReply: false, replyText: '' }
     ])
-    const userProfileImage = ref('https://randomuser.me/api/portraits/men/99.jpg')
+    const userProfileImage = ref('https://randomuser.me/api/portraits/men/31.jpg')
     const userName = ref('Rean Giggs')
     const userEmail = ref('somorean@example.com')
 
