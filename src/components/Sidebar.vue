@@ -84,6 +84,7 @@ export default {
 
     const currentRoute = computed(() => route)
     const menuItems = [
+
       { path: '/entrance-exam', name: 'EntranceExam', meta: { title: 'Entrance Exam', icon: 'assignment' } },
       { path: '/student-management', name: 'StudentManagement', meta: { title: 'Student Management', icon: 'people' } },
       { path: '/personnel', name: 'PersonnelManagement', meta: { title: 'Gestion du Personnel', icon: 'people' } },

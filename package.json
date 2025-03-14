@@ -15,6 +15,8 @@
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "axios": "^1.7.9",
     "chart.js": "^4.4.8",
+    "core-js": "^3.8.3",
+    "date-fns": "^4.1.0",
     "core-js": "^3.40.0",
     "dompurify": "^3.2.4",
     "esstic": "file:",
@@ -33,6 +35,9 @@
     "vuex": "^4.0.2"
   },
   "devDependencies": {
+
+    "sass": "^1.85.1",
+    "sass-loader": "^16.0.5",
     "@babel/core": "^7.26.8",
     "@babel/eslint-parser": "^7.26.8",
     "@vue/cli-plugin-babel": "~5.0.8",

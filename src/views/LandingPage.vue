@@ -1,3 +1,4 @@
+
 <template>
   <div class="h-screen flex flex-col">
     <!-- Header -->
@@ -179,9 +180,11 @@
 
       <!-- Decorative Elements -->
       <div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black/20 to-transparent"></div>
+
     </section>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
@@ -393,3 +396,4 @@ onUnmounted(() => {
   background-color: rgba(16, 84, 167, 1);
 }
 </style>
+
