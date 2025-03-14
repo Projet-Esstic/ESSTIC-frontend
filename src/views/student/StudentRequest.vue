@@ -74,7 +74,7 @@
                   type="checkbox"
                   :value="request.id"
                   v-model="selectedRequests"
-                  :disabled="request.status !== 'new'"
+                  :disabled="request.status !== 'new' && request.status !== 'rejected'"
                 />
               </td>
               <td class="p-3">{{ request.studentId }}</td>
@@ -112,7 +112,7 @@
                   </button>
                   <button 
                     @click="updateStatus(request.id, 'done')" 
-                    :disabled="request.status === 'done' || request.status === 'new'"
+                    :disabled="request.status === 'done' || request.status === 'new' || request.status === 'rejected'"
                     class="px-3 py-1 bg-green-500 text-white rounded text-sm disabled:opacity-50"
                   >
                     Complete
@@ -212,7 +212,7 @@
                 </table>
                 <div class="mt-12 pt-8 border-t">
                   <p>Registrar</p>
-                  <p>_________________________</p>
+                  <p></p>
                   <p>Date: {{ formatDate(new Date()) }}</p>
                 </div>
               </div>
@@ -226,7 +226,7 @@
                 <p class="mb-4">For {{ selectedRequest.semester }} of Academic Year {{ selectedRequest.academicYear }}</p>
                 <div class="mt-12 pt-8 border-t">
                   <p>Dean of Students</p>
-                  <p>_________________________</p>
+                  <p></p>
                   <p>Date: {{ formatDate(new Date()) }}</p>
                 </div>
               </div>
@@ -242,11 +242,11 @@
                 <div class="mt-12 pt-8 border-t flex justify-between">
                   <div>
                     <p>Registrar</p>
-                    <p>_________________________</p>
+                    <p></p>
                   </div>
                   <div>
                     <p>Dean</p>
-                    <p>_________________________</p>
+                    <p></p>
                   </div>
                 </div>
               </div>
@@ -426,7 +426,7 @@
       toggleSelectAll() {
         if (this.selectAll) {
           this.selectedRequests = this.paginatedRequests
-            .filter(r => r.status === 'new')
+            .filter(r => r.status === 'new' || r.status === 'rejected')
             .map(r => r.id);
         } else {
           this.selectedRequests = [];
@@ -435,7 +435,7 @@
   
       processSingleRequest(requestId) {
         const request = this.requests.find(r => r.id === requestId);
-        if (!request || request.status !== 'new') return;
+        if (!request || (request.status !== 'new' && request.status !== 'rejected')) return;
   
         this.updateStatus(requestId, 'pending');
         this.generatePdfForRequest(request);
@@ -449,7 +449,7 @@
   
         const requestsToProcess = this.requests.filter(r => this.selectedRequests.includes(r.id));
         requestsToProcess.forEach(request => {
-          if (request.status === 'new') {
+          if (request.status === 'new' || request.status === 'rejected') {
             this.updateStatus(request.id, 'pending');
             this.generatePdfForRequest(request);
           }
@@ -481,7 +481,7 @@
               [`Advanced ${program}`, 'B+', '4']
             ]
           });
-          doc.text(`Registrar: _________________________`, 20, doc.lastAutoTable.finalY + 20);
+          doc.text(`Registrar: `, 20, doc.lastAutoTable.finalY + 20);
           doc.text(`Date: ${currentDate}`, 20, doc.lastAutoTable.finalY + 30);
         } else if (requestType === 'attestation') {
           doc.text('STUDENT ATTESTATION', 105, 20, { align: 'center' });
@@ -491,7 +491,7 @@
           doc.text('Is a student of ESSTIC University', 20, 60);
           doc.text(`Enrolled in ${program} for ${semester} of ${academicYear}`, 20, 70);
           doc.text('Issued upon request.', 20, 80);
-          doc.text(`Dean: _________________________`, 20, 100);
+          doc.text(`Dean: `, 20, 100);
           doc.text(`Date: ${currentDate}`, 20, 110);
         } else if (requestType === 'certificate') {
           doc.text('CERTIFICATE OF COMPLETION', 105, 20, { align: 'center' });
@@ -505,8 +505,8 @@
           doc.text(`Completed ${program}`, 105, 80, { align: 'center' });
           doc.text(`During ${semester} of ${academicYear}`, 105, 90, { align: 'center' });
           doc.text(`Awarded on ${currentDate}`, 105, 100, { align: 'center' });
-          doc.text('Registrar: _________________________', 20, 120);
-          doc.text('Dean: _________________________', 140, 120);
+          doc.text('Registrar: ', 20, 120);
+          doc.text('Dean: ', 140, 120);
         }
   
         doc.save(`${requestType}_${studentId}_${semester.replace(' ', '_')}_${request.id}.pdf`);
@@ -534,7 +534,7 @@
               [`Advanced ${program}`, 'B+', '4']
             ]
           });
-          doc.text(`Registrar: _________________________`, 20, doc.lastAutoTable.finalY + 20);
+          doc.text(`Registrar: `, 20, doc.lastAutoTable.finalY + 20);
           doc.text(`Date: ${currentDate}`, 20, doc.lastAutoTable.finalY + 30);
         } else if (requestType === 'attestation') {
           doc.text('STUDENT ATTESTATION', 105, 20, { align: 'center' });
@@ -544,7 +544,7 @@
           doc.text('Is a student of ESSTIC University', 20, 60);
           doc.text(`Enrolled in ${program} for ${semester} of ${academicYear}`, 20, 70);
           doc.text('Issued upon request.', 20, 80);
-          doc.text(`Dean: _________________________`, 20, 100);
+          doc.text(`Dean: `, 20, 100);
           doc.text(`Date: ${currentDate}`, 20, 110);
         } else if (requestType === 'certificate') {
           doc.text('CERTIFICATE OF COMPLETION', 105, 20, { align: 'center' });
@@ -558,8 +558,8 @@
           doc.text(`Completed ${program}`, 105, 80, { align: 'center' });
           doc.text(`During ${semester} of ${academicYear}`, 105, 90, { align: 'center' });
           doc.text(`Awarded on ${currentDate}`, 105, 100, { align: 'center' });
-          doc.text('Registrar: _________________________', 20, 120);
-          doc.text('Dean: _________________________', 140, 120);
+          doc.text('Registrar: ', 20, 120);
+          doc.text('Dean: ', 140, 120);
         }
   
         doc.autoPrint();
