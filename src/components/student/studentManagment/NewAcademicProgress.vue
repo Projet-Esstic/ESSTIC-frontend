@@ -1,99 +1,10 @@
 <template>
   <div class="text-center p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-    <h1 class="text-2xl text-left font-bold text-primary-light dark:text-white mb-8">
-      ESSTIC Academic Progress Tracker
-    </h1>
 
-    <!-- Filters -->
-    <div class="max-w-5xl mx-auto mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <div>
-          <label for="level-select" class="block text-sm font-medium text-text-light dark:text-white mb-1">
-            Level:
-          </label>
-          <select
-            id="level-select"
-            v-model="selectedLevel"
-            @change="updateFilteredStudents"
-            class="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-          >
-            <option value="">All Levels</option>
-            <option v-for="level in levels" :key="level" :value="level">
-              {{ level }}
-            </option>
-          </select>
-        </div>
-        <div>
-          <label for="department-select" class="block text-sm font-medium text-text-light dark:text-white mb-1">
-            Filière/Serie:
-          </label>
-          <select
-            id="department-select"
-            v-model="selectedDepartment"
-            @change="updateFilteredStudents"
-            class="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-          >
-            <option value="">All Filières</option>
-            <option v-for="dept in departments" :key="dept" :value="dept">
-              {{ dept }}
-            </option>
-          </select>
-        </div>
-        <div>
-          <label for="academic-year-select" class="block text-sm font-medium text-text-light dark:text-white mb-1">
-            Academic Year:
-          </label>
-          <select
-            id="academic-year-select"
-            v-model="selectedAcademicYear"
-            @change="updateFilteredStudents"
-            class="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-          >
-            <option value="">All Years</option>
-            <option v-for="year in academicYears" :key="year" :value="year">
-              {{ year }}
-            </option>
-          </select>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label for="semester-select" class="block text-sm font-medium text-text-light dark:text-white mb-1">
-            Semester:
-          </label>
-          <select
-            id="semester-select"
-            v-model="selectedSemester"
-            @change="updateFilteredStudents"
-            class="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-          >
-            <option value="">All Semesters</option>
-            <option v-for="semester in semesters" :key="semester" :value="semester">
-              {{ semester }}
-            </option>
-          </select>
-        </div>
-        <div class="col-span-2">
-          <label for="student-search" class="block text-sm font-medium text-text-light dark:text-white mb-1">
-            Search by Student Name:
-          </label>
-          <input
-            id="student-search"
-            v-model="searchName"
-            @input="updateFilteredStudents"
-            type="text"
-            placeholder="Enter student name"
-            class="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-          />
-        </div>
-      </div>
-    </div>
-
+    
     <!-- Student Records -->
     <div class="max-w-5xl mx-auto mb-6">
-      <h2 class="text-2xl font-semibold text-text-light dark:text-white mb-4">
-        Student Transcripts
-      </h2>
+
       <div v-if="filteredStudents.length === 0" class="text-gray-500 dark:text-gray-400">
         No students match the selected filters.
       </div>
@@ -130,7 +41,7 @@
                 </div>
               </div>
               <div class="mr-4">
-                <img src="@/assets/images/logo1.png" alt="ESSTIC Logo" class="w-50 h-20 bg-white p-1 mb-1" />
+                <img src="@/assets/images/logo.png" alt="ESSTIC Logo" class="w-50 h-20 bg-white p-1 mb-1" />
                 </div>
               <div class="flex items-center mt-4 md:mt-0">
                 <div class="text-center">
@@ -289,17 +200,17 @@ export default {
           ]
         },
         {
-          id: 2,
-          firstName: "Jean-Paul",
-          lastName: "Meboulou",
-          registrationNumber: "ESSTIC2021002",
-          birthDate: "22/07/1999",
-          birthPlace: "Yaoundé",
+          id: 1,
+          firstName: "Alice",
+          lastName: "Nguema",
+          registrationNumber: "ESSTIC2021001",
+          birthDate: "15/04/2000",
+          birthPlace: "Douala",
           nationality: "Camerounaise",
           status: "Etudiant",
-          department: "Communication",
+          department: "Journalisme",
           level: "Licence 3",
-          academicYear: "2022-2023",
+          academicYear: "2023-2024",
           courses: [
             { code: "CO5-101", title: "Stratégies de communication", grade: 13.75, coefficient: 3, credits: 6, mention: "B", semester: "Semestre 5", academicYear: "2022-2023" },
             { code: "CO5-102", title: "Communication d'entreprise", grade: 11.25, coefficient: 3, credits: 6, mention: "C", semester: "Semestre 5", academicYear: "2022-2023" },
@@ -314,17 +225,17 @@ export default {
           ]
         },
         {
-          id: 3,
-          firstName: "Marie",
-          lastName: "Ekambi",
-          registrationNumber: "ESSTIC2022001",
-          birthDate: "05/03/2001",
-          birthPlace: "Bafoussam",
+          id: 1,
+          firstName: "Alice",
+          lastName: "Nguema",
+          registrationNumber: "ESSTIC2021001",
+          birthDate: "15/04/2000",
+          birthPlace: "Douala",
           nationality: "Camerounaise",
           status: "Etudiant",
-          department: "Documentation",
+          department: "Journalisme",
           level: "Licence 1",
-          academicYear: "2022-2023",
+          academicYear: "2021-2022",
           courses: [
             { code: "DO1-101", title: "Introduction aux sciences de l'information", grade: 12.50, coefficient: 2, credits: 4, mention: "C", semester: "Semestre 1", academicYear: "2022-2023" },
             { code: "DO1-102", title: "Gestion documentaire", grade: 14.25, coefficient: 3, credits: 6, mention: "B", semester: "Semestre 1", academicYear: "2022-2023" },
@@ -337,57 +248,8 @@ export default {
             { code: "DO2-204", title: "Gestion de contenu numérique", grade: 12.75, coefficient: 2, credits: 4, mention: "C", semester: "Semestre 2", academicYear: "2022-2023" },
             { code: "DO2-205", title: "Droit de l'information", grade: 10.50, coefficient: 2, credits: 4, mention: "D", semester: "Semestre 2", academicYear: "2022-2023" }
           ]
-        },
-        {
-          id: 4,
-          firstName: "Pierre",
-          lastName: "Kamto",
-          registrationNumber: "ESSTIC2021003",
-          birthDate: "17/11/1998",
-          birthPlace: "Kribi",
-          nationality: "Camerounaise",
-          status: "Etudiant",
-          department: "Informatique",
-          level: "Master 1",
-          academicYear: "2023-2024",
-          courses: [
-            { code: "IN7-101", title: "Algorithmique avancée", grade: 18.25, coefficient: 3, credits: 6, mention: "A", semester: "Semestre 1", academicYear: "2023-2024" },
-            { code: "IN7-102", title: "Bases de données", grade: 17.50, coefficient: 4, credits: 8, mention: "A", semester: "Semestre 1", academicYear: "2023-2024" },
-            { code: "IN7-103", title: "Développement web", grade: 16.75, coefficient: 3, credits: 6, mention: "A", semester: "Semestre 1", academicYear: "2023-2024" },
-            { code: "IN7-104", title: "Réseaux informatiques", grade: 15.00, coefficient: 2, credits: 4, mention: "B", semester: "Semestre 1", academicYear: "2023-2024" },
-            { code: "IN7-105", title: "Sécurité informatique", grade: 14.25, coefficient: 3, credits: 6, mention: "B", semester: "Semestre 1", academicYear: "2023-2024" },
-            { code: "IN8-201", title: "Intelligence artificielle", grade: 16.00, coefficient: 4, credits: 8, mention: "B", semester: "Semestre 2", academicYear: "2023-2024" },
-            { code: "IN8-202", title: "Développement mobile", grade: 17.75, coefficient: 3, credits: 6, mention: "A", semester: "Semestre 2", academicYear: "2023-2024" },
-            { code: "IN8-203", title: "Génie logiciel", grade: 15.50, coefficient: 3, credits: 6, mention: "B", semester: "Semestre 2", academicYear: "2023-2024" },
-            { code: "IN8-204", title: "Big Data", grade: 14.75, coefficient: 3, credits: 6, mention: "B", semester: "Semestre 2", academicYear: "2023-2024" },
-            { code: "IN8-205", title: "Cloud Computing", grade: 16.25, coefficient: 2, credits: 4, mention: "B", semester: "Semestre 2", academicYear: "2023-2024" }
-          ]
-        },
-        {
-          id: 5,
-          firstName: "Sophie",
-          lastName: "Mbarga",
-          registrationNumber: "ESSTIC2022002",
-          birthDate: "30/09/2000",
-          birthPlace: "Garoua",
-          nationality: "Camerounaise",
-          status: "Etudiant",
-          department: "Journalisme",
-          level: "Licence 2",
-          academicYear: "2023-2024",
-          courses: [
-            { code: "JL3-101", title: "Introduction au journalisme", grade: 14.25, coefficient: 3, credits: 6, mention: "B", semester: "Semestre 3", academicYear: "2023-2024" },
-            { code: "JL3-102", title: "Techniques d'écriture journalistique", grade: 12.75, coefficient: 4, credits: 8, mention: "C", semester: "Semestre 3", academicYear: "2023-2024" },
-            { code: "JL3-103", title: "Éthique et déontologie", grade: 8.50, coefficient: 2, credits: 4, mention: "E", semester: "Semestre 3", academicYear: "2023-2024" },
-            { code: "JL3-104", title: "Presse écrite", grade: 11.00, coefficient: 3, credits: 6, mention: "C", semester: "Semestre 3", academicYear: "2023-2024" },
-            { code: "JL3-105", title: "Culture générale et actualité", grade: 10.25, coefficient: 2, credits: 4, mention: "D", semester: "Semestre 3", academicYear: "2023-2024" },
-            { code: "JL4-201", title: "Journalisme radio", grade: 13.50, coefficient: 3, credits: 6, mention: "B", semester: "Semestre 4", academicYear: "2023-2024" },
-            { code: "JL4-202", title: "Journalisme télévisé", grade: 12.00, coefficient: 3, credits: 6, mention: "C", semester: "Semestre 4", academicYear: "2023-2024" },
-            { code: "JL4-203", title: "Journalisme numérique", grade: 9.75, coefficient: 3, credits: 6, mention: "D", semester: "Semestre 4", academicYear: "2023-2024" },
-            { code: "JL4-204", title: "Photojournalisme", grade: 13.25, coefficient: 2, credits: 4, mention: "B", semester: "Semestre 4", academicYear: "2023-2024" },
-            { code: "JL4-205", title: "Recherche et vérification des faits", grade: 11.50, coefficient: 2, credits: 4, mention: "C", semester: "Semestre 4", academicYear: "2023-2024" }
-          ]
         }
+        
       ],
       
       // UI state
