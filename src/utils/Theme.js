@@ -99,4 +99,30 @@ export class Theme {
   static getSpacing(size) {
     return this.SPACING[size] || this.SPACING.layoutBase;
   }
+
+  static applyGradient(type) {
+    switch (type) {
+      case 'primary':
+        return 'bg-gradient-to-r from-primary-light to-primary-dark';
+      case 'secondary':
+        return 'bg-gradient-to-r from-secondary-light to-secondary-dark';
+      case 'accent':
+        return 'bg-gradient-to-r from-accent-light to-accent-dark';
+      default:
+        return 'bg-gradient-to-r from-primary-light to-primary-dark';
+    }
+  }
+
+  static applyInputStyle(type = 'default') {
+    const baseStyle = 'w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 transition-colors duration-200';
+    
+    switch (type) {
+      case 'error':
+        return `${baseStyle} bg-background-light dark:bg-background-dark border-error-light dark:border-error-dark focus:border-error-light dark:focus:border-error-dark focus:ring-error-light/20`;
+      case 'success':
+        return `${baseStyle} bg-background-light dark:bg-background-dark border-success-light dark:border-success-dark focus:border-success-light dark:focus:border-success-dark focus:ring-success-light/20`;
+      default:
+        return `${baseStyle} bg-background-light dark:bg-background-dark border-gray-300 dark:border-gray-600 focus:border-primary-light dark:focus:border-primary-dark focus:ring-primary-light/20`;
+    }
+  }
 }

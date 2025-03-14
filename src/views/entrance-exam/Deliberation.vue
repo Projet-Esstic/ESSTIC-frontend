@@ -9,17 +9,44 @@
 
     <!-- Filters and Controls -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Field of Study</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
           <select 
-            v-model="selectedField"
+            v-model="selectedDepartment"
             class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           >
-            <option value="">All Fields</option>
-            <option v-for="field in fields" :key="field.id" :value="field.id">
-              {{ field.name }}
+            <option value="">All Departments</option>
+            <option 
+              v-for="dept in departments" 
+              :key="dept._id" 
+              :value="dept._id"
+            >
+              {{ dept.name }}
             </option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Region</label>
+          <select 
+            v-model="selectedRegion"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          >
+            <option value="">All Regions</option>
+            <option v-for="region in regions" :key="region" :value="region">
+              {{ region }}
+            </option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gender</label>
+          <select 
+            v-model="selectedGender"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          >
+            <option value="">All Genders</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
           </select>
         </div>
         <div>
@@ -113,15 +140,15 @@
           </tr>
         </thead>
         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-          <tr v-for="candidate in filteredCandidates" :key="candidate.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+          <tr v-for="candidate in filteredCandidates" :key="candidate._id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-              {{ candidate.registrationNumber }}
+              {{ generateRegistrationNumber(candidate._id) }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-              {{ candidate.name }}
+              {{ candidate.user ? `${candidate.user.firstName} ${candidate.user.lastName}` : 'N/A' }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-              {{ getFieldName(candidate.fieldId) }}
+              {{ getFieldName(candidate.fieldOfStudy) }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               {{ calculateAverage(candidate).toFixed(2) }}
@@ -145,8 +172,11 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
-import { useStore } from 'vuex'
+import { ref, computed, onMounted, watch, onBeforeUnmount, markRaw } from 'vue'
+import { io } from 'socket.io-client'
+import { departmentService } from '@/api/services/index';
+import { candidateService, courseService } from '@/api/services'
+import { debounce } from 'lodash'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -179,76 +209,207 @@ ChartJS.register(
 export default {
   name: 'Deliberation',
 
-  props: {
-    fields: {
-      type: Array,
-      required: true
-    }
-  },
-
-  setup(props) {
-    const store = useStore()
-    const selectedField = ref('')
+  setup() {
+    const socket = ref(null)
+    const departments = ref([])
+    const candidates = ref([])
+    const courses = ref([])
+    const selectedDepartment = ref('')
+    const selectedRegion = ref('')
+    const selectedGender = ref('')
     const passingAverage = ref(10)
     const distributionChart = ref(null)
     const fieldChart = ref(null)
     const distributionChartInstance = ref(null)
     const fieldChartInstance = ref(null)
 
-    // Get data from store
-    const subjects = computed(() => store.getters['entranceExam/getSubjects'] || [])
-    const allCandidates = computed(() => store.getters['entranceExam/getCandidates'] || [])
+    const regions = ['Centre', 'Littoral', 'North West', 'South West', 'West', 'Adamawa', 'East', 'Far North', 'North', 'South']
 
-    // Filter candidates by field
+    // Computed properties
     const filteredCandidates = computed(() => {
-      return allCandidates.value.filter(candidate => {
-        return !selectedField.value || candidate.fieldId === selectedField.value
-      })
+      return candidates.value.filter(candidate => {
+        // First filter for registered status
+        if (candidate.applicationStatus !== 'registered') return false;
+        
+        // Then apply department filter if selected
+        const matchesDepartment = selectedDepartment.value 
+          ? candidate.fieldOfStudy === selectedDepartment.value 
+          : true;
+
+        // Apply region filter
+        const matchesRegion = selectedRegion.value
+          ? candidate.user?.region === selectedRegion.value
+          : true;
+        
+        // Apply gender filter
+        const matchesGender = selectedGender.value === '' || candidate.user?.gender === selectedGender.value
+        
+        return matchesDepartment && matchesRegion && matchesGender;
+      });
     })
 
-    // Calculate total coefficient
-    const totalCoefficient = computed(() => {
-      return subjects.value.reduce((sum, subject) => sum + subject.coefficient, 0) || 1
-    })
-
-    // Calculate average for a candidate
-    const calculateAverage = (candidate) => {
-      let totalWeightedMarks = 0
-      
-      subjects.value.forEach(subject => {
-        const mark = store.getters['entranceExam/getMarksByCandidateAndSubject'](
-          candidate.id,
-          subject.id
-        ) || 0
-        totalWeightedMarks += mark * subject.coefficient
-      })
-
-      return totalWeightedMarks / totalCoefficient.value
-    }
-
-    // Check if candidate passed
-    const isPassed = (candidate) => {
-      return calculateAverage(candidate) >= passingAverage.value
-    }
-
-    // Statistics
     const totalCandidates = computed(() => filteredCandidates.value.length)
+
     const passedCandidates = computed(() => 
       filteredCandidates.value.filter(candidate => isPassed(candidate))
     )
+
     const failedCandidates = computed(() => 
       filteredCandidates.value.filter(candidate => !isPassed(candidate))
     )
+
     const passRate = computed(() => {
       if (totalCandidates.value === 0) return 0
       return ((passedCandidates.value.length / totalCandidates.value) * 100).toFixed(1)
     })
 
-    // Chart data
-    const distributionData = computed(() => {
-      const ranges = ['0-5', '5-10', '10-15', '15-20']
-      const data = new Array(4).fill(0)
+    // Lifecycle hooks
+    onMounted(() => {
+      initializeChartsWithEmptyData()
+      loadData().then(() => {
+        updateCharts()
+      })
+    })
 
+    onBeforeUnmount(() => {
+      if (socket.value) {
+        socket.value.disconnect()
+      }
+      if (distributionChartInstance.value) {
+        distributionChartInstance.value.destroy()
+      }
+      if (fieldChartInstance.value) {
+        fieldChartInstance.value.destroy()
+      }
+    })
+
+    // Data loading functions
+    const loadDepartments = async () => {
+      try {
+        const response = await departmentService.getAllDepartments()
+        departments.value = response
+      } catch (err) {
+        console.error('Failed to load departments:', err)
+      }
+    }
+
+    const loadCourses = async () => {
+      try {
+        const response = await courseService.getAllCourses()
+        courses.value = response
+      } catch (err) {
+        console.error('Failed to load courses:', err)
+      }
+    }
+
+    const loadCandidates = async () => {
+      try {
+        const response = await candidateService.getAllCandidates()
+        candidates.value = response
+      } catch (err) {
+        console.error('Failed to load candidates:', err)
+      }
+    }
+
+    const loadData = async () => {
+      await loadDepartments()
+      await Promise.all([loadCourses(), loadCandidates()])
+
+      // Socket setup after data is loaded
+      socket.value = io(process.env.VUE_APP_SOCKET_ENDPOINT)
+      socket.value.on('candidateUpdated', (updatedCandidate) => {
+        const index = candidates.value.findIndex(c => c._id === updatedCandidate._id)
+        if (index !== -1) {
+          candidates.value[index] = updatedCandidate
+        }
+      })
+      socket.value.on('candidateAdded', (newCandidate) => {
+        candidates.value.push(newCandidate)
+      })
+      socket.value.on('candidateDeleted', (deletedId) => {
+        candidates.value = candidates.value.filter(c => c._id !== deletedId)
+      })
+    }
+
+    // Chart initialization with empty data
+    const initializeChartsWithEmptyData = () => {
+      const emptyData = {
+        labels: [],
+        datasets: []
+      }
+      if (distributionChart.value) {
+        const chart = new ChartJS(
+          distributionChart.value.getContext('2d'),
+          {
+            type: 'bar',
+            data: emptyData,
+            options: barChartOptions
+          }
+        )
+        distributionChartInstance.value = markRaw(chart) // Prevent reactivity
+      }
+      if (fieldChart.value) {
+        const chart = new ChartJS(
+          fieldChart.value.getContext('2d'),
+          {
+            type: 'doughnut',
+            data: emptyData,
+            options: doughnutOptions
+          }
+        )
+        fieldChartInstance.value = markRaw(chart) // Prevent reactivity
+      }
+    }
+
+    // Chart update function
+    const updateCharts = () => {
+      if (!distributionChartInstance.value || !fieldChartInstance.value) {
+        console.log('Charts not initialized yet')
+        return
+      }
+      const distData = getDistributionData()
+      const fieldData = getFieldData()
+      distributionChartInstance.value.data = distData
+      fieldChartInstance.value.data = fieldData
+      distributionChartInstance.value.update('none')
+      fieldChartInstance.value.update('none')
+    }
+
+    const debouncedUpdateCharts = debounce(updateCharts, 300)
+
+    // Watchers for reactive updates
+    watch(() => selectedDepartment.value, debouncedUpdateCharts)
+    watch(() => selectedRegion.value, debouncedUpdateCharts)
+    watch(() => selectedGender.value, debouncedUpdateCharts)
+    watch(() => passingAverage.value, debouncedUpdateCharts)
+    watch(() => candidates.value, debouncedUpdateCharts, { deep: true })
+
+    // Helper functions
+    const calculateAverage = (candidate) => {
+      if (!candidate.Marks?.length) return 0
+      let totalWeightedMarks = 0
+      let totalCoefficients = 0
+      candidate.Marks.forEach(mark => {
+        const course = courses.value.find(c => c._id === mark.courseId)
+        if (course) {
+          const deptCoefficient = course.department.find(
+            dept => dept.departmentInfo === candidate.fieldOfStudy
+          )
+          const coefficient = deptCoefficient ? deptCoefficient.coefficient : 1
+          totalWeightedMarks += mark.mark.currentMark * coefficient
+          totalCoefficients += coefficient
+        }
+      })
+      return totalCoefficients > 0 ? totalWeightedMarks / totalCoefficients : 0
+    }
+
+    const isPassed = (candidate) => {
+      return calculateAverage(candidate) >= passingAverage.value
+    }
+
+    const getDistributionData = () => {
+      const ranges = ['0-5', '5-10', '10-15', '15-20']
+      const data = [0, 0, 0, 0]
       filteredCandidates.value.forEach(candidate => {
         const average = calculateAverage(candidate)
         if (average < 5) data[0]++
@@ -256,12 +417,11 @@ export default {
         else if (average < 15) data[2]++
         else data[3]++
       })
-
       return {
         labels: ranges,
         datasets: [{
           label: 'Number of Students',
-          data,
+          data: [...data],
           backgroundColor: [
             'rgba(255, 99, 132, 0.5)',
             'rgba(255, 159, 64, 0.5)',
@@ -277,52 +437,51 @@ export default {
           borderWidth: 1
         }]
       }
-    })
+    }
 
-    const fieldData = computed(() => {
-      const fieldResults = {}
-      props.fields.forEach(field => {
-        fieldResults[field.id] = { passed: 0, failed: 0 }
+    const getFieldData = () => {
+      const departmentResults = {}
+      departments.value.forEach(dept => {
+        departmentResults[dept._id] = { passed: 0, failed: 0 }
       })
-
       filteredCandidates.value.forEach(candidate => {
-        if (fieldResults[candidate.fieldId]) {
-          const status = isPassed(candidate) ? 'passed' : 'failed'
-          fieldResults[candidate.fieldId][status]++
+        if (candidate.fieldOfStudy && departmentResults[candidate.fieldOfStudy]) {
+          if (isPassed(candidate)) {
+            departmentResults[candidate.fieldOfStudy].passed++
+          } else {
+            departmentResults[candidate.fieldOfStudy].failed++
+          }
         }
       })
-
       return {
-        labels: props.fields.map(field => field.name),
-        datasets: [{
-          data: props.fields.map(field => fieldResults[field.id]?.passed || 0),
+        labels: departments.value.map(dept => dept.name),
+        datasets: [
+          {
+            label: 'Passed',
+            data: departments.value.map(dept => departmentResults[dept._id]?.passed || 0),
           backgroundColor: 'rgba(75, 192, 192, 0.5)',
-          borderColor: 'rgb(75, 192, 192)',
-          label: 'Passed'
-        }, {
-          data: props.fields.map(field => fieldResults[field.id]?.failed || 0),
+            borderColor: 'rgb(75, 192, 192)'
+          }, 
+          {
+            label: 'Failed',
+            data: departments.value.map(dept => departmentResults[dept._id]?.failed || 0),
           backgroundColor: 'rgba(255, 99, 132, 0.5)',
-          borderColor: 'rgb(255, 99, 132)',
-          label: 'Failed'
-        }]
+            borderColor: 'rgb(255, 99, 132)'
+          }
+        ]
       }
-    })
+    }
 
-    // Chart options
     const barChartOptions = {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false
-        }
+        legend: { display: false }
       },
       scales: {
         y: {
           beginAtZero: true,
-          ticks: {
-            stepSize: 1
-          }
+          ticks: { stepSize: 1 }
         }
       }
     }
@@ -331,114 +490,59 @@ export default {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          position: 'bottom'
-        }
+        legend: { position: 'bottom' }
       }
     }
 
-    // Initialize charts
-    const initializeCharts = () => {
-      // Clean up existing charts
-      if (distributionChartInstance.value) {
-        distributionChartInstance.value.destroy()
-        distributionChartInstance.value = null
-      }
-      if (fieldChartInstance.value) {
-        fieldChartInstance.value.destroy()
-        fieldChartInstance.value = null
-      }
-
-      // Create new charts
-      if (distributionChart.value) {
-        const ctx = distributionChart.value.getContext('2d')
-        distributionChartInstance.value = new ChartJS(ctx, {
-          type: 'bar',
-          data: distributionData.value,
-          options: barChartOptions
-        })
-      }
-
-      if (fieldChart.value) {
-        const ctx = fieldChart.value.getContext('2d')
-        fieldChartInstance.value = new ChartJS(ctx, {
-          type: 'doughnut',
-          data: fieldData.value,
-          options: doughnutOptions
-        })
-      }
-    }
-
-    // Handle passing average changes
     const handlePassingAverageInput = (event) => {
       const value = parseFloat(event.target.value)
       passingAverage.value = Math.min(Math.max(value, 0), 20)
     }
 
-    // Watch for data changes
-    watch([distributionData, fieldData], () => {
-      if (distributionChartInstance.value) {
-        distributionChartInstance.value.data = distributionData.value
-        distributionChartInstance.value.update('none')
-      }
-      if (fieldChartInstance.value) {
-        fieldChartInstance.value.data = fieldData.value
-        fieldChartInstance.value.update('none')
-      }
-    })
-
-    // Lifecycle hooks
-    onMounted(() => {
-      initializeCharts()
-    })
-
-    onBeforeUnmount(() => {
-      if (distributionChartInstance.value) {
-        distributionChartInstance.value.destroy()
-      }
-      if (fieldChartInstance.value) {
-        fieldChartInstance.value.destroy()
-      }
-    })
-
-    const getFieldName = (fieldId) => {
-      const field = props.fields.find(f => f.id === fieldId)
-      return field ? field.name : ''
+    const generateRegistrationNumber = (id) => {
+      if (!id) return 'N/A'
+      const shortId = id.slice(-6).toUpperCase()
+      const year = new Date().getFullYear()
+      return `${year}/${shortId}`
     }
 
-    // Export results to PDF
+    const getFieldName = (fieldId) => {
+      const dept = departments.value.find(d => d._id === fieldId)
+      return dept ? dept.name : 'Unknown Field'
+    }
+
     const exportResults = () => {
       const doc = new jsPDF()
-      
       doc.setFontSize(16)
       doc.text('Entrance Exam Results', 14, 15)
-      
       doc.setFontSize(12)
       doc.text(`Passing Average: ${passingAverage.value}`, 14, 25)
       doc.text(`Total Candidates: ${totalCandidates.value}`, 14, 32)
       doc.text(`Passed: ${passedCandidates.value.length}`, 14, 39)
       doc.text(`Failed: ${failedCandidates.value.length}`, 14, 46)
       doc.text(`Pass Rate: ${passRate.value}%`, 14, 53)
-
       const tableData = filteredCandidates.value.map(candidate => [
-        candidate.registrationNumber,
-        candidate.name,
-        getFieldName(candidate.fieldId),
+        generateRegistrationNumber(candidate._id),
+        `${candidate.user?.firstName || ''} ${candidate.user?.lastName || ''}`,
+        getFieldName(candidate.fieldOfStudy),
         calculateAverage(candidate).toFixed(2),
         isPassed(candidate) ? 'PASSED' : 'FAILED'
       ])
-
       doc.autoTable({
         startY: 60,
         head: [['Reg. No.', 'Name', 'Field', 'Average', 'Status']],
         body: tableData
       })
-
       doc.save('entrance-exam-results.pdf')
     }
 
     return {
-      selectedField,
+      departments,
+      candidates,
+      courses,
+      selectedDepartment,
+      selectedRegion,
+      selectedGender,
       passingAverage,
       filteredCandidates,
       totalCandidates,
@@ -451,7 +555,9 @@ export default {
       isPassed,
       getFieldName,
       exportResults,
-      handlePassingAverageInput
+      handlePassingAverageInput,
+      generateRegistrationNumber,
+      regions
     }
   }
 }

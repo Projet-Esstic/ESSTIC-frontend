@@ -1,158 +1,246 @@
 <template>
   <form @submit.prevent="handleSubmit" class="civil-status-form mb-6 p-4 bg-white dark:bg-background-dark rounded shadow-md">
-    <!-- Profile Image Upload -->
+    <!-- Exam Selection -->
+    <div class="form-section mb-6">
+      <h3 class="section-title">Sélection de l'Examen <span class="text-red-500">*</span></h3>
+      <ExamSelection v-model="form.selectedEntranceExam" v-model:selectedField="form.fieldOfStudy" required />
+    </div>
+
+    <!-- Profile Image -->
     <div class="form-section">
-      <h3 class="section-title">Photo de profil</h3>
-      <ProfileImageUpload />
+      <h3 class="section-title">Photo de profil <span class="text-red-500">*</span></h3>
+      <ProfileImageUpload 
+        v-model="form.profilePicture" 
+        @update:modelValue="handleProfilePictureUpdate"
+        @change="handleProfileChange"
+        @input="handleProfileInput"
+        required 
+      />
     </div>
 
     <!-- Informations de base -->
     <div class="grid grid-cols-2 gap-4">
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Nom</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Email <span class="text-red-500">*</span></label>
         <input 
-          v-model="form.nom" 
-          type="text" 
-          required 
+          v-model="form.email" 
+          type="email" 
+          placeholder="exemple@email.com"
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
-          :class="{ 'border-red-500': errors.nom }"
+          required
         />
-        <span v-if="errors.nom" class="text-red-500 text-sm">{{ errors.nom }}</span>
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Prénom</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Prénom <span class="text-red-500">*</span></label>
         <input 
-          v-model="form.prenom" 
+          v-model="form.firstName" 
           type="text" 
-          required 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
-          :class="{ 'border-red-500': errors.prenom }"
+          required
         />
-        <span v-if="errors.prenom" class="text-red-500 text-sm">{{ errors.prenom }}</span>
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Date de Naissance</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Nom <span class="text-red-500">*</span></label>
         <input 
-          v-model="form.dateDeNaissance" 
+          v-model="form.lastName" 
+          type="text" 
+          class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Date de Naissance <span class="text-red-500">*</span></label>
+        <input 
+          v-model="form.dateOfBirth" 
           type="date" 
-          required 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
-          :class="{ 'border-red-500': errors.dateDeNaissance }"
-          :max="maxDate"
+          required
         />
-        <span v-if="errors.dateDeNaissance" class="text-red-500 text-sm">{{ errors.dateDeNaissance }}</span>
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Lieu de Naissance</label>
-        <input 
-          v-model="form.lieuDeNaissance" 
-          type="text" 
-          required 
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Genre <span class="text-red-500">*</span></label>
+        <select 
+          v-model="form.gender" 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
-          :class="{ 'border-red-500': errors.lieuDeNaissance }"
-        />
-        <span v-if="errors.lieuDeNaissance" class="text-red-500 text-sm">{{ errors.lieuDeNaissance }}</span>
-      </div>
-    </div>
-
-    <!-- Situation familiale -->
-    <div class="form-group mt-4">
-      <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Situation de Famille</label>
-      <select 
-        v-model="form.situationDeFamille" 
-        required 
-        class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
-        :class="{ 'border-red-500': errors.situationDeFamille }"
-      >
-        <option value="">Sélectionnez</option>
-        <option value="Célibataire">Célibataire</option>
-        <option value="Marié">Marié(e)</option>
-        <option value="Veuf ou divorcé">Veuf ou divorcé(e)</option>
-      </select>
-      <span v-if="errors.situationDeFamille" class="text-red-500 text-sm">{{ errors.situationDeFamille }}</span>
-    </div>
-
-    <!-- Coordonnées -->
-    <div class="grid grid-cols-2 gap-4 mt-4">
-      <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Résidence Habituelle</label>
-        <input 
-          v-model="form.residenceHabituelle" 
-          type="text" 
-          required 
-          class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
-          :class="{ 'border-red-500': errors.residenceHabituelle }"
-        />
-        <span v-if="errors.residenceHabituelle" class="text-red-500 text-sm">{{ errors.residenceHabituelle }}</span>
+          required
+        >
+          <option value="">Sélectionnez votre genre</option>
+          <option value="male">Masculin</option>
+          <option value="female">Féminin</option>
+          <option value="other">Autre</option>
+        </select>
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Boîte Postale</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Numéro de Téléphone <span class="text-red-500">*</span></label>
         <input 
-          v-model="form.boitePostale" 
-          type="text" 
-          required 
-          class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
-          :class="{ 'border-red-500': errors.boitePostale }"
-        />
-        <span v-if="errors.boitePostale" class="text-red-500 text-sm">{{ errors.boitePostale }}</span>
-      </div>
-      <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Numéro de Téléphone</label>
-        <input 
-          v-model="form.numeroDeTelephone" 
+          v-model="form.phoneNumber" 
           type="tel" 
-          required 
           pattern="[0-9]{9}"
           placeholder="6XXXXXXXX"
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
-          :class="{ 'border-red-500': errors.numeroDeTelephone }"
+          required
         />
-        <span v-if="errors.numeroDeTelephone" class="text-red-500 text-sm">{{ errors.numeroDeTelephone }}</span>
       </div>
-    </div>
-
-    <!-- Références familiales -->
-    <div class="grid grid-cols-2 gap-4 mt-4">
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Nom du Père</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Lieu de Naissance <span class="text-red-500">*</span></label>
+        <input 
+          v-model="form.lieuDeNaissance" 
+          type="text" 
+          class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Situation de Famille <span class="text-red-500">*</span></label>
+        <select 
+          v-model="form.situationDeFamille" 
+          class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
+        >
+          <option value="">Sélectionnez</option>
+          <option value="Célibataire">Célibataire</option>
+          <option value="Marié">Marié(e)</option>
+          <option value="Veuf ou divorcé">Veuf ou divorcé(e)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Boîte Postale <span class="text-red-500">*</span></label>
+        <input 
+          v-model="form.boitePostale" 
+          type="text" 
+          class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Nom du Père <span class="text-red-500">*</span></label>
         <input 
           v-model="form.referencesFamilales.nom_pere" 
           type="text" 
-          required 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
-          :class="{ 'border-red-500': errors.nom_pere }"
+          required
         />
-        <span v-if="errors.nom_pere" class="text-red-500 text-sm">{{ errors.nom_pere }}</span>
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Nom de la Mère</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Nom de la Mère <span class="text-red-500">*</span></label>
         <input 
           v-model="form.referencesFamilales.nom_mere" 
           type="text" 
-          required 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
-          :class="{ 'border-red-500': errors.nom_mere }"
+          required
         />
-        <span v-if="errors.nom_mere" class="text-red-500 text-sm">{{ errors.nom_mere }}</span>
       </div>
       <div class="form-group">
-        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Adresse des Parents</label>
+        <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Adresse des Parents <span class="text-red-500">*</span></label>
         <input 
           v-model="form.addressParents" 
           type="text" 
-          required 
           class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
-          :class="{ 'border-red-500': errors.addressParents }"
+          required
         />
-        <span v-if="errors.addressParents" class="text-red-500 text-sm">{{ errors.addressParents }}</span>
       </div>
+    </div>
+
+    <!-- Adresse -->
+    <div class="mt-6">
+      <h3 :class="[Theme.applyTextStyle('titleMedium'), 'mb-4']">Adresse <span class="text-red-500">*</span></h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="form-group">
+          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Rue <span class="text-red-500">*</span></label>
+          <input 
+            v-model="form.address.street" 
+            type="text" 
+            class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Ville <span class="text-red-500">*</span></label>
+          <input 
+            v-model="form.address.city" 
+            type="text" 
+            class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Région <span class="text-red-500">*</span></label>
+          <select 
+            v-model="form.address.state" 
+            class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+            required
+          >
+            <option value="">Sélectionnez une région</option>
+            <option value="Adamaoua">Adamaoua</option>
+            <option value="Centre">Centre</option>
+            <option value="Est">Est</option>
+            <option value="Extrême-Nord">Extrême-Nord</option>
+            <option value="Littoral">Littoral</option>
+            <option value="Nord">Nord</option>
+            <option value="Nord-Ouest">Nord-Ouest</option>
+            <option value="Ouest">Ouest</option>
+            <option value="Sud">Sud</option>
+            <option value="Sud-Ouest">Sud-Ouest</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Pays <span class="text-red-500">*</span></label>
+          <input 
+            v-model="form.address.country" 
+            type="text" 
+            class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+            required
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact d'Urgence -->
+    <div class="mt-6">
+      <h3 :class="[Theme.applyTextStyle('titleMedium'), 'mb-4']">Contact d'Urgence <span class="text-red-500">*</span></h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="form-group">
+          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Nom Complet <span class="text-red-500">*</span></label>
+          <input 
+            v-model="form.emergencyContact.name" 
+            type="text" 
+            class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Relation <span class="text-red-500">*</span></label>
+          <input 
+            v-model="form.emergencyContact.relationship" 
+            type="text" 
+            class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Téléphone <span class="text-red-500">*</span></label>
+          <input 
+            v-model="form.emergencyContact.phone" 
+            type="tel" 
+            pattern="[0-9]{9}"
+            placeholder="6XXXXXXXX"
+            class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600"
+            required
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Required Fields Notice -->
+    <div class="mt-4 text-sm text-red-500">
+      * Tous les champs sont obligatoires
     </div>
 
     <!-- Boutons de navigation -->
     <div class="flex justify-between mt-8">
       <button 
         type="button" 
-        @click="$emit('previous-step')"
+        @click.stop="$emit('previous-step')"
         class="bg-secondary-light dark:bg-secondary-dark text-white hover:bg-secondary-hover rounded p-2"
       >
         Précédent
@@ -173,31 +261,58 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { Theme } from '@/utils/Theme'
 import ProfileImageUpload from '@/components/registration/ProfileImageUpload.vue'
+import ExamSelection from '@/components/registration/ExamSelection.vue'
 
 export default {
   name: 'CivilStatus',
-  
   components: {
-    ProfileImageUpload
+    ProfileImageUpload,
+    ExamSelection
   },
-  
-  setup() {
+  emits: ['previous-step', 'next-step'],
+  setup(props, { emit }) {
     const store = useStore()
-    const errors = ref({})
-    
+    const loading = ref(false)
+
+    // Form data initialized with empty values
     const form = ref({
-      nom: '',
-      prenom: '',
-      dateDeNaissance: '',
+      email: '',
+      firstName: '',
+      lastName: '',
+      dateOfBirth: '',
+      gender: '',
+      phoneNumber: '',
+      profilePicture: {
+        preview: '',
+        file: null
+      },
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        country: ''
+      },
+      emergencyContact: {
+        name: '',
+        relationship: '',
+        phone: ''
+      },
+      selectedEntranceExam: '',
+      fieldOfStudy: '',
+      examCenter: '',
+      documents: {
+        transcript: null,
+        diploma: null,
+        cv: null,
+        other: null
+      },
       lieuDeNaissance: '',
       situationDeFamille: '',
-      residenceHabituelle: '',
       boitePostale: '',
-      numeroDeTelephone: '',
       referencesFamilales: {
         nom_pere: '',
         nom_mere: ''
@@ -205,154 +320,102 @@ export default {
       addressParents: ''
     })
 
-    // Calculate max date (must be at least 17 years old)
-    const maxDate = computed(() => {
-      const date = new Date()
-      date.setFullYear(date.getFullYear() - 17)
-      return date.toISOString().split('T')[0]
+    // Load saved data if available
+    onMounted(() => {
+      const savedData = store.state.candidateRegistration.steps?.civilStatus
+      if (savedData) {
+        Object.assign(form.value, savedData)
+      }
     })
 
-    // Initialize form with existing data if any
-    const existingData = store.getters['candidateRegistration/getFormData']('civilStatus')
-    if (existingData) {
-      form.value = { ...form.value, ...existingData }
-    }
-
-    const loading = computed(() => store.getters['candidateRegistration/getLoading'])
-
+    // Custom form validation
     const validateForm = () => {
-      const newErrors = {}
-
-      // Required field validation
-      if (!form.value.nom) newErrors.nom = 'Le nom est requis'
-      if (!form.value.prenom) newErrors.prenom = 'Le prénom est requis'
-      if (!form.value.dateDeNaissance) newErrors.dateDeNaissance = 'La date de naissance est requise'
-      if (!form.value.lieuDeNaissance) newErrors.lieuDeNaissance = 'Le lieu de naissance est requis'
-      if (!form.value.situationDeFamille) newErrors.situationDeFamille = 'La situation de famille est requise'
-      if (!form.value.residenceHabituelle) newErrors.residenceHabituelle = 'La résidence habituelle est requise'
-      if (!form.value.boitePostale) newErrors.boitePostale = 'La boîte postale est requise'
-      if (!form.value.referencesFamilales.nom_pere) newErrors.nom_pere = 'Le nom du père est requis'
-      if (!form.value.referencesFamilales.nom_mere) newErrors.nom_mere = 'Le nom de la mère est requis'
-      if (!form.value.addressParents) newErrors.addressParents = "L'adresse des parents est requise"
-
-      // Phone number validation
-      if (!form.value.numeroDeTelephone) {
-        newErrors.numeroDeTelephone = 'Le numéro de téléphone est requis'
-      } else if (!/^[67][0-9]{8}$/.test(form.value.numeroDeTelephone)) {
-        newErrors.numeroDeTelephone = 'Le numéro doit commencer par 6 ou 7 et avoir 9 chiffres'
-      }
-
-      // Date validation
-      if (form.value.dateDeNaissance) {
-        const birthDate = new Date(form.value.dateDeNaissance)
-        const minDate = new Date()
-        minDate.setFullYear(minDate.getFullYear() - 35) // Max age 35 years
-        const maxDateValue = new Date(maxDate.value)
-
-        if (birthDate < minDate) {
-          newErrors.dateDeNaissance = 'Vous devez avoir moins de 35 ans'
-        } else if (birthDate > maxDateValue) {
-          newErrors.dateDeNaissance = 'Vous devez avoir au moins 17 ans'
-        }
-      }
-
-      errors.value = newErrors
-      return Object.keys(newErrors).length === 0
+      // Add custom validation if needed beyond HTML5 validation
+      return true
     }
 
-    const handleSubmit = async () => {
-      if (!validateForm()) {
-        return
-      }
+    const handleProfilePictureUpdate = (imageData) => {
+      form.value.profilePicture = imageData;
+      form.value.profileImageFile = imageData.file;
+      console.log('Profile picture updated:', {
+        hasPreview: !!imageData.preview,
+        hasFile: !!imageData.file
+      });
+    }
 
+    const handleProfileChange = (event) => {
+      console.log('Change event received:', event);
+    }
+
+    const handleProfileInput = (event) => {
+      console.log('Input event received:', event);
+    }
+
+    // Handle form submission
+    const handleSubmit = async () => {
+      if (!validateForm()) return
+      
+      loading.value = true
       try {
-        // Save form data
-        await store.dispatch('candidateRegistration/saveStepData', {
+        console.log('Form submission - Profile picture status:', {
+          exists: !!form.value.profilePicture.file,
+          type: typeof form.value.profilePicture.file,
+          value: form.value.profilePicture.file
+        });
+        
+        await store.dispatch('candidateRegistration/updateStepData', {
           step: 'civilStatus',
           data: form.value
         })
-        
-        // Move to next step
-        store.dispatch('candidateRegistration/nextStep')
+        console.log('Civil status data saved successfully');
+        emit('next-step')
       } catch (error) {
-        console.error('Failed to save form data:', error)
-        store.commit('candidateRegistration/SET_ERROR', 'Failed to save form data')
+        console.error('Error updating civil status:', error)
+      } finally {
+        loading.value = false
       }
     }
 
     return {
       form,
-      errors,
       loading,
-      maxDate,
-      Theme,
-      handleSubmit
+      handleSubmit,
+      handleProfilePictureUpdate,
+      handleProfileChange,
+      handleProfileInput,
+      Theme
     }
   }
 }
 </script>
 
 <style scoped>
-.civil-status-form {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.form-section {
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
 .section-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 1rem;
+  @apply text-lg font-semibold mb-4 text-text-light dark:text-text-dark;
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  @apply mb-4;
 }
 
 .form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
+  @apply block mb-2;
 }
 
-.error-message {
-  color: #ef4444;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
+.form-section {
+  @apply mb-6;
 }
 
-input:focus, select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+/* Highlight fields with errors */
+input:user-invalid,
+select:user-invalid,
+textarea:user-invalid {
+  @apply border-red-500 bg-red-50 dark:bg-red-900/20;
+}
+input:user-valid,
+select:user-valid,
+textarea:user-valid {
+  @apply border-green-500 bg-green-50 dark:bg-green-900/20;
 }
 
-input.border-red-500:focus, select.border-red-500:focus {
-  border-color: #ef4444;
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.fa-spin {
-  animation: spin 1s linear infinite;
-}
 </style>

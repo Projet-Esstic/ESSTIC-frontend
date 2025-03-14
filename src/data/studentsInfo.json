@@ -1,0 +1,356 @@
+[
+  {
+    "student": {
+      "mat_std": "21C036D",
+      "name_std": "EFFATAKANG",
+      "subName_std": "HOPE DIVINE",
+      "bornDate_std": "16 Mai 2001",
+      "lieuxBorn_std": "YAOUNDE",
+      "serie_std": "Archivistique et Records Management",
+      "academicYear_std": "2022-2023",
+      "level_std": "2 LICENCE",
+      "quality_std": "Regulier",
+      "gender_std": "Homme"
+    },
+    "grades": {
+      "totalGen_std": 122.65,
+      "moyGen_std": 12.27,
+      "menGen_std": "ASSEZ-BIEN",
+      "totalCredit_std": 52,
+      "ue_list": [
+        {
+          "cod_ue": "ARF31",
+          "name_ue": "TECH. DOCU./GEST.ET TRAIT. DES ARCH. COUR.INTER1 / DOC TECH / MGT & PROCOF",
+          "avg_ue": 11.98,
+          "men_ue": "C",
+          "cred_ue": 8,
+          "matieres": [
+            {
+              "cod_mat": "ARF311",
+              "title_mat": "Princ. et out. ges. des arch. courantes et inter / Principles and Tools for the Mgt of Act",
+              "coef_mat": 1,
+              "noteCC_mat": 12,
+              "noteSN_mat": 11,
+              "noteFinal_mat": 11.98,
+              "moy_mat": 11.98,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF312",
+              "title_mat": "Outils et techniques de gestion du courrier / Tools and Techniques for Mail Mgt",
+              "coef_mat": 1,
+              "noteCC_mat": 13,
+              "noteSN_mat": 11,
+              "noteFinal_mat": 11.98,
+              "moy_mat": 11.98,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF313",
+              "title_mat": "Gestion et traitement des archives courantes / Management and Processing of Active A",
+              "coef_mat": 1,
+              "noteCC_mat": 11,
+              "noteSN_mat": 13,
+              "noteFinal_mat": 11.98,
+              "moy_mat": 11.98,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF315",
+              "title_mat": "Analyse et representation documentaire3",
+              "coef_mat": 1,
+              "noteCC_mat": 12,
+              "noteSN_mat": 12,
+              "noteFinal_mat": 11.98,
+              "moy_mat": 11.98,
+              "sem_mat": "3--2023"
+            }
+          ]
+        },
+        {
+          "cod_ue": "ARF32",
+          "name_ue": "GESTION ET TRAITEMENT DES ARCHIVES DÉFINITIVES / MGT AND PROC OF CLASSIFIE",
+          "avg_ue": 9.90,
+          "men_ue": "D",
+          "cred_ue": 8,
+          "matieres": [
+            {
+              "cod_mat": "ARF321",
+              "title_mat": "Gestion de l'info dans les organisations / Information Management in Organizations",
+              "coef_mat": 1,
+              "noteCC_mat": 10,
+              "noteSN_mat": 9,
+              "noteFinal_mat": 9.90,
+              "moy_mat": 9.90,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF322",
+              "title_mat": "Techniques géné.de descrip. des docu. d'archives / General Techniques for the Descript",
+              "coef_mat": 1,
+              "noteCC_mat": 9,
+              "noteSN_mat": 10,
+              "noteFinal_mat": 9.90,
+              "moy_mat": 9.90,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF323",
+              "title_mat": "Conception des outils de gestion / Designing of Management TOOLS",
+              "coef_mat": 1,
+              "noteCC_mat": 10,
+              "noteSN_mat": 10,
+              "noteFinal_mat": 9.90,
+              "moy_mat": 9.90,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF324",
+              "title_mat": "Evaluation et pratique du tri archivistique / Assessment and Practice of Archival Sortin",
+              "coef_mat": 1,
+              "noteCC_mat": 9,
+              "noteSN_mat": 10,
+              "noteFinal_mat": 9.90,
+              "moy_mat": 9.90,
+              "sem_mat": "3--2023"
+            }
+          ]
+        },
+        {
+          "cod_ue": "ARF33",
+          "name_ue": "INFORMATION DOCUMENTAIRE 2 / DOCUMENTARY DATA PROCESSING 2",
+          "avg_ue": 10.49,
+          "men_ue": "D",
+          "cred_ue": 8,
+          "matieres": [
+            {
+              "cod_mat": "ARF331",
+              "title_mat": "Introduction à la recherche d'information / Introduction to Information Retrieval",
+              "coef_mat": 1,
+              "noteCC_mat": 11,
+              "noteSN_mat": 10,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF332",
+              "title_mat": "Méthodes et techniques de recherche d'information / Methods and Techniques of Information Retrieval",
+              "coef_mat": 1,
+              "noteCC_mat": 10,
+              "noteSN_mat": 11,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF333",
+              "title_mat": "Langages documentaires / Documentary Languages",
+              "coef_mat": 1,
+              "noteCC_mat": 11,
+              "noteSN_mat": 10,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF334",
+              "title_mat": "Systèmes de recherche d'information / Information Retrieval Systems",
+              "coef_mat": 1,
+              "noteCC_mat": 10,
+              "noteSN_mat": 11,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            }
+          ]
+        },
+        {
+          "cod_ue": "ARF34",
+          "name_ue": "GESTION DES DOCUMENTS AUDIOVISUELS ET NUMERIQUES / MANAGEMENT OF AUDIOVISUAL AND DIGITAL DOCUMENTS",
+          "avg_ue": 10.49,
+          "men_ue": "D",
+          "cred_ue": 8,
+          "matieres": [
+            {
+              "cod_mat": "ARF341",
+              "title_mat": "Gestion des documents audiovisuels / Management of Audiovisual Documents",
+              "coef_mat": 1,
+              "noteCC_mat": 11,
+              "noteSN_mat": 10,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF342",
+              "title_mat": "Gestion des documents numériques / Management of Digital Documents",
+              "coef_mat": 1,
+              "noteCC_mat": 10,
+              "noteSN_mat": 11,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF343",
+              "title_mat": "Numérisation des documents / Document Digitization",
+              "coef_mat": 1,
+              "noteCC_mat": 11,
+              "noteSN_mat": 10,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF344",
+              "title_mat": "Conservation des documents numériques / Digital Document Preservation",
+              "coef_mat": 1,
+              "noteCC_mat": 10,
+              "noteSN_mat": 11,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            }
+          ]
+        },
+        {
+          "cod_ue": "ARF35",
+          "name_ue": "GESTION DES ARCHIVES ET DES DOCUMENTS DANS LES ORGANISATIONS / ARCHIVES AND RECORDS MANAGEMENT IN ORGANIZATIONS",
+          "avg_ue": 10.49,
+          "men_ue": "D",
+          "cred_ue": 8,
+          "matieres": [
+            {
+              "cod_mat": "ARF351",
+              "title_mat": "Gestion des archives dans les organisations / Archives Management in Organizations",
+              "coef_mat": 1,
+              "noteCC_mat": 11,
+              "noteSN_mat": 10,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF352",
+              "title_mat": "Gestion des documents dans les organisations / Records Management in Organizations",
+              "coef_mat": 1,
+              "noteCC_mat": 10,
+              "noteSN_mat": 11,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF353",
+              "title_mat": "Politiques et procédures de gestion des archives et des documents / Archives and Records Management Policies and Procedures",
+              "coef_mat": 1,
+              "noteCC_mat": 11,
+              "noteSN_mat": 10,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF354",
+              "title_mat": "Audit des archives et des documents / Archives and Records Audit",
+              "coef_mat": 1,
+              "noteCC_mat": 10,
+              "noteSN_mat": 11,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            }
+          ]
+        },
+        {
+          "cod_ue": "ARF36",
+          "name_ue": "GESTION DES ARCHIVES ET DES DOCUMENTS DANS LE SECTEUR PUBLIC / ARCHIVES AND RECORDS MANAGEMENT IN THE PUBLIC SECTOR",
+          "avg_ue": 10.49,
+          "men_ue": "D",
+          "cred_ue": 8,
+          "matieres": [
+            {
+              "cod_mat": "ARF361",
+              "title_mat": "Gestion des archives dans le secteur public / Archives Management in the Public Sector",
+              "coef_mat": 1,
+              "noteCC_mat": 11,
+              "noteSN_mat": 10,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF362",
+              "title_mat": "Gestion des documents dans le secteur public / Records Management in the Public Sector",
+              "coef_mat": 1,
+              "noteCC_mat": 10,
+              "noteSN_mat": 11,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF363",
+              "title_mat": "Législation et réglementation des archives et des documents dans le secteur public / Archives and Records Legislation and Regulation in the Public Sector",
+              "coef_mat": 1,
+              "noteCC_mat": 11,
+              "noteSN_mat": 10,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            },
+            {
+              "cod_mat": "ARF364",
+              "title_mat": "Accès aux archives et aux documents dans le secteur public / Access to Archives and Records in the Public Sector",
+              "coef_mat": 1,
+              "noteCC_mat": 10,
+              "noteSN_mat": 11,
+              "noteFinal_mat": 10.49,
+              "moy_mat": 10.49,
+              "sem_mat": "3--2023"
+            }
+          ]
+        },
+        {
+          "cod_ue": "ARF43",
+          "name_ue": "Standard d'encodage par les instruments de rech / Encoding Standard for Research Inst",
+          "avg_ue": 11.40,
+          "men_ue": "C",
+          "cred_ue": 1,
+          "matieres": [
+            {
+              "cod_mat": "ARF433",
+              "title_mat": "Standard d'encodage par les instruments de rech / Encoding Standard for Research Inst",
+              "coef_mat": 1,
+              "noteCC_mat": 12,
+              "noteSN_mat": 11,
+              "noteFinal_mat": 11.40,
+              "moy_mat": 11.40,
+              "sem_mat": "4--2023"
+            }
+          ]
+        },
+        {
+          "cod_ue": "ARF44",
+          "name_ue": "STAGE DE PARTICIPATION / PARTICIPATION INTERNSHIP",
+          "avg_ue": 16.93,
+          "men_ue": "B",
+          "cred_ue": 2,
+          "matieres": [
+            {
+              "cod_mat": "ARF441",
+              "title_mat": "Stage de participation / Participation Intership",
+              "coef_mat": 1,
+              "noteCC_mat": 17,
+              "noteSN_mat": 17,
+              "noteFinal_mat": 16.93,
+              "moy_mat": 16.93,
+              "sem_mat": "4--2023"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

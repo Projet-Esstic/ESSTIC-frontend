@@ -1,316 +1,521 @@
 <template>
   <div class="space-y-6">
-    <div class="flex justify-between items-center">
-      <h2 class="text-2xl font-semibold">Course Management</h2>
-      <button 
-        @click="showAddModal = true"
-        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-      >
-        Add Course
-      </button>
-    </div>
-
     <!-- Loading State -->
-    <div v-if="loading" class="flex justify-center items-center p-8">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-      <span class="ml-2 text-gray-600 dark:text-gray-400">Loading courses...</span>
+    <div v-if="loading" class="flex justify-center items-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="bg-red-50 dark:bg-red-900 rounded-lg p-4 mb-4">
-      <div class="flex items-center">
-        <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        <div class="ml-3">
-          <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Error loading courses</h3>
-          <div class="mt-2 text-sm text-red-700 dark:text-red-300">
-            {{ error }}
+    <div v-else-if="error" class="bg-red-50 dark:bg-red-900 p-4 rounded-lg">
+      <p class="text-red-600 dark:text-red-200">{{ error }}</p>
+    </div>
+
+    <!-- Content -->
+    <div v-else>
+      <!-- <EntranceExamNav /> -->
+      
+      <!-- Course List and Add Button -->
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-semibold">Course Management</h2>
+        <button 
+          @click="openCreateModal"
+          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2"
+        >
+          <i class="material-icons">add</i>
+          Add Course
+        </button>
+      </div>
+
+      <!-- Course Table -->
+      <div class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-700">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Course Code</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Course Name</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Description</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tr v-for="course in courses" :key="course._id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                {{ course.courseCode }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                {{ course.courseName }}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                {{ course.description }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                {{ course.isActive ? 'Active' : 'Inactive' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <div class="flex items-center gap-2">
+                  <button 
+                    @click="editCourse(course)"
+                    class="text-blue-600 hover:text-blue-900 dark:hover:text-blue-400"
+                    title="Edit"
+                  >
+                    <i class="material-icons">edit</i>
+                  </button>
+                  <button 
+                    @click="deleteCourse(course)"
+                    class="text-red-600 hover:text-red-900 dark:hover:text-red-400"
+                    title="Delete"
+                  >
+                    <i class="material-icons">delete</i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Create/Edit Modal -->
+    <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true" @click="showModal = false"></div>
+
+        <!-- Modal panel -->
+        <div class="relative inline-block w-full px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-2xl sm:p-6 modal-padding">
+          <div class="absolute top-0 right-0 pt-4 pr-4">
+            <button
+              @click="showModal = false"
+              class="text-gray-400 hover:text-gray-500 focus:outline-none"
+            >
+              <span class="sr-only">Close</span>
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="sm:flex sm:items-start">
+            <div class="w-full mt-3 text-center sm:mt-0 sm:text-left">
+              <h3 class="text-lg font-medium leading-6 text-gray-900" id="modal-title">
+                {{ courseForm._id ? 'Edit Course' : 'Add New Course' }}
+              </h3>
+
+              <div class="mt-6 space-y-4">
+                <!-- Course Code -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Course Code</label>
+                  <input 
+                    v-model="courseForm.courseCode"
+                    type="text"
+                    required
+                    placeholder="Enter course code"
+                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  >
+                </div>
+
+                <!-- Course Name -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Course Name</label>
+                  <input 
+                    v-model="courseForm.courseName"
+                    type="text"
+                    required
+                    placeholder="Enter course name"
+                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  >
+                </div>
+
+                <!-- Description -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Description</label>
+                  <textarea 
+                    v-model="courseForm.description"
+                    rows="3"
+                    placeholder="Enter course description"
+                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  ></textarea>
+                </div>
+
+                <!-- Active Status -->
+                <div class="flex items-center">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      v-model="courseForm.isActive"
+                      class="sr-only peer"
+                    >
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    <span class="ml-3 text-sm font-medium text-gray-700">Active</span>
+                  </label>
+                </div>
+
+                <!-- Department Coefficients -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Department Coefficients</label>
+                  <div v-for="(dept, index) in courseForm.department" :key="index" class="flex gap-4 mb-2">
+                    <select 
+                      v-model="dept.departmentInfo"
+                      class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    >
+                      <option value="">Select Department</option>
+                      <option 
+                        v-for="department in departments" 
+                        :key="department._id" 
+                        :value="department._id"
+                      >
+                        {{ department.name }} ({{ department.code }})
+                      </option>
+                    </select>
+                    <input 
+                      v-model.number="dept.coefficient"
+                      type="number"
+                      min="1"
+                      placeholder="Coefficient"
+                      class="w-32 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    >
+                    <button 
+                      @click="removeDepartment(index)"
+                      class="text-red-600 hover:text-red-900"
+                    >
+                      <i class="material-icons">remove_circle</i>
+                    </button>
+                  </div>
+                  <button 
+                    @click="addDepartment"
+                    class="mt-2 text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                  >
+                    <i class="material-icons">add_circle</i>
+                    Add Department
+                  </button>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex flex-col gap-3 mt-6 sm:flex-row sm:justify-end">
+                <button
+                  @click="showModal = false"
+                  class="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  @click="saveCourse"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  {{ courseForm._id ? 'Update' : 'Create' }}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Courses List -->
-    <div v-else class="bg-white rounded-lg shadow overflow-hidden">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Course Name
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Code
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Duration (mins)
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Total Marks
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Field
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Coefficient
-            </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="course in courses" :key="course.id">
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ course.name }}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ course.code }}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ course.duration }}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ course.totalMarks }}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="space-y-1">
-                <div v-for="field in fields" :key="field.id" class="text-sm text-gray-900">
-                  {{ field.name }}
-                </div>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="space-y-1">
-                <div v-for="field in fields" :key="field.id" class="text-sm text-gray-900">
-                  {{ course.coefficients[field.id] || 0 }}
-                </div>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              <button 
-                @click="editCourse(course)"
-                class="text-indigo-600 hover:text-indigo-900 mr-3"
-              >
-                Edit
-              </button>
-              <button 
-                @click="deleteCourse(course)"
-                class="text-red-600 hover:text-red-900"
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true" @click="showDeleteModal = false"></div>
 
-    <!-- Add/Edit Course Modal -->
-    <div v-if="showAddModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
-      <div class="bg-white rounded-lg p-6 max-w-md w-full">
-        <h3 class="text-lg font-medium mb-4">{{ editingCourse ? 'Edit Course' : 'Add New Course' }}</h3>
-        <form @submit.prevent="saveCourse" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Course Name</label>
-            <input 
-              type="text" 
-              v-model="courseForm.name"
-              required
-              class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm"
-            />
+        <!-- Modal panel -->
+        <div class="relative inline-block w-full px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-2xl sm:p-6 modal-padding">
+          <div class="absolute top-0 right-0 pt-4 pr-4">
+            <button
+              @click="showDeleteModal = false"
+              class="text-gray-400 hover:text-gray-500 focus:outline-none"
+            >
+              <span class="sr-only">Close</span>
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Course Code</label>
-            <input 
-              type="text" 
-              v-model="courseForm.code"
-              required
-              class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Duration (minutes)</label>
-            <input 
-              type="number" 
-              v-model.number="courseForm.duration"
-              required
-              min="1"
-              class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Total Marks</label>
-            <input 
-              type="number" 
-              v-model.number="courseForm.totalMarks"
-              required
-              min="1"
-              class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm"
-            />
-          </div>
-          <div class="space-y-4">
-            <label class="block text-lg font-medium text-gray-700">Fields of Study Coefficients</label>
-            <div v-for="field in fields" :key="field.id" class="flex items-center space-x-4">
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300 flex-grow">
-                {{ field.name }} Coefficient
-              </label>
-              <input 
-                type="number" 
-                v-model.number="courseForm.coefficients[field.id]"
-                min="0"
-                max="10"
-                step="0.5"
-                class="w-24 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                @input="validateCoefficient($event, field.id)"
-              >
+
+          <div class="sm:flex sm:items-start">
+            <div class="w-full mt-3 text-center sm:mt-0 sm:text-left">
+              <h3 class="text-lg font-medium leading-6 text-gray-900" id="modal-title">
+                Confirm Delete
+              </h3>
+
+              <div class="mt-6 space-y-4">
+                <p class="text-sm text-gray-600">Are you sure you want to delete this course? This action cannot be undone.</p>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex flex-col gap-3 mt-6 sm:flex-row sm:justify-end">
+                <button
+                  @click="showDeleteModal = false"
+                  class="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  @click="confirmDelete"
+                  class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
-          <div class="flex justify-end space-x-3 mt-6">
-            <button 
-              type="button"
-              @click="showAddModal = false"
-              class="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button 
-              type="submit"
-              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              {{ editingCourse ? 'Save Changes' : 'Add Course' }}
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, computed } from 'vue';
-import { useStore } from 'vuex';
+import { ref, onMounted } from 'vue'
+import {  courseService, departmentService } from '@/api/services/index'
 
 export default {
   name: 'CourseManagement',
-  props: {
-    fields: {
-      type: Array,
-      required: true
-    }
-  },
-  setup(props) {
-    const store = useStore();
-    const showAddModal = ref(false);
-    const editingCourse = ref(null);
+
+  setup() {
+    const showModal = ref(false)
+    const showDeleteModal = ref(false)
+    const courseToDelete = ref(null)
+    const loading = ref(false)
+    const error = ref(null)
+    const courses = ref([])
+    const departments = ref([])
+    const formError=ref(null)
+
+
+    // Form state
     const courseForm = ref({
-      name: '',
-      code: '',
-      duration: 60,
-      totalMarks: 20,
-      coefficients: {}
-    });
+      _id: '',
+      courseCode: '',
+      courseName: '',
+      description: '',
+      isActive: true,
+      isEntranceExam: true,
+      department: []
+    })
 
-    // Get courses from store
-    const courses = computed(() => store.getters['courses/getAllCourses']);
-    const loading = computed(() => store.getters['courses/isLoading']);
-    const error = computed(() => store.getters['courses/getError']);
+    const loadDepartments = async () => {
+      try {
+        const response = await departmentService.getAllDepartments()
+        departments.value = response
+      } catch (err) {
+        console.error('Failed to load departments:', err)
+        formError.value = 'Failed to load departments'
+      }
+    }
 
-    // Initialize coefficients for all fields
-    props.fields.forEach(field => {
-      courseForm.value.coefficients[field.id] = 0;
-    });
+    // Methods
+    const fetchCourses = async () => {
+      loading.value = true
+      error.value = null
+      try {
+        const response = await courseService.getAllCourses()
+        courses.value = response
+      } catch (err) {
+        error.value = err.message || 'Failed to fetch courses'
+        console.error('Error fetching courses:', err)
+      } finally {
+        loading.value = false
+      }
+    }
 
-    const resetForm = () => {
+    onMounted(() => {
+      fetchCourses()
+      loadDepartments()
+    })
+
+    const openCreateModal = () => {
       courseForm.value = {
-        name: '',
-        code: '',
-        duration: 60,
-        totalMarks: 20,
-        coefficients: {}
-      };
-      // Reset coefficients
-      props.fields.forEach(field => {
-        courseForm.value.coefficients[field.id] = 0;
-      });
-      editingCourse.value = null;
-    };
+        _id: '',
+        courseCode: '',
+        courseName: '',
+        description: '',
+        isActive: true,
+        isEntranceExam: true,
+        department: []
+      }
+      showModal.value = true
+    }
 
     const editCourse = (course) => {
-      editingCourse.value = course;
-      courseForm.value = {
-        name: course.name,
-        code: course.code,
-        duration: course.duration,
-        totalMarks: course.totalMarks,
-        coefficients: { ...(course.coefficients || {}) }
-      };
-      showAddModal.value = true;
-    };
+      courseForm.value = { ...course }
+      showModal.value = true
+    }
 
-    const saveCourse = async () => {
-      try {
-        const courseData = {
-          ...courseForm.value,
-          fields: props.fields.map(field => ({
-            id: field.id,
-            coefficient: courseForm.value.coefficients[field.id]
-          }))
-        };
+    const deleteCourse = (course) => {
+      courseToDelete.value = course
+      showDeleteModal.value = true
+    }
 
-        if (editingCourse.value) {
-          await store.dispatch('courses/updateCourse', {
-            id: editingCourse.value.id,
-            courseData
-          });
-        } else {
-          await store.dispatch('courses/createCourse', courseData);
-        }
-
-        showAddModal.value = false;
-        resetForm();
-      } catch (err) {
-        console.error('Error saving course:', err);
-      }
-    };
-
-    const deleteCourse = async (course) => {
-      if (confirm('Are you sure you want to delete this course?')) {
+    const confirmDelete = async () => {
+      if (courseToDelete.value) {
+        loading.value = true
+        error.value = null
         try {
-          await store.dispatch('courses/deleteCourse', course.id);
+          await courseService.deleteCourse(courseToDelete.value._id)
+          await fetchCourses() // Refresh the list
+          showDeleteModal.value = false
+          courseToDelete.value = null
         } catch (err) {
-          console.error('Error deleting course:', err);
+          error.value = err.message || 'Failed to delete course'
+          console.error('Error deleting course:', err)
+        } finally {
+          loading.value = false
         }
-      }
-    };
-
-    const validateCoefficient = (event, fieldId) => {
-      const value = parseFloat(event.target.value)
-      if (isNaN(value) || value < 0) {
-        courseForm.value.coefficients[fieldId] = 0
-      } else if (value > 10) {
-        courseForm.value.coefficients[fieldId] = 10
       }
     }
 
-    // Load initial courses
-    onMounted(async () => {
-      await store.dispatch('courses/fetchCourses');
-    });
+    const saveCourse = async () => {
+      loading.value = true
+      error.value = null
+      try {
+        if (courseForm.value._id) {
+          await courseService.updateCourse(courseForm.value._id, courseForm.value)
+        } else {
+          await courseService.createCourse(courseForm.value)
+        }
+        await fetchCourses() // Refresh the list
+        showModal.value = false
+      } catch (err) {
+        error.value = err.message || 'Failed to save course'
+        console.error('Error saving course:', err)
+      } finally {
+        loading.value = false
+      }
+    }
+
+    const addDepartment = () => {
+      courseForm.value.department.push({
+        departmentInfo: '',
+        coefficient: 1
+      })
+    }
+
+    const removeDepartment = (index) => {
+      courseForm.value.department.splice(index, 1)
+    }
 
     return {
       courses,
-      showAddModal,
-      editingCourse,
-      courseForm,
       loading,
       error,
+      showModal,
+      showDeleteModal,
+      courseForm,
+      courseToDelete,
+      openCreateModal,
       editCourse,
-      saveCourse,
       deleteCourse,
-      validateCoefficient
-    };
+      confirmDelete,
+      saveCourse,
+      addDepartment,
+      removeDepartment,
+      departments,
+      loadDepartments
+    }
   }
-};</script>
+}
+</script>
+
+<style scoped>
+/* Fade transition for modal */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+/* Slide transition for modal content */
+.modal-content-enter-active,
+.modal-content-leave-active {
+  transition: all 0.3s ease;
+}
+
+.modal-content-enter-from,
+.modal-content-leave-to {
+  transform: translateY(-20px);
+  opacity: 0;
+}
+
+/* Custom scrollbar for modal */
+.modal-content {
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E0 #EDF2F7;
+}
+
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: #EDF2F7;
+  border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background-color: #CBD5E0;
+  border-radius: 4px;
+  border: 2px solid #EDF2F7;
+}
+
+/* Input focus styles */
+.form-input:focus {
+  @apply ring-2 ring-blue-500 border-blue-500;
+  outline: none;
+}
+
+/* Responsive padding adjustments */
+@media (max-width: 640px) {
+  .modal-padding {
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 641px) {
+  .modal-padding {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .modal-padding {
+    padding: 2rem;
+  }
+}
+
+.form-switch {
+  appearance: none;
+  position: relative;
+  background-color: #d1d5db; /* gray-300 */
+  border-radius: 9999px;
+  width: 2.75rem; /* w-11 */
+  height: 1.5rem; /* h-6 */
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.form-switch::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1.25rem; /* Roughly half the width minus padding */
+  height: 1.25rem;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.2s ease-in-out;
+}
+
+.form-switch:checked {
+  background-color: #2563eb; /* blue-600 */
+}
+
+.form-switch:checked::before {
+  transform: translateX(1.25rem);
+}
+</style>

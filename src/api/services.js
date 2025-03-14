@@ -1,346 +1,726 @@
-import { 
-  candidates, 
-  marks, 
-  fields, 
-  academicYears,
-  examSessions,
-  examCenters,
-  courses 
-} from './dummy-data'
+/* eslint-disable no-unused-vars */
+import axios from 'axios'
+import { ENDPOINTS } from './config'
 
-// Simulate API delay
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
-
-// Helper function to simulate API errors
-const simulateError = (probability = 0.1) => {
-  if (Math.random() < probability) {
-    throw new Error('Simulated API error')
-  }
-}
+// Configure axios to send credentials
+axios.defaults.withCredentials = true
 
 // Helper function to validate course data
 const validateCourseData = (courseData) => {
   const errors = []
-  
+
   if (!courseData.name || courseData.name.trim().length === 0) {
     errors.push('Course name is required')
   }
-  
+
   if (!courseData.code || courseData.code.trim().length === 0) {
     errors.push('Course code is required')
   }
-  
+
   if (!courseData.duration || courseData.duration < 30) {
     errors.push('Duration must be at least 30 minutes')
   }
-  
+
   if (!courseData.totalMarks || courseData.totalMarks <= 0) {
     errors.push('Total marks must be greater than 0')
   }
-  
+
   if (!courseData.coefficients || Object.keys(courseData.coefficients).length === 0) {
     errors.push('At least one field coefficient is required')
   }
-  
+
   return errors
 }
 
-// Simulate file storage
-const fileStorage = new Map()
+// Helper function to transform frontend data to backend format
+const transformCandidateData = (formData) => {
+  console.log('Transforming data:', formData)
+  const transformedData = {
+    // User related data
+    user: {
+      email: formData.email,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      dateOfBirth: formData.dateOfBirth,
+      gender: formData.gender,
+      phoneNumber: formData.phoneNumber,
+      profilePicture: formData.profilePicture,
+      address: formData.address,
+      emergencyContact: formData.emergencyContact
+    },
+
+    // Candidate specific data
+    selectedEntranceExam: formData.selectedEntranceExam,
+    fieldOfStudy: formData.fieldOfStudy,
+    examCenter: formData.examCenter,
+    documents: formData.documents,
+
+    // Additional data
+    lieuDeNaissance: formData.lieuDeNaissance,
+    situationDeFamille: formData.situationDeFamille,
+    boitePostale: formData.boitePostale,
+    referencesFamilales: formData.referencesFamilales,
+    addressParents: formData.addressParents
+  }
+
+  console.log('Transformed data:', transformedData)
+  return transformedData
+};
 
 export const courseService = {
   // Get all courses
   async getAllCourses() {
-    await delay(500)
     try {
-      simulateError(0.1)
-      return courses
+      console.log('Calling getAllCourses API');
+      const response = await axios.get(ENDPOINTS.COURSES);
+      console.log('API Response:', response);
+      const courses = response.data.data || response.data;
+      console.log('Processed courses data:', courses);
+      return courses;
     } catch (error) {
-      throw new Error('Failed to fetch courses: ' + error.message)
+      console.error('Error in getAllCourses:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get all courses');
     }
   },
 
   // Get course by ID
   async getCourseById(id) {
-    await delay(300)
-    simulateError()
-    const course = courses.find(c => c.id === id)
-    if (!course) throw new Error('Course not found')
-    return course
+    try {
+      console.log('Calling getCourseById API');
+      const response = await axios.get(ENDPOINTS.COURSE_BY_ID(id));
+      console.log('API Response:', response);
+      const course = response.data.data || response.data;
+      console.log('Processed course data:', course);
+      return course;
+    } catch (error) {
+      console.error('Error in getCourseById:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get course by ID');
+    }
   },
 
   // Create new course
   async createCourse(courseData) {
-    await delay(800)
     try {
-      const validationErrors = validateCourseData(courseData)
+      console.log('Calling createCourse API');
+      const validationErrors = validateCourseData(courseData);
       if (validationErrors.length > 0) {
-        throw new Error('Validation failed: ' + validationErrors.join(', '))
+        throw new Error(`Validation failed: ${validationErrors.join(', ')}`);
       }
-
-      simulateError(0.1)
-      const newCourse = {
-        id: Date.now(),
-        ...courseData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-      courses.push(newCourse)
-      return newCourse
+      const response = await axios.post(ENDPOINTS.COURSES, courseData);
+      console.log('API Response:', response);
+      const course = response.data.data || response.data;
+      console.log('Processed course data:', course);
+      return course;
     } catch (error) {
-      throw new Error('Failed to create course: ' + error.message)
+      console.error('Error in createCourse:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to create course');
     }
   },
 
   // Update course
   async updateCourse(id, courseData) {
-    await delay(500)
     try {
-      const validationErrors = validateCourseData(courseData)
+      console.log('Calling updateCourse API');
+      const validationErrors = validateCourseData(courseData);
       if (validationErrors.length > 0) {
-        throw new Error('Validation failed: ' + validationErrors.join(', '))
+        throw new Error(`Validation failed: ${validationErrors.join(', ')}`);
       }
-
-      simulateError(0.1)
-      const index = courses.findIndex(c => c.id === id)
-      if (index === -1) throw new Error('Course not found')
-      
-      const updatedCourse = {
-        ...courses[index],
-        ...courseData,
-        updatedAt: new Date().toISOString()
-      }
-      courses[index] = updatedCourse
-      return updatedCourse
+      const response = await axios.put(ENDPOINTS.COURSE_BY_ID(id), courseData);
+      console.log('API Response:', response);
+      const course = response.data.data || response.data;
+      console.log('Processed course data:', course);
+      return course;
     } catch (error) {
-      throw new Error('Failed to update course: ' + error.message)
+      console.error('Error in updateCourse:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to update course');
     }
   },
 
   // Delete course
   async deleteCourse(id) {
-    await delay(500)
-    simulateError()
-    const index = courses.findIndex(c => c.id === id)
-    if (index === -1) throw new Error('Course not found')
-    courses.splice(index, 1)
-    return { success: true }
+    try {
+      console.log('Calling deleteCourse API');
+      await axios.delete(ENDPOINTS.COURSE_BY_ID(id));
+      console.log('API Response:', 'Course deleted successfully');
+    } catch (error) {
+      console.error('Error in deleteCourse:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to delete course');
+    }
   }
 }
 
 export const candidateService = {
   // Get all candidates
   async getAllCandidates() {
-    await delay(500)
-    simulateError()
-    return candidates
+    try {
+      console.log('Calling getAllCandidates API');
+      const response = await axios.get(ENDPOINTS.CANDIDATES);
+      console.log('API Response:', response);
+      const candidates = response.data.data || response.data;
+      console.log('Processed candidates data:', candidates);
+      return candidates;
+    } catch (error) {
+      console.error('Error in getAllCandidates:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get all candidates');
+    }
   },
 
   // Get candidate by ID
   async getCandidateById(id) {
-    await delay(300)
-    simulateError()
-    const candidate = candidates.find(c => c.id === id)
-    if (!candidate) throw new Error('Candidate not found')
-    return candidate
+    try {
+      console.log('Calling getCandidateById API');
+      const response = await axios.get(ENDPOINTS.CANDIDATE_BY_ID(id));
+      console.log('API Response:', response);
+      const candidate = response.data.data || response.data;
+      console.log('Processed candidate data:', candidate);
+      return candidate;
+    } catch (error) {
+      console.error('Error in getCandidateById:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get candidate by ID');
+    }
   },
 
   // Get candidates by field
   async getCandidatesByField(fieldId) {
-    await delay(500)
-    simulateError()
-    return candidates.filter(c => c.fieldId === fieldId)
-  },
-
-  // Create new candidate
-  async createCandidate(candidateData) {
-    await delay(800)
-    simulateError()
-    const newCandidate = {
-      id: Date.now(),
-      ...candidateData,
-      status: 'active'
+    try {
+      console.log('Calling getCandidatesByField API');
+      const response = await axios.get(ENDPOINTS.CANDIDATES_BY_FIELD(fieldId));
+      console.log('API Response:', response);
+      const candidates = response.data.data || response.data;
+      console.log('Processed candidates data:', candidates);
+      return candidates;
+    } catch (error) {
+      console.error('Error in getCandidatesByField:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get candidates by field');
     }
-    candidates.push(newCandidate)
-    return newCandidate
   },
 
-  // Update candidate
-  async updateCandidate(id, candidateData) {
-    await delay(500)
-    simulateError()
-    const index = candidates.findIndex(c => c.id === id)
-    if (index === -1) throw new Error('Candidate not found')
-    candidates[index] = { ...candidates[index], ...candidateData }
-    return candidates[index]
+  // Create new candidate with documents
+  async createCandidate(formData) {
+    try {
+      console.log('Calling createCandidate API');
+      const transformedData = transformCandidateData(formData);
+      const data = new FormData();
+
+      // Add transformed data as JSON
+      data.append('formData', JSON.stringify(transformedData));
+
+      // Handle profile image upload
+      if (formData.civilStatus?.profilePicture?.file) {
+        console.log('Adding profile image to FormData');
+        data.append('profile', formData.civilStatus.profilePicture.file);
+      } else {
+        console.log('No profile image file found in:', formData.civilStatus?.profilePicture);
+      }
+
+      // Handle other documents
+      const documentTypes = ['resume', 'transcript', 'recommendation', 'cv', 'other','diploma'];
+      documentTypes.forEach(type => {
+        if (formData.documents?.[type]) {
+          data.append(type, formData.documents[type]);
+        }
+      });
+
+      const response = await axios.post('http://localhost:5000/api/candidates/register', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          // You can emit this progress to your store if needed
+        }
+      });
+
+      console.log('API Response:', response);
+      const candidate = response.data.data || response.data;
+      console.log('Processed candidate data:', candidate);
+      return candidate;
+    } catch (error) {
+      console.error('Error in createCandidate:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to create candidate');
+    }
+  },
+
+  // Update candidate status
+  async updateCandidateStatus(id, { applicationStatus }) {
+    try {
+      console.log('Updating candidate status:', { id, applicationStatus });
+      const updateData = {
+        applicationStatus,
+        highSchool: {
+          schoolName: '',
+          yearCompleted: null,
+          majorSubjects: []
+        },
+        university: {
+          universityName: '',
+          degree: '',
+          yearCompleted: null
+        },
+        professionalExperience: [],
+        extraActivities: [],
+        internationalExposure: []
+      };
+      console.log('Sending update data:', updateData);
+      const response = await axios.put(ENDPOINTS.CANDIDATE_BY_ID(id), updateData);
+      console.log('API Response:', response);
+      const candidate = response.data.data || response.data;
+      console.log('Updated candidate data:', candidate);
+      return candidate;
+    } catch (error) {
+      console.error('Error in updateCandidateStatus:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to update candidate status');
+    }
+  },
+
+  // Update candidate with documents
+  async updateCandidate(id, formData) {
+    try {
+      console.log('Calling updateCandidate API');
+      const transformedData = transformCandidateData(formData);
+      const data = new FormData();
+
+      data.append('formData', JSON.stringify(transformedData));
+
+      // Handle document updates
+      if (formData.profileImageFile) {
+        data.append('profile', formData.profileImageFile);
+      }
+
+      const documentTypes = ['resume', 'transcript', 'recommendation', 'cv', 'other','diploma'];
+      documentTypes.forEach(type => {
+        if (formData.documents?.[type]) {
+          data.append(type, formData.documents[type]);
+        }
+      });
+
+      const response = await axios.put(ENDPOINTS.CANDIDATE_BY_ID(id), data, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      console.log('API Response:', response);
+      const candidate = response.data.data || response.data;
+      console.log('Processed candidate data:', candidate);
+      return candidate;
+    } catch (error) {
+      console.error('Error in updateCandidate:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to update candidate');
+    }
+  },
+
+  async updateCandidateMarks(candidateId, courseId, mark) {
+    try {
+      const response = await axios.put(`${ENDPOINTS.CANDIDATE_BY_ID(candidateId)}/marks/${courseId}`, mark)
+      return response.data
+    } catch (error) {
+      console.error('Error updating candidate marks:', error)
+      throw new Error(error.response?.data?.message || 'Failed to update candidate marks')
+    }
+  },
+
+  async updateCandidateResult(candidateId, resultData) {
+    try {
+      const response = await axios.put(`${ENDPOINTS.CANDIDATE_BY_ID(candidateId)}/result`, resultData)
+      return response.data
+    } catch (error) {
+      console.error('Error updating candidate result:', error)
+      throw new Error(error.response?.data?.message || 'Failed to update candidate result')
+    }
+  },
+    // Graduate candidates
+  async graduateCandidates(graduationData) {
+    try {
+      console.log('Calling graduateCandidates API with data:', graduationData);
+      const response = await axios.post('/api/candidates/graduate', graduationData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('API Response:', response);
+      return response.data;
+    } catch (error) {
+      console.error('Error in graduateCandidates:', error);
+      // Provide detailed error information
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to graduate candidates';
+      throw new Error(errorMessage);
+    }
   }
 }
+
 
 export const marksService = {
   // Get marks for a candidate
   async getCandidateMarks(candidateId) {
-    await delay(500)
-    simulateError()
-    return marks.filter(m => m.candidateId === candidateId)
+    try {
+      console.log('Calling getCandidateMarks API');
+      const response = await axios.get(ENDPOINTS.MARKS_BY_CANDIDATE(candidateId));
+      console.log('API Response:', response);
+      const marks = response.data.data || response.data;
+      console.log('Processed marks data:', marks);
+      return marks;
+    } catch (error) {
+      console.error('Error in getCandidateMarks:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get candidate marks');
+    }
   },
 
   // Get marks for all candidates
   async getAllMarks() {
-    await delay(500)
-    simulateError()
-    return marks
+    try {
+      console.log('Calling getAllMarks API');
+      const response = await axios.get(ENDPOINTS.MARKS);
+      console.log('API Response:', response);
+      const marks = response.data.data || response.data;
+      console.log('Processed marks data:', marks);
+      return marks;
+    } catch (error) {
+      console.error('Error in getAllMarks:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get all marks');
+    }
   },
 
-  // Update marks for a candidate
-  async updateCandidateMarks(candidateId, subjectId, mark) {
-    await delay(500)
-    simulateError()
-    const index = marks.findIndex(m => m.candidateId === candidateId && m.subjectId === subjectId)
-    if (index !== -1) {
-      marks[index].mark = mark
-    } else {
-      marks.push({ candidateId, subjectId, mark })
+  // Update marks for multiple candidates
+  async updateCandidateMarks(marks) {
+    try {
+      console.log('Calling updateCandidateMarks API');
+      const response = await axios.put(`${ENDPOINTS.CANDIDATES}/update`, marks); // Adjust the endpoint as necessary
+      console.log('API Response:', response);
+      const updatedMarks = response.data.data || response.data;
+      console.log('Processed updated marks data:', updatedMarks);
+      return updatedMarks;
+    } catch (error) {
+      console.error('Error in updateCandidateMarks:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to update candidate marks');
     }
-    return { success: true }
   },
 
   // Calculate average for a candidate
   async calculateAverage(candidateId) {
-    await delay(500)
-    simulateError()
-    const candidateMarks = marks.filter(m => m.candidateId === candidateId)
-    if (candidateMarks.length === 0) return 0
-
-    const total = candidateMarks.reduce((sum, mark) => {
-      const subject = courses.find(s => s.id === mark.subjectId)
-      if (!subject) return sum
-      const candidate = candidates.find(c => c.id === candidateId)
-      if (!candidate) return sum
-      const coefficient = subject.coefficients[candidate.fieldId] || 1
-      return sum + (mark.mark * coefficient)
-    }, 0)
-
-    const totalCoefficients = candidateMarks.reduce((sum, mark) => {
-      const subject = courses.find(s => s.id === mark.subjectId)
-      if (!subject) return sum
-      const candidate = candidates.find(c => c.id === candidateId)
-      if (!candidate) return sum
-      return sum + (subject.coefficients[candidate.fieldId] || 1)
-    }, 0)
-
-    return totalCoefficients > 0 ? total / totalCoefficients : 0
+    try {
+      console.log('Calling calculateAverage API');
+      const response = await axios.get(`${ENDPOINTS.MARKS_BY_CANDIDATE(candidateId)}/average`);
+      console.log('API Response:', response);
+      const average = response.data.data || response.data;
+      console.log('Processed average data:', average);
+      return average;
+    } catch (error) {
+      console.error('Error in calculateAverage:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to calculate average');
+    }
   }
 }
 
 export const subjectService = {
   // Get all subjects
   async getAllSubjects() {
-    await delay(300)
-    simulateError()
-    return courses
+    try {
+      console.log('Calling getAllSubjects API');
+      const response = await axios.get(ENDPOINTS.COURSES);
+      console.log('API Response:', response);
+      const subjects = response.data.data || response.data;
+      console.log('Processed subjects data:', subjects);
+      return subjects;
+    } catch (error) {
+      console.error('Error in getAllSubjects:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get all subjects');
+    }
   },
 
   // Get subject by ID
   async getSubjectById(id) {
-    await delay(200)
-    simulateError()
-    const course = courses.find(c => c.id === id)
-    if (!course) throw new Error('Subject not found')
-    return course
+    try {
+      console.log('Calling getSubjectById API');
+      const response = await axios.get(ENDPOINTS.COURSE_BY_ID(id));
+      console.log('API Response:', response);
+      const subject = response.data.data || response.data;
+      console.log('Processed subject data:', subject);
+      return subject;
+    } catch (error) {
+      console.error('Error in getSubjectById:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get subject by ID');
+    }
   }
 }
 
 export const fieldService = {
   // Get all fields
   async getAllFields() {
-    await delay(500)
-    simulateError()
-    return fields
+    try {
+      console.log('Calling getAllFields API');
+      const response = await axios.get(ENDPOINTS.FIELDS);
+      console.log('API Response:', response);
+      const fields = response.data.data || response.data;
+      console.log('Processed fields data:', fields);
+      return fields;
+    } catch (error) {
+      console.error('Error in getAllFields:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get all fields');
+    }
   },
 
   // Get field by ID
   async getFieldById(id) {
-    await delay(300)
-    simulateError()
-    const field = fields.find(f => f.id === id)
-    if (!field) throw new Error('Field not found')
-    return field
+    try {
+      console.log('Calling getFieldById API');
+      const response = await axios.get(ENDPOINTS.FIELD_BY_ID(id));
+      console.log('API Response:', response);
+      const field = response.data.data || response.data;
+      console.log('Processed field data:', field);
+      return field;
+    } catch (error) {
+      console.error('Error in getFieldById:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get field by ID');
+    }
   }
 }
 
 export const examService = {
   // Get all academic years
   async getAcademicYears() {
-    await delay(500)
-    simulateError()
-    return academicYears
+    try {
+      const response = await axios.get(ENDPOINTS.ACADEMIC_YEARS)
+      return response.data.data || response.data
+    } catch (error) {
+      console.error('Error in getAcademicYears:', error)
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get academic years')
+    }
   },
 
   // Get current academic year
   async getCurrentAcademicYear() {
-    await delay(300)
-    simulateError()
-    return academicYears.find(year => year.isCurrent)
+    try {
+      const response = await axios.get(ENDPOINTS.CURRENT_ACADEMIC_YEAR)
+      return response.data.data || response.data
+    } catch (error) {
+      console.error('Error in getCurrentAcademicYear:', error)
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get current academic year')
+    }
+  },
+
+  // Create new academic year
+  async createAcademicYear(data) {
+    try {
+      const response = await axios.post(ENDPOINTS.ACADEMIC_YEARS, data)
+      return response.data.data || response.data
+    } catch (error) {
+      console.error('Error in createAcademicYear:', error)
+      throw new Error(error.response?.data?.message || error.message || 'Failed to create academic year')
+    }
+  },
+
+  // Update academic year
+  async updateAcademicYear(id, data) {
+    try {
+      const response = await axios.put(`${ENDPOINTS.ACADEMIC_YEARS}/${id}`, data)
+      return response.data.data || response.data
+    } catch (error) {
+      console.error('Error in updateAcademicYear:', error)
+      throw new Error(error.response?.data?.message || error.message || 'Failed to update academic year')
+    }
+  },
+
+  // Delete academic year
+  async deleteAcademicYear(id) {
+    try {
+      const response = await axios.delete(`${ENDPOINTS.ACADEMIC_YEARS}/${id}`)
+      return response.data.data || response.data
+    } catch (error) {
+      console.error('Error in deleteAcademicYear:', error)
+      throw new Error(error.response?.data?.message || error.message || 'Failed to delete academic year')
+    }
   },
 
   // Get exam sessions
   async getExamSessions(academicYearId) {
-    await delay(500)
-    simulateError()
-    return examSessions.filter(session => session.academicYearId === academicYearId)
+    try {
+      const response = await axios.get(ENDPOINTS.EXAM_SESSIONS(academicYearId))
+      return response.data.data || response.data
+    } catch (error) {
+      console.error('Error in getExamSessions:', error)
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get exam sessions')
+    }
   },
 
   // Get exam centers
   async getExamCenters() {
-    await delay(500)
-    simulateError()
-    return examCenters
+    try {
+      const response = await axios.get(ENDPOINTS.EXAM_CENTERS)
+      return response.data.data || response.data
+    } catch (error) {
+      console.error('Error in getExamCenters:', error)
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get exam centers')
+    }
   }
 }
 
 export const fileService = {
   // Upload file
-  uploadFile(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = async () => {
-        try {
-          await delay(1000)
-          simulateError()
-          const fileUrl = `file-${Date.now()}`
-          fileStorage.set(fileUrl, {
-            content: reader.result,
-            name: file.name,
-            type: file.type,
-            size: file.size
-          })
-          resolve({ fileUrl })
-        } catch (error) {
-          reject(error)
+  async uploadFile(file) {
+    try {
+      console.log('Calling uploadFile API');
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await axios.post(ENDPOINTS.FILE_UPLOAD, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
         }
-      }
-      reader.onerror = () => reject(new Error('File read error'))
-      reader.readAsDataURL(file)
-    })
+      });
+      console.log('API Response:', response);
+      const fileData = response.data.data || response.data;
+      console.log('Processed file data:', fileData);
+      return fileData;
+    } catch (error) {
+      console.error('Error in uploadFile:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to upload file');
+    }
   },
 
   // Get file info
-  async getFileInfo(fileUrl) {
-    await delay(300)
-    simulateError()
-    const fileInfo = fileStorage.get(fileUrl)
-    if (!fileInfo) throw new Error('File not found')
-    return fileInfo
+  async getFileInfo(fileId) {
+    try {
+      console.log('Calling getFileInfo API');
+      const response = await axios.get(ENDPOINTS.FILE_INFO(fileId));
+      console.log('API Response:', response);
+      const fileInfo = response.data.data || response.data;
+      console.log('Processed file info:', fileInfo);
+      return fileInfo;
+    } catch (error) {
+      console.error('Error in getFileInfo:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to get file info');
+    }
   },
 
   // Delete file
-  async deleteFile(fileUrl) {
-    await delay(500)
-    simulateError()
-    if (!fileStorage.has(fileUrl)) {
-      throw new Error('File not found')
+  async deleteFile(fileId) {
+    try {
+      console.log('Calling deleteFile API');
+      await axios.delete(ENDPOINTS.FILE_INFO(fileId));
+      console.log('API Response:', 'File deleted successfully');
+    } catch (error) {
+      console.error('Error in deleteFile:', error);
+      throw new Error(error.response?.data?.message || error.message || 'Failed to delete file');
     }
-    fileStorage.delete(fileUrl)
-    return { success: true }
   }
+}
+
+const submitPayment = async (data) => {
+  try {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid input data');
+    }
+
+    // Log incoming data structure
+    console.log('Incoming data structure:', {
+      hasCivilStatus: !!data.civilStatus,
+      hasProfilePicture: !!data.civilStatus?.profilePicture,
+      hasEducation: !!data.education,
+      hasPayment: !!data.paymentData
+    });
+
+    // Construct form data object
+    const formDataObj = {
+      email: data.civilStatus.email,
+      password: 'defaultPassword123',
+      firstName: data.civilStatus.firstName,
+      lastName: data.civilStatus.lastName,
+      dateOfBirth: data.civilStatus.dateOfBirth,
+      gender: data.civilStatus.gender,
+      phoneNumber: data.civilStatus.phoneNumber,
+      address: data.civilStatus.address,
+      emergencyContact: data.civilStatus.emergencyContact,
+      examId: data.civilStatus.selectedEntranceExam,
+      highSchool: data.education.highSchool,
+      university: data.education.university,
+      professionalExperience: data.professional.professionalExperience,
+      extraActivities: data.extraActivities.activities,
+      internationalExposure: [],
+      fieldOfStudy: data.civilStatus.fieldOfStudy,
+      payment: data.paymentData,
+    };
+
+    // Create FormData
+    const formData = new FormData();
+
+    // First, verify the formDataObj is valid
+    console.log('FormDataObj before stringify:', formDataObj);
+    const jsonString = JSON.stringify(formDataObj);
+    console.log('JSON string created successfully');
+
+    // Add the JSON data
+    formData.append('formData', jsonString);
+
+    // Handle files with explicit error checking
+    if (data.civilStatus?.profilePicture?.file instanceof File) {
+      console.log('Adding profile image:', data.civilStatus.profilePicture.file.name);
+      formData.append('profileImage', data.civilStatus.profilePicture.file);
+    }
+
+    // Handle other documents with explicit checks
+    if (data.education?.documents?.transcript instanceof File) {
+      formData.append('transcript', data.education.documents.transcript);
+    }
+    if (data.education?.documents?.diploma instanceof File) {
+      formData.append('diploma', data.education.documents.diploma);
+    }
+    if (data.education?.documents?.cv instanceof File) {
+      formData.append('cv', data.education.documents.cv);
+    }
+    if (data.education?.documents?.other instanceof File) {
+      formData.append('other', data.education.documents.other);
+    }
+    if (data.paymentData?.receiptFile instanceof File) {
+      formData.append('receipt', data.paymentData.receiptFile);
+    }
+
+    // Verify FormData contents before sending
+    console.log('FormData contents:');
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ':', pair[1] instanceof File ? `File: ${pair[1].name}` : 'JSON data');
+    }
+
+    // Send request with explicit content type
+    const response = await axios.post(
+      'http://localhost:5000/api/candidates/register',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+
+    console.log('✅ API Response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error in submitPayment:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      data: error.response?.data
+    });
+    throw error;
+  }
+};
+
+const studentService = {
+  async createStudents(students) {
+    try {
+      console.log('Creating students:', students)
+      const response = await axios.post('http://localhost:3000/student/add', students)
+      console.log('API Response:', response)
+      return response.data
+    } catch (error) {
+      console.error('Error in createStudents:', error)
+      throw new Error(error.response?.data?.message || error.message || 'Failed to create students')
+    }
+  }
+}
+
+
+export const paymentService = {
+  submitPayment,
+  studentService
 }

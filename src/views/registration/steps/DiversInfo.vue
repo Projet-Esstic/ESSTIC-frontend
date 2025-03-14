@@ -1,58 +1,97 @@
 <template>
-  <div class="mb-6 p-4  rounded shadow-md">
-    <h2 :class="Theme.applyTextStyle('heading2')">Renseignements Divers</h2>
+  <div class="max-w-4xl mx-auto bg-background-light dark:bg-background-dark rounded-xl shadow-lg overflow-hidden">
+    <div :class="[Theme.applyGradient('primary'), 'p-6']">
+      <h2 :class="[Theme.applyTextStyle('titleLarge'), 'text-white dark:text-text-dark mb-2']">Renseignements Divers</h2>
+      <p :class="[Theme.applyTextStyle('bodyMedium'), 'text-white dark:text-text-dark opacity-80']">Informations complémentaires importantes</p>
+    </div>
 
-    <form @submit.prevent="handleSubmit" class="space-y-6">
-      <div class="mb-6">
-        <h3 :class="Theme.applyTextStyle('heading3')">Séjours à l'étranger</h3>
-        <div class="form-group">
-          <label :class="Theme.applyTextStyle('bodyLarge')">Avez-vous déjà séjourné à l'étranger?</label>
-          <SwitchField v-model="form.sejourne_a_l_etranger.avez_vous" />
-        </div>
+    <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
+      <!-- Additional Information -->
+      <div class="space-y-6">
+        <div class="bg-surface-light dark:bg-surface-dark rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-600">
+          <div class="grid grid-cols-1 gap-6">
+            <div class="form-group">
+              <label :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark mb-2']">Motivation pour la formation</label>
+              <textarea 
+                v-model="form.motivation" 
+                :class="Theme.applyInputStyle()" 
+                rows="4"
+                placeholder="Expliquez votre motivation pour suivre cette formation..."
+                required
+              ></textarea>
+            </div>
 
-        <div v-if="form.sejourne_a_l_etranger.avez_vous" class="space-y-4">
-          <div class="grid grid-cols-2 gap-4">
             <div class="form-group">
-              <label :class="Theme.applyTextStyle('bodyLarge')">Motif du séjour</label>
-              <input v-model="form.sejourne_a_l_etranger.reason" type="text" required :class="[Theme.getThemeClasses(isDark).input, 'border rounded p-2 w-full']" placeholder="Ex: Études, Stage, Travail..." />
+              <label :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark mb-2']">Objectifs professionnels</label>
+              <textarea 
+                v-model="form.objectives" 
+                :class="Theme.applyInputStyle()" 
+                rows="4"
+                placeholder="Décrivez vos objectifs professionnels après la formation..."
+                required
+              ></textarea>
             </div>
-            <div class="form-group">
-              <label :class="Theme.applyTextStyle('bodyLarge')">Pays/Ville de séjour</label>
-              <input v-model="form.sejourne_a_l_etranger.lieu" type="text" required :class="[Theme.getThemeClasses(isDark).input, 'border rounded p-2 w-full']" placeholder="Ex: France, Paris" />
-            </div>
-          </div>
 
-          <div class="grid grid-cols-2 gap-4">
             <div class="form-group">
-              <label :class="Theme.applyTextStyle('bodyLarge')">Date de début</label>
-              <input v-model="form.sejourne_a_l_etranger.dates.commencement" type="date" required :class="[Theme.getThemeClasses(isDark).input, 'border rounded p-2 w-full']" />
+              <label :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark mb-2']">Compétences particulières</label>
+              <div class="space-y-4">
+                <div v-for="(skill, index) in form.skills" :key="index" class="flex gap-4">
+                  <input 
+                    v-model="skill.name"
+                    type="text" 
+                    class="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                    placeholder="Ex: Leadership, Communication, ..."
+                    required
+                  />
+                  <button 
+                    @click="removeSkill(index)" 
+                    type="button"
+                    class="text-gray-400 hover:text-red-500 transition-colors duration-200"
+                    v-if="form.skills.length > 1"
+                  >
+                    <span class="material-icons">close</span>
+                  </button>
+                </div>
+              </div>
+              <button 
+                type="button"
+                @click="addSkill"
+                class="mt-4 py-2 px-4 border-2 border-dashed border-blue-500 dark:border-blue-500 rounded-lg text-blue-600 dark:text-blue-300  hover:bg-blue-100 dark:hover:bg-blue-200 transition-colors duration-200 flex items-center gap-2"
+              >
+                <span class="material-icons">add_circle_outline</span>
+                Ajouter une compétence
+              </button>
             </div>
-            <div class="form-group">
-              <label :class="Theme.applyTextStyle('bodyLarge')">Date de fin</label>
-              <input v-model="form.sejourne_a_l_etranger.dates.fini" type="date" required :class="[Theme.getThemeClasses(isDark).input, 'border rounded p-2 w-full']" />
-            </div>
-          </div>
 
-          <div class="form-group">
-            <label :class="Theme.applyTextStyle('bodyLarge')">Rencontres Internationales</label>
-            <TagInput v-model="form.sejourne_a_l_etranger.rencontresInternationales" placeholder="Ajouter une rencontre + Enter" :class="[Theme.getThemeClasses(isDark).input, 'border rounded p-2 w-full']" />
+            <div class="form-group">
+              <label :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark mb-2']">Informations supplémentaires</label>
+              <textarea 
+                v-model="form.additionalInfo" 
+                :class="Theme.applyInputStyle()" 
+                rows="4"
+                placeholder="Autres informations pertinentes..."
+              ></textarea>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="flex justify-between mt-8">
+      <!-- Navigation Buttons -->
+      <div class="flex justify-between items-center pt-6 mt-8 border-t border-gray-200 dark:border-gray-700">
         <button 
           type="button" 
           @click="previousStep"
-          :class="[Theme.getThemeClasses(isDark).button.secondary, 'rounded p-2']"
+          class="flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg transition-colors duration-200"
         >
+          <span class="material-icons mr-2">arrow_back</span>
           Précédent
         </button>
         <button 
           type="submit"
-          :class="[Theme.getThemeClasses(isDark).button.primary, 'rounded p-2']"
+          class="flex items-center px-6 py-3 bg-primary-light hover:bg-primary-dark text-white rounded-lg transition-colors duration-200"
         >
-          Suivant
+        Terminer
+        <span class="material-icons ml-2">check_circle</span>
         </button>
       </div>
     </form>
@@ -60,49 +99,55 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { Theme } from '@/utils/Theme'
-import SwitchField from '@/components/SwitchField.vue'
 
 export default {
-  components: {
-    SwitchField
-  },
   setup() {
     const store = useStore()
     
     const form = ref({
-      sejourne_a_l_etranger: {
-        avez_vous: false,
-        reason: '',
-        lieu: '',
-        dates: {
-          commencement: null,
-          fini: null
-        },
-        rencontresInternationales: []
-      }
+      motivation: 'Je souhaite suivre cette formation pour approfondir mes connaissances en développement web et acquérir de nouvelles compétences en Vue.js. Ayant travaillé pendant 5 ans dans le développement front-end, je cherche maintenant à me spécialiser davantage pour pouvoir prendre en charge des projets plus complexes et innovants.',
+      objectives: `À l'issue de cette formation, j'ambitionne de devenir développeur Vue.js senior et d'intégrer une équipe travaillant sur des projets à forte valeur ajoutée. À moyen terme, je souhaite évoluer vers un poste de lead developer, en apportant mon expertise technique et en encadrant des développeurs juniors.`,
+      skills: [
+        { name: 'Développement front-end (HTML, CSS, JavaScript)' },
+        { name: 'Gestion de projet Agile' },
+        { name: `Conception d'interfaces utilisateur` },
+        { name: 'Anglais professionnel courant' }
+      ],
+      additionalInfo: `Je suis disponible pour commencer la formation immédiatement et peux m'adapter à tout type d'horaire. Je possède mon propre équipement informatique et dispose d'une connexion internet stable pour suivre les cours en ligne si nécessaire. Je suis également intéressé par toute opportunité de stage ou de projet pratique en entreprise pendant ou après la formation.`
     })
 
+    const addSkill = () => {
+      form.value.skills.push({ name: '' })
+    }
+
+    const removeSkill = (index) => {
+      if (form.value.skills.length > 1) {
+        form.value.skills.splice(index, 1)
+      }
+    }
+
     const previousStep = () => {
-      store.dispatch('previousStep')
+      store.dispatch('candidateRegistration/previousStep')
     }
 
     const handleSubmit = () => {
-      store.dispatch('saveStepData', {
+      store.dispatch('candidateRegistration/updateStepData', {
         step: 'diversInfo',
         data: form.value
       })
-      store.dispatch('nextStep')
+      store.dispatch('candidateRegistration/nextStep')
     }
 
     return {
       form,
-      Theme,
+      addSkill,
+      removeSkill,
       handleSubmit,
       previousStep,
-      isDark: computed(() => store.state.theme === Theme.THEMES.DARK)
+      Theme
     }
   }
 }

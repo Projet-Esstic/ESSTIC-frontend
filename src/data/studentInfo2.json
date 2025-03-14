@@ -1,0 +1,236 @@
+{
+  "students": [
+    {
+      "student": {
+        "user": {
+          "fullName": "EFFATAKANG HOPE DIVINE",
+          "dateOfBirth": "16 Mai 2001",
+          "gender": "Homme",
+          "email": "hope.effatakang@example.com"
+        },
+        "applicant": {
+          "applicantId": "ID_DU_CANDIDAT_1"
+        },
+        "academicInfo": {
+          "level": "1 LICENCE",
+          "department": "Archivistique et Records Management",
+          "academicYears": [
+            {
+              "year": "2023-2024",
+              "semesters": [
+                {
+                  "semesterInfo": "Semestre 1",
+                  "totalPoints": 130.5,
+                  "average": 13.05,
+                  "rank": "À définir",
+                  "credits": 55,
+                  "absences": "À définir",
+                  "discipline": "BIEN"
+                },
+                {
+                  "semesterInfo": "Semestre 2",
+                  "totalPoints": 0,
+                  "average": 0,
+                  "rank": "À définir",
+                  "credits": 0,
+                  "absences": "À définir",
+                  "discipline": "À définir"
+                }
+              ]
+            }
+          ],
+          "courses": [
+            {
+              "courseId": {
+                "courseName": "Introduction à l'archivistique",
+                "courseCode": "ARF11"
+              },
+              "marks": {
+                "CA": 13,
+                "EXAM": 14,
+                "RESIT": null
+              }
+            },
+            {
+              "courseId": {
+                "courseName": "Gestion des documents courants",
+                "courseCode": "ARF12"
+              },
+              "marks": {
+                "CA": 12,
+                "EXAM": 13,
+                "RESIT": null
+              }
+            },
+            {
+              "courseId": {
+                "courseName": "Techniques de classement",
+                "courseCode": "ARF13"
+              },
+              "marks": {
+                "CA": 14,
+                "EXAM": 13,
+                "RESIT": null
+              }
+            }
+          ],
+          "annualTotalPoints": 130.5,
+          "annualAverage": 13.05,
+          "annualRank": "À définir",
+          "annualCredits": 55,
+          "annualHourOfAbsences": "À définir",
+          "annualDiscipline": "BIEN",
+          "finalDecision": "À définir"
+        }
+      },
+      "bulletins": {
+        "2 LICENCE": {
+          "academicInfo": {
+            "level": "2 LICENCE",
+            "department": "Archivistique et Records Management",
+            "academicYears": [
+              {
+                "year": "2022-2023",
+                "semesters": [
+                  {
+                    "semesterInfo": "Semestre 3",
+                    "totalPoints": 122.65,
+                    "average": 12.27,
+                    "rank": "À définir",
+                    "credits": 52,
+                    "absences": "À définir",
+                    "discipline": "ASSEZ-BIEN"
+                  },
+                  {
+                    "semesterInfo": "Semestre 4",
+                    "totalPoints": 0,
+                    "average": 0,
+                    "rank": "À définir",
+                    "credits": 3,
+                    "absences": "À définir",
+                    "discipline": "À définir"
+                  }
+                ]
+              }
+            ],
+            "courses": [
+              {
+                "courseId": {
+                  "courseName": "TECH. DOCU./GEST.ET TRAIT. DES ARCH. COUR.INTER1 / DOC TECH / MGT & PROCOF",
+                  "courseCode": "ARF31"
+                },
+                "marks": {
+                  "CA": 12,
+                  "EXAM": 11,
+                  "RESIT": null
+                }
+              },
+              {
+                "courseId": {
+                  "courseName": "GESTION ET TRAITEMENT DES ARCHIVES DÉFINITIVES / MGT AND PROC OF CLASSIFIE",
+                  "courseCode": "ARF32"
+                },
+                "marks": {
+                  "CA": 10,
+                  "EXAM": 9,
+                  "RESIT": null
+                }
+              },
+              {
+                "courseId": {
+                  "courseName": "INFORMATION DOCUMENTAIRE 2 / DOCUMENTARY DATA PROCESSING 2",
+                  "courseCode": "ARF33"
+                },
+                "marks": {
+                  "CA": 11,
+                  "EXAM": 10,
+                  "RESIT": null
+                }
+              }
+            ],
+            "annualTotalPoints": 122.65,
+            "annualAverage": 12.27,
+            "annualRank": "À définir",
+            "annualCredits": 55,
+            "annualHourOfAbsences": "À définir",
+            "annualDiscipline": "ASSEZ-BIEN",
+            "finalDecision": "À définir"
+          }
+        },
+        "3 LICENCE": {
+          "academicInfo": {
+            "level": "3 LICENCE",
+            "department": "Archivistique et Records Management",
+            "academicYears": [
+              {
+                "year": "2021-2022",
+                "semesters": [
+                  {
+                    "semesterInfo": "Semestre 5",
+                    "totalPoints": 140.00,
+                    "average": 14.00,
+                    "rank": "À définir",
+                    "credits": 60,
+                    "absences": "À définir",
+                    "discipline": "BIEN"
+                  },
+                  {
+                    "semesterInfo": "Semestre 6",
+                    "totalPoints": 0,
+                    "average": 0,
+                    "rank": "À définir",
+                    "credits": 0,
+                    "absences": "À définir",
+                    "discipline": "À définir"
+                  }
+                ]
+              }
+            ],
+            "courses": [
+              {
+                "courseId": {
+                  "courseName": "Gestion avancée des archives",
+                  "courseCode": "ARF51"
+                },
+                "marks": {
+                  "CA": 15,
+                  "EXAM": 16,
+                  "RESIT": null
+                }
+              },
+              {
+                "courseId": {
+                  "courseName": "Archives numériques",
+                  "courseCode": "ARF52"
+                },
+                "marks": {
+                  "CA": 13,
+                  "EXAM": 14,
+                  "RESIT": null
+                }
+              },
+              {
+                "courseId": {
+                  "courseName": "Législation archivistique",
+                  "courseCode": "ARF53"
+                },
+                "marks": {
+                  "CA": 14,
+                  "EXAM": 13,
+                  "RESIT": null
+                }
+              }
+            ],
+            "annualTotalPoints": 140.00,
+            "annualAverage": 14.00,
+            "annualRank": "À définir",
+            "annualCredits": 60,
+            "annualHourOfAbsences": "À définir",
+            "annualDiscipline": "BIEN",
+            "finalDecision": "À définir"
+          }
+        }
+      }
+    }
+  ]
+}

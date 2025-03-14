@@ -1,52 +1,75 @@
 <template>
-  <div class="mb-6 p-4  rounded shadow-md">
-    <h2 :class="Theme.applyTextStyle('heading2')">Autres Activités</h2>
+  <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+    <div class="bg-gradient-to-r from-primary-light to-primary-light p-6">
+      <h2 class="text-2xl font-bold text-white mb-2">Activités Extra</h2>
+      <p class="text-white">Partagez vos activités extrascolaires et expériences</p>
+    </div>
 
-    <form @submit.prevent="handleSubmit" class="space-y-6">
-      <div class="mb-6">
-        <div class="form-group">
-          <label :class="Theme.applyTextStyle('bodyLarge')">Avez-vous des activités extra-scolaires ou extra-professionnelles?</label>
-          <SwitchField v-model="form.extra_socalariesOuExtra_professionelles.avez_vous" />
-        </div>
-
-        <div v-if="form.extra_socalariesOuExtra_professionelles.avez_vous">
-          <div v-for="(activite, index) in form.extra_socalariesOuExtra_professionelles.lesquelle" :key="index" class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-              <div class="form-group">
-                <label :class="Theme.applyTextStyle('bodyLarge')">Nature des activités</label>
-                <input v-model="activite.natureDesActivies" type="text" required :class="[Theme.getThemeClasses(isDark).input, 'border rounded p-2 w-full']" />
-              </div>
-              <div class="form-group">
-                <label :class="Theme.applyTextStyle('bodyLarge')">Organismes liés</label>
-                <input v-model="activite.organismesAuxquelSontLies" type="text" required :class="[Theme.getThemeClasses(isDark).input, 'border rounded p-2 w-full']" />
-              </div>
-              <div class="form-group">
-                <label :class="Theme.applyTextStyle('bodyLarge')">Date de début</label>
-                <input v-model="activite.dates.commencement" type="date" required :class="[Theme.getThemeClasses(isDark).input, 'border rounded p-2 w-full']" />
-              </div>
-              <div class="form-group">
-                <label :class="Theme.applyTextStyle('bodyLarge')">Date de fin</label>
-                <input v-model="activite.dates.fini" type="date" required :class="[Theme.getThemeClasses(isDark).input, 'border rounded p-2 w-full']" />
-              </div>
+    <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
+      <!-- Activities List -->
+      <div class="space-y-6">
+        <div v-for="(activity, index) in form.activities" :key="index" 
+             class="bg-white dark:bg-gray-700 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-600 relative">
+          <button 
+            @click="removeActivity(index)" 
+            class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors duration-200"
+            type="button"
+          >
+            <span class="material-icons">close</span>
+          </button>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Activité</label>
+              <input 
+                v-model="activity.activity" 
+                type="text" 
+                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                placeholder="Ex: Club d'informatique, Association sportive..."
+                required
+              />
+            </div>
+            
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+              <textarea 
+                v-model="activity.description" 
+                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                rows="2"
+                placeholder="Décrivez votre rôle et vos réalisations..."
+                required
+              ></textarea>
             </div>
           </div>
-          <button @click="addActivity" :class="[Theme.getThemeClasses(isDark).button.secondary, 'mt-2']">+ Ajouter une activité</button>
         </div>
       </div>
 
-      <div class="flex justify-between mt-8">
+      <!-- Add Activity Button -->
+      <button 
+        type="button"
+        @click="addActivity"
+        class="w-full py-3 px-4 border-2 border-dashed border-blue-500 dark:border-blue-500 rounded-lg text-blue-600 dark:text-blue-300  hover:bg-blue-100 dark:hover:bg-blue-200 transition-colors duration-200 flex items-center justify-center gap-2"
+      >
+        <span class="material-icons">add_circle_outline</span>
+        Ajouter une activité
+      </button>
+
+      <!-- Navigation Buttons -->
+      <div class="flex justify-between items-center pt-6 mt-8 border-t border-gray-200 dark:border-gray-700">
         <button 
           type="button" 
-          @click="$emit('previous-step')"
-          :class="[Theme.getThemeClasses(isDark).button.secondary, 'rounded p-2']"
+          @click="previousStep"
+          class="flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg transition-colors duration-200"
         >
+          <span class="material-icons mr-2">arrow_back</span>
           Précédent
         </button>
         <button 
           type="submit"
-          :class="[Theme.getThemeClasses(isDark).button.primary, 'rounded p-2']"
+          class="flex items-center px-6 py-3 bg-primary-light hover:bg-primary-dark text-white rounded-lg transition-colors duration-200"
         >
           Suivant
+          <span class="material-icons ml-2">arrow_forward</span>
         </button>
       </div>
     </form>
@@ -54,57 +77,81 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { Theme } from '@/utils/Theme'
-import SwitchField from '@/components/SwitchField.vue'
 
 export default {
-  components: {
-    SwitchField
-  },
   setup() {
     const store = useStore()
     
     const form = ref({
-      extra_socalariesOuExtra_professionelles: {
-        avez_vous: false,
-        lesquelle: [{
-          natureDesActivies: '',
-          organismesAuxquelSontLies: '',
-          dates: {
-            commencement: null,
-            fini: null
-          }
-        }]
-      }
+      activities: [
+        {
+          activity: 'Club de Robotique',
+          description: 'Membre actif du club de robotique universitaire. Participation à des compétitions nationales et conception de robots autonomes.'
+        },
+        {
+          activity: 'Bénévolat - Les Restos du Cœur',
+          description: 'Distribution de repas et aide à l\'organisation d\'événements de collecte. Contribution hebdomadaire de 4 heures pendant 2 ans.'
+        },
+        {
+          activity: 'Association Sportive - Basketball',
+          description: 'Capitaine de l\'équipe universitaire de basketball. Organisation d\'entraînements et participation à des tournois régionaux.'
+        }
+      ]
     })
 
     const addActivity = () => {
-      form.value.extra_socalariesOuExtra_professionelles.lesquelle.push({
-        natureDesActivies: '',
-        organismesAuxquelSontLies: '',
-        dates: {
-          commencement: null,
-          fini: null
-        }
+      form.value.activities.push({
+        activity: '',
+        description: ''
       })
     }
 
-    const handleSubmit = () => {
-      store.dispatch('saveStepData', {
-        step: 'extraActivities',
-        data: form.value
-      })
-      store.dispatch('nextStep')
+    const removeActivity = (index) => {
+      if (form.value.activities.length > 1) {
+        form.value.activities.splice(index, 1)
+      }
+    }
+
+    const previousStep = () => {
+      store.dispatch('candidateRegistration/previousStep')
+    }
+
+    const handleSubmit = async () => {
+      if (validateForm()) {
+        try {
+          await store.dispatch('candidateRegistration/updateStepData', {
+            step: 'extraActivities',
+            data: form.value
+          })
+          store.dispatch('candidateRegistration/nextStep')
+        } catch (error) {
+          console.error('Error submitting form:', error)
+        }
+      }
+    }
+
+    const validateForm = () => {
+      const newErrors = {}
+      
+      // Validate activities
+      if (form.value.activities.length === 0 || form.value.activities.every(activity => activity.activity === '' && activity.description === '')) {
+        newErrors.activities = 'Au moins une activité est requise'
+      }
+
+      // Check if any errors were found
+      return Object.keys(newErrors).length === 0
     }
 
     return {
       form,
-      Theme,
-      handleSubmit,
       addActivity,
-      isDark: computed(() => store.state.theme === Theme.THEMES.DARK)
+      removeActivity,
+      handleSubmit,
+      previousStep,
+      Theme
     }
   }
 }

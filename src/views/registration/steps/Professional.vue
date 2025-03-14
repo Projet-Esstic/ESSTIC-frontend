@@ -1,75 +1,97 @@
 <template>
-  <div class="mb-6 p-4 rounded shadow-md">
-    <h2 :class="Theme.applyTextStyle('heading2')">Activités Professionnelles</h2>
+  <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+    <div class="bg-gradient-to-r from-blue-600 to-blue-800 p-6">
+      <h2 class="text-2xl font-bold text-white mb-2">Activités Professionnelles</h2>
+      <p class="text-blue-100">Partagez votre expérience professionnelle</p>
+    </div>
 
-    <form @submit.prevent="handleSubmit" class="space-y-6">
-      <!-- Activités passées -->
-      <div class="mb-6">
-        <h3 :class="Theme.applyTextStyle('heading3')">Expériences Professionnelles Passées</h3>
-        <div class="form-group">
-          <label :class="Theme.applyTextStyle('bodyLarge')">Avez-vous déjà exercé?</label>
-          <SwitchField v-model="form.activitesProfessionellesPassees.avez_vous_deja_exerce" />
-        </div>
-        
-        <div v-if="form.activitesProfessionellesPassees.avez_vous_deja_exerce">
-          <div v-for="(prof, index) in form.activitesProfessionellesPassees.professions" :key="index" class="space-y-4">
-            <div class="grid grid-cols-3 gap-4">
-              <div class="form-group">
-                <label :class="Theme.applyTextStyle('bodyLarge')">Années</label>
-                <input v-model="prof.annees" type="text" :class="[Theme.getThemeClasses(isDark).input, 'border rounded p-2 w-full']" />
-              </div>
-              <div class="form-group">
-                <label :class="Theme.applyTextStyle('bodyLarge')">Secteur d'activité</label>
-                <input v-model="prof.secteurdActivite" type="text" :class="[Theme.getThemeClasses(isDark).input, 'border rounded p-2 w-full']" />
-              </div>
-              <div class="form-group">
-                <label :class="Theme.applyTextStyle('bodyLarge')">Nature des emplois</label>
-                <input v-model="prof.natureDesEmpoisOcccupes" type="text" :class="[Theme.getThemeClasses(isDark).input, 'border rounded p-2 w-full']" />
-              </div>
+    <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
+      <!-- Professional Experience List -->
+      <div class="space-y-6">
+        <div v-for="(experience, index) in form.professionalExperience" :key="index" 
+             class="bg-white dark:bg-gray-700 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-600 relative">
+          <button 
+            @click="removeExperience(index)" 
+            class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors duration-200"
+            type="button"
+          >
+            <span class="material-icons">close</span>
+          </button>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Entreprise</label>
+              <input 
+                v-model="experience.company" 
+                type="text" 
+                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                placeholder="Nom de l'entreprise"
+                required
+              />
+            </div>
+            
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Poste</label>
+              <input 
+                v-model="experience.position" 
+                type="text" 
+                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                placeholder="Titre du poste"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Années d'expérience</label>
+              <input 
+                v-model="experience.yearsOfExperience" 
+                type="number" 
+                min="0"
+                max="50"
+                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+              <textarea 
+                v-model="experience.description" 
+                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                rows="2"
+                placeholder="Décrivez vos responsabilités et réalisations..."
+              ></textarea>
             </div>
           </div>
-          <button @click="addProfession" :class="[Theme.getThemeClasses(isDark).button.secondary, 'mt-2']">+ Ajouter une expérience</button>
         </div>
       </div>
 
-      <!-- Activité actuelle -->
-      <div class="mb-6">
-        <h3 :class="Theme.applyTextStyle('heading3')">Activité Professionnelle Actuelle</h3>
-        <div class="form-group">
-          <label :class="Theme.applyTextStyle('bodyLarge')">Exercez-vous actuellement?</label>
-          <SwitchField v-model="form.activitesProfessionellesCurrent.exercez_vous" />
-        </div>
-        
-        <div v-if="form.activitesProfessionellesCurrent.exercez_vous" class="space-y-4">
-          <div class="form-group">
-            <label :class="Theme.applyTextStyle('bodyLarge')">Domaine</label>
-            <input v-model="form.activitesProfessionellesCurrent.domaines" type="text" :class="[Theme.getThemeClasses(isDark).input, 'border rounded p-2 w-full']" />
-          </div>
-          <div class="form-group">
-            <label :class="Theme.applyTextStyle('bodyLarge')">Nom de l'employeur</label>
-            <input v-model="form.activitesProfessionellesCurrent.nomEmployeur" type="text" :class="[Theme.getThemeClasses(isDark).input, 'border rounded p-2 w-full']" />
-          </div>
-          <div class="form-group">
-            <label :class="Theme.applyTextStyle('bodyLarge')">Depuis quand?</label>
-            <input v-model="form.activitesProfessionellesCurrent.depuisQuand" type="date" :class="[Theme.getThemeClasses(isDark).input, 'border rounded p-2 w-full']" />
-          </div>
-        </div>
-      </div>
+      <!-- Add Experience Button -->
+      <button 
+        type="button"
+        @click="addExperience"
+        class="w-full py-3 px-4 border-2 border-dashed border-blue-300 dark:border-blue-700 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors duration-200 flex items-center justify-center gap-2"
+      >
+        <span class="material-icons">add_circle_outline</span>
+        Ajouter une expérience professionnelle
+      </button>
 
-      <!-- Boutons de navigation -->
-      <div class="flex justify-between mt-8">
+      <!-- Navigation Buttons -->
+      <div class="flex justify-between items-center pt-6 mt-8 border-t border-gray-200 dark:border-gray-700">
         <button 
           type="button" 
-          @click="$emit('previous-step')"
-          :class="[Theme.getThemeClasses(isDark).button.secondary, 'rounded p-2']"
+          @click="previousStep"
+          class="flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg transition-colors duration-200"
         >
+          <span class="material-icons mr-2">arrow_back</span>
           Précédent
         </button>
         <button 
           type="submit"
-          :class="[Theme.getThemeClasses(isDark).button.primary, 'rounded p-2']"
+          class="flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
         >
           Suivant
+          <span class="material-icons ml-2">arrow_forward</span>
         </button>
       </div>
     </form>
@@ -77,57 +99,82 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { Theme } from '@/utils/Theme'
-import SwitchField from '@/components/SwitchField.vue'
 
 export default {
-  components: {
-    SwitchField
-  },
   setup() {
     const store = useStore()
     
     const form = ref({
-      activitesProfessionellesPassees: {
-        avez_vous_deja_exerce: false,
-        professions: [{
-          annees: '',
-          secteurdActivite: '',
-          natureDesEmpoisOcccupes: ''
-        }]
-      },
-      activitesProfessionellesCurrent: {
-        exercez_vous: false,
-        domaines: '',
-        nomEmployeur: '',
-        depuisQuand: null
-      }
+      professionalExperience: [
+        {
+          company: 'Acme Solutions',
+          position: 'Développeur Web',
+          yearsOfExperience: 2,
+          description: 'Développement de solutions web pour des clients internationaux. Utilisation de Vue.js, Node.js et MongoDB pour créer des applications web performantes et réactives.'
+        },
+        {
+          company: 'Tech Innovations',
+          position: 'Stagiaire en développement',
+          yearsOfExperience: 1,
+          description: 'Participation au développement d\'une application mobile de gestion de projets. Collaboration avec une équipe agile et mise en place de tests automatisés.'
+        }
+      ]
     })
 
-    const addProfession = () => {
-      form.value.activitesProfessionellesPassees.professions.push({
-        annees: '',
-        secteurdActivite: '',
-        natureDesEmpoisOcccupes: ''
+    const addExperience = () => {
+      form.value.professionalExperience.push({
+        company: '',
+        position: '',
+        yearsOfExperience: 0,
+        description: ''
       })
     }
 
-    const handleSubmit = () => {
-      store.dispatch('saveStepData', {
-        step: 'professional',
-        data: form.value
-      })
-      store.dispatch('nextStep')
+    const removeExperience = (index) => {
+      if (form.value.professionalExperience.length > 1) {
+        form.value.professionalExperience.splice(index, 1)
+      }
+    }
+
+    const previousStep = () => {
+      store.dispatch('candidateRegistration/previousStep')
+    }
+
+    const handleSubmit = async () => {
+      if (validateForm()) {
+        try {
+          await store.dispatch('candidateRegistration/updateStepData', {
+            step: 'professional',
+            data: form.value
+          })
+          store.dispatch('candidateRegistration/nextStep')
+        } catch (error) {
+          console.error('Error submitting form:', error)
+        }
+      }
+    }
+
+    const validateForm = () => {
+      const newErrors = {}
+      
+      // Validate work experience
+      if (form.value.professionalExperience.length === 0) {
+        newErrors.workExperience = 'Au moins une expérience professionnelle est requise'
+      }
+      
+      return Object.keys(newErrors).length === 0
     }
 
     return {
       form,
-      Theme,
+      addExperience,
+      removeExperience,
       handleSubmit,
-      addProfession,
-      isDark: computed(() => store.state.theme === Theme.THEMES.DARK)
+      previousStep,
+      Theme
     }
   }
 }

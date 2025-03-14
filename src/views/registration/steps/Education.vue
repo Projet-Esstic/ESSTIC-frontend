@@ -1,106 +1,145 @@
 <template>
-  <div class="mb-6 p-4 bg-white dark:bg-background-dark rounded shadow-md">
-    <h2 :class="Theme.applyTextStyle('heading2')" class="text-text-light dark:text-text-dark">Études et Diplômes</h2>
-    
-    <form @submit.prevent="handleSubmit" class="space-y-6">
-      <!-- Études secondaires -->
-      <div class="mb-6">
-        <h3 :class="Theme.applyTextStyle('heading3')" class="text-text-light dark:text-text-dark">Études Secondaires ou Techniques</h3>
-        <div v-for="(etude, index) in form.etudesSecondairesOuTechniques" :key="index" class="space-y-4">
-          <div class="grid grid-cols-3 gap-4">
-            <div class="form-group">
-              <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Années</label>
-              <input v-model="etude.annees" type="text" required class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600" />
-            </div>
-            <div class="form-group">
-              <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Classes</label>
-              <input v-model="etude.classes" type="text" required class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600" />
-            </div>
-            <div class="form-group">
-              <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Établissements</label>
-              <input v-model="etude.etablissements" type="text" required class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600" />
-            </div>
-          </div>
-        </div>
-        <button @click.prevent="addSecondaryEducation" class="bg-secondary-light dark:bg-secondary-dark text-white hover:bg-secondary-hover mt-2 p-2 rounded">+ Ajouter</button>
-      </div>
+  <div class="max-w-4xl mx-auto bg-background-light dark:bg-background-dark rounded-xl shadow-lg overflow-hidden">
+    <div :class="[Theme.applyGradient('primary'), 'p-6']">
+      <h2 :class="[Theme.applyTextStyle('titleLarge'), 'text-white dark:text-text-dark mb-2']">Formation Académique</h2>
+      <p :class="[Theme.applyTextStyle('bodyMedium'), 'text-white dark:text-text-dark opacity-80']">Détails de votre parcours académique</p>
+    </div>
 
-      <!-- Études supérieures -->
-      <div class="mb-6">
-        <h3 :class="Theme.applyTextStyle('heading3')" class="text-text-light dark:text-text-dark">Études Supérieures</h3>
-        <div v-for="(etude, index) in form.etudesSuperieures" :key="index" class="space-y-4">
-          <div class="grid grid-cols-3 gap-4">
-            <div class="form-group">
-              <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Années</label>
-              <input v-model="etude.annees" type="text" required class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600" />
-            </div>
-            <div class="form-group">
-              <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Disciplines</label>
-              <input v-model="etude.disciplines" type="text" required class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600" />
-            </div>
-            <div class="form-group">
-              <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Facultés/Écoles</label>
-              <input v-model="etude.facultesOuEcoles" type="text" required class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600" />
-            </div>
+    <form @submit.prevent="handleSubmit" class="p-6 space-y-8">
+      <!-- High School Section -->
+      <div class="bg-surface-light dark:bg-surface-dark rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-600">
+        <h3 :class="[Theme.applyTextStyle('heading3'), 'text-text-light dark:text-text-dark mb-4']">Études Secondaires</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="form-group">
+            <label :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark mb-2']">Nom de l'établissement</label>
+            <input 
+              v-model="form.highSchool.schoolName" 
+              type="text" 
+              :class="Theme.applyInputStyle()" 
+              placeholder="Nom de votre lycée"
+              required
+            />
           </div>
-        </div>
-        <button @click.prevent="addHigherEducation" class="bg-secondary-light dark:bg-secondary-dark text-white hover:bg-secondary-hover mt-2 p-2 rounded">+ Ajouter</button>
-      </div>
 
-      <!-- Langues -->
-      <div class="mb-6">
-        <h3 :class="Theme.applyTextStyle('heading3')" class="text-text-light dark:text-text-dark">Langues Pratiquées</h3>
-        <div class="grid grid-cols-1 gap-4">
           <div class="form-group">
-            <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Langues Nationales</label>
-            <select v-model="form.languesPartiquees.languesNationale" required class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600">
-              <option value="">Sélectionnez</option>
-              <option value="Ewondo">Ewondo</option>
-              <option value="Bamiléké">Bamiléké</option>
-              <option value="Fulfulde">Fulfulde</option>
-              <option value="Douala">Douala</option>
-              <option value="Bassa">Bassa</option>
-            </select>
+            <label :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark mb-2']">Année d'obtention</label>
+            <input 
+              v-model="form.highSchool.yearCompleted" 
+              type="number" 
+              min="1950"
+              :max="currentYear"
+              :class="Theme.applyInputStyle()" 
+              required
+            />
           </div>
-          <div class="form-group">
-            <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Langues étrangères que vous lisez</label>
-            <select v-model="form.languesPartiquees.languesEtrangeres_lisez_vous" multiple class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600">
-              <option value="Anglais">Anglais</option>
-              <option value="Français">Français</option>
-              <option value="Espagnol">Espagnol</option>
-              <option value="Allemand">Allemand</option>
-              <option value="Italien">Italien</option>
-              <option value="Chinois">Chinois</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label :class="[Theme.applyTextStyle('bodyLarge'), 'text-text-light dark:text-text-dark']">Langues étrangères que vous parlez</label>
-            <select v-model="form.languesPartiquees.languesEtrangeres_parlez_vous" multiple class="border rounded p-2 w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border-gray-300 dark:border-gray-600">
-              <option value="Anglais">Anglais</option>
-              <option value="Français">Français</option>
-              <option value="Espagnol">Espagnol</option>
-              <option value="Allemand">Allemand</option>
-              <option value="Italien">Italien</option>
-              <option value="Chinois">Chinois</option>
-            </select>
+
+          <div class="form-group md:col-span-2">
+            <label :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark mb-2']">Matières principales</label>
+            <textarea 
+              v-model="form.highSchool.majorSubjects" 
+              :class="Theme.applyInputStyle()" 
+              rows="2"
+              placeholder="Ex: Mathématiques, Physique, Sciences..."
+              required
+            ></textarea>
           </div>
         </div>
       </div>
 
-      <!-- Boutons de navigation -->
-      <div class="flex justify-between mt-8">
+      <!-- University Section -->
+      <div class="bg-surface-light dark:bg-surface-dark rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-600">
+        <h3 :class="[Theme.applyTextStyle('heading3'), 'text-text-light dark:text-text-dark mb-4']">Études Universitaires</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="form-group">
+            <label :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark mb-2']">Nom de l'université</label>
+            <input 
+              v-model="form.university.universityName" 
+              type="text" 
+              :class="Theme.applyInputStyle()" 
+              placeholder="Nom de votre université"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark mb-2']">Diplôme obtenu</label>
+            <input 
+              v-model="form.university.degree" 
+              type="text" 
+              :class="Theme.applyInputStyle()" 
+              placeholder="Ex: Licence en Informatique"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark mb-2']">Année d'obtention</label>
+            <input 
+              v-model="form.university.yearCompleted" 
+              type="number" 
+              min="1950"
+              :max="currentYear"
+              :class="Theme.applyInputStyle()" 
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Document Upload Section -->
+      <div class="bg-surface-light dark:bg-surface-dark rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-600">
+        <h3 :class="[Theme.applyTextStyle('heading3'), 'text-text-light dark:text-text-dark mb-4']">Documents Académiques</h3>
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 md:grid-cols-2 gap-6">
+          <div class="form-group">
+            <label :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark mb-2']">Relevé de notes</label>
+            <input 
+              type="file" 
+              @change="handleTranscriptUpload" 
+              accept=".pdf,.doc,.docx"
+              :class="Theme.applyInputStyle()" 
+            />
+          </div>
+
+          <div class="form-group">
+            <label :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark mb-2']">Diplômes</label>
+            <input 
+              type="file" 
+              @change="handleDiplomaUpload" 
+              accept=".pdf,.doc,.docx"
+              :class="Theme.applyInputStyle()" 
+            />
+          </div>
+
+          <div class="form-group">
+            <label :class="[Theme.applyTextStyle('bodyMedium'), 'text-text-light dark:text-text-dark mb-2']">CV</label>
+            <input 
+              type="file" 
+              @change="handleCVUpload" 
+              accept=".pdf,.doc,.docx"
+              :class="Theme.applyInputStyle()" 
+            />
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="flex justify-between items-center pt-6 mt-8 border-t border-gray-200 dark:border-gray-700">
         <button 
           type="button" 
           @click="previousStep"
-          class="bg-secondary-light dark:bg-secondary-dark text-white hover:bg-secondary-hover rounded p-2"
+          class="flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg transition-colors duration-200"
         >
+          <span class="material-icons mr-2">arrow_back</span>
           Précédent
         </button>
         <button 
           type="submit"
-          class="bg-primary-light dark:bg-primary-dark text-white hover:bg-primary-hover rounded p-2"
+          class="flex items-center px-6 py-3 bg-primary-light hover:bg-primary-dark text-white rounded-lg transition-colors duration-200"
         >
-          Suivant
+        Suivant
+        <span class="material-icons mr-2">arrow_forward</span>
         </button>
       </div>
     </form>
@@ -108,7 +147,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { Theme } from '@/utils/Theme'
 
@@ -116,60 +155,106 @@ export default {
   setup() {
     const store = useStore()
     
+    const currentYear = new Date().getFullYear()
+
     const form = ref({
-      etudesSecondairesOuTechniques: [{
-        annees: '',
-        classes: '',
-        etablissements: ''
-      }],
-      etudesSuperieures: [{
-        annees: '',
-        disciplines: '',
-        facultesOuEcoles: ''
-      }],
-      languesPartiquees: {
-        languesNationale: '',
-        languesEtrangeres_lisez_vous: [],
-        languesEtrangeres_parlez_vous: []
+      highSchool: {
+        schoolName: 'Lycée Victor Hugo',
+        yearCompleted: 2018,
+        majorSubjects: 'Mathématiques, Physique-Chimie, Sciences de la Vie et de la Terre'
+      },
+      university: {
+        universityName: 'Université Paris-Saclay',
+        degree: 'Licence en Informatique',
+        yearCompleted: 2021
+      },
+      documents: {
+        transcript: null,
+        diploma: null,
+        cv: null
       }
     })
 
-    const addSecondaryEducation = () => {
-      form.value.etudesSecondairesOuTechniques.push({
-        annees: '',
-        classes: '',
-        etablissements: ''
-      })
+    const handleTranscriptUpload = (event) => {
+      form.value.documents.transcript = event.target.files[0]
     }
 
-    const addHigherEducation = () => {
-      form.value.etudesSuperieures.push({
-        annees: '',
-        disciplines: '',
-        facultesOuEcoles: ''
-      })
+    const handleDiplomaUpload = (event) => {
+      form.value.documents.diploma = event.target.files[0]
+    }
+
+    const handleCVUpload = (event) => {
+      form.value.documents.cv = event.target.files[0]
     }
 
     const previousStep = () => {
-      store.dispatch('previousStep')
+      store.dispatch('candidateRegistration/previousStep')
     }
 
-    const handleSubmit = () => {
-      store.dispatch('saveStepData', {
-        step: 'education',
-        data: form.value
-      })
-      store.dispatch('nextStep')
+    const handleSubmit = async () => {
+      if (validateForm()) {
+        const formData = {
+          highSchool: {
+            schoolName: form.value.highSchool.schoolName,
+            yearCompleted: form.value.highSchool.yearCompleted,
+            majorSubjects: form.value.highSchool.majorSubjects
+          },
+          university: {
+            universityName: form.value.university.universityName,
+            degree: form.value.university.degree,
+            yearCompleted: form.value.university.yearCompleted
+          },
+          documents: {
+            transcript: form.value.documents.transcript,
+            diploma: form.value.documents.diploma,
+            cv: form.value.documents.cv
+          }
+        }
+        store.dispatch('candidateRegistration/updateStepData', {
+          step: 'education',
+          data: formData
+        })
+        store.dispatch('candidateRegistration/nextStep')
+      }
+    }
+
+    const validateForm = () => {
+      const newErrors = {}
+      
+      // Validate high school information
+      if (!form.value.highSchool.schoolName) {
+        newErrors.schoolName = "Le nom de l'établissement est requis"
+      }
+      if (!form.value.highSchool.yearCompleted) {
+        newErrors.yearCompleted = "L'année d'obtention est requise"
+      }
+      if (!form.value.highSchool.majorSubjects) {
+        newErrors.majorSubjects = 'Les matières principales sont requises'
+      }
+
+      // Validate university information
+      if (!form.value.university.universityName) {
+        newErrors.universityName = "Le nom de l'université est requis"
+      }
+      if (!form.value.university.degree) {
+        newErrors.degree = 'Le diplôme est requis'
+      }
+      if (!form.value.university.yearCompleted) {
+        newErrors.uniYearCompleted = "L'année d'obtention est requise"
+      }
+      
+      return Object.keys(newErrors).length === 0
     }
 
     return {
       form,
-      Theme,
+      currentYear,
+      handleTranscriptUpload,
+      handleDiplomaUpload,
+      handleCVUpload,
       handleSubmit,
       previousStep,
-      addSecondaryEducation,
-      addHigherEducation,
-      isDark: computed(() => store.state.theme === Theme.THEMES.DARK)
+      Theme
     }
   }
 }
