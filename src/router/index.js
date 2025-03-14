@@ -92,40 +92,54 @@ const routes = [
     children: [
       {
         path: '',
-        name: 'PersonnelRegistration',
-        component: () => import('../views/personnel/PersonnelList.vue'),
+        name: 'PersonnelManagement',
+        component: () => import('../views/personnel/PersonnelManagement.vue'),
         meta: {
-          title: 'Register Personnel'
-        },
-        beforeEnter: (to, from, next) => {
-          if (to.query.source === 'admin') {
-            to.meta.isAdmin = true;
-          }
-          next();
+          title: 'Personnel Management'
         }
       },
       {
-        path: '/personnel/create',
-        name: 'CreatePersonnel',
-        component: () => import('../views/personnel/CreatePersonnel.vue'),
+        path: 'attendance',
+        name: 'PersonnelAttendance',
+        component: () => import('../views/personnel/PersonnelAttendance.vue'),
         meta: {
-          title: 'Create Personnel'
-        },
-        beforeEnter: (to, from, next) => {
-          if (to.query.source === 'admin') {
-            to.meta.isAdmin = true;
-          }
-          next();
+          title: 'Personnel Attendance'
         }
       },
       {
-        path: '/personnel/detail/:id',
+        path: 'schedule',
+        name: 'PersonnelSchedule', 
+        component: () => import('../views/personnel/PersonnelSchedule.vue'),
+        meta: {
+          title: 'Personnel Schedule'
+        }
+      },
+      {
+        path: 'leave',
+        name: 'PersonnelLeave',
+        component: () => import('../views/personnel/PersonnelLeave.vue'),
+        meta: {
+          title: 'Personnel Leave'
+        }
+      },
+      {
+        path: 'requests',
+        name: 'PersonnelRequest',
+        component: () => import('../views/personnel/PersonnelRequest.vue'),
+        meta: {
+          title: 'Personnel Requests'
+        }
+      },
+      {
+        path: 'detail/:id',
         name: 'PersonnelDetail',
-        component:import('../views/personnel/PersonnelDetail.vue'),
+        component: () => import('../views/personnel/PersonnelDetail.vue'),
+        meta: {
+          title: 'Personnel Details'
+        }
       }
     ]
-  },
-  { 
+  },  { 
     path: '/login', 
     component: LoginView 
   },
@@ -162,6 +176,10 @@ const routes = [
     ]
   },
   // Public routes
+  {
+    path: '/all-routes',
+    component: () => import('../views/AllRoute.vue'),
+    },
   {
     path: '/candidate-registration',
     component: () => import('../layouts/PublicLayout.vue'),
