@@ -1,34 +1,45 @@
 <template>
   <div class="text-center p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div class="max-w-5xl mx-auto mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <label for="level-select" class="block text-sm font-medium text-text-light dark:text-white mb-1">
+          Level:
+        </label>
+        <select
+          id="level-select"
+          v-model="selectedLevel"
+          @change="updateFilteredStudents"
+          class="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+        >
+          <option value="">All Levels</option>
+          <option v-for="level in levels" :key="level" :value="level">
+            {{ level }}
+          </option>
+        </select>
+      </div>
+    </div>
 
-    
-    <!-- Student Records -->
     <div class="max-w-5xl mx-auto mb-6">
-
       <div v-if="filteredStudents.length === 0" class="text-gray-500 dark:text-gray-400">
         No students match the selected filters.
       </div>
       <div v-else>
-        <div v-for="student in filteredStudents" :key="student.id" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-4">
-          <!-- Save as PDF Button at Top Right -->
+        <div v-for="student in filteredStudents" :key="student.student.user.fullName" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-4">
           <div class="flex justify-end mb-4">
-            <button 
-              @click="saveAsPDF(student)" 
+            <button
+              @click="printTranscript(student)"
               class="hover:text-white hover:bg-black border-2 text-black font-medium py-2 px-4 rounded-md flex items-center"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2-4h6m-6 8a3 3 0 100-6 3 3 0 000 6z" />
               </svg>
               Save as PDF
             </button>
           </div>
-          
-          <!-- Printable Transcript Area -->
-          <div :id="'transcript-' + student.id" class="transcript-content">
-            <!-- Header with ESSTIC Logo and Information -->
+
+          <div :id="'transcript-' + student.student.user.fullName" class="transcript-content">
             <div class="flex flex-col md:flex-row justify-between items-start border-b pb-4 mb-4">
               <div class="flex items-center">
-                
                 <div class="mr-4 text-left">
                   <img src="@/assets/images/logo.png" alt="ESSTIC Logo" class="w-50 h-20 bg-white p-1 mb-1" />
                   <div class="text-xs text-gray-600 dark:text-gray-300">ECOLE SUPERIEURE DES SCIENCES ET</div>
@@ -42,7 +53,7 @@
               </div>
               <div class="mr-4">
                 <img src="@/assets/images/logo.png" alt="ESSTIC Logo" class="w-50 h-20 bg-white p-1 mb-1" />
-                </div>
+              </div>
               <div class="flex items-center mt-4 md:mt-0">
                 <div class="text-center">
                   <div class="font-bold">REPUBLIQUE DU CAMEROUN</div>
@@ -51,28 +62,25 @@
                 </div>
               </div>
             </div>
-            
-            <!-- Transcript Title -->
+
             <div class="text-xl font-bold text-center my-6">RELEVE DE NOTES / TRANSCRIPT</div>
-            
-            <!-- Student Information -->
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-left">
               <div>
-                <div><span class="font-medium">Nom(s) et prénom(s)/ Name and Surname : </span>{{ student.firstName }} {{ student.lastName }}</div>
-                <div><span class="font-medium">Né Le /Born on: </span>{{ student.birthDate }}</div>
-                <div><span class="font-medium">Nationalité /Nationality: </span>{{ student.nationality }}</div>
-                <div><span class="font-medium">Statut / Quality: </span>{{ student.status }}</div>
+                <div><span class="font-medium">Nom(s) et prénom(s)/ Name and Surname : </span>{{ student.student.user.fullName }}</div>
+                <div><span class="font-medium">Né Le /Born on: </span>{{ student.student.user.dateOfBirth }}</div>
+                <div><span class="font-medium">Nationalité /Nationality: </span>{{ student.generalInfo?.nationality }}</div>
+                <div><span class="font-medium">Statut / Quality: </span>{{ student.generalInfo?.status }}</div>
               </div>
               <div>
-                <div><span class="font-medium">A /at: </span>{{ student.birthPlace }}</div>
-                <div><span class="font-medium">N° Matricule /Registration N°: </span>{{ student.registrationNumber }}</div>
-                <div><span class="font-medium">Filière /Serie: </span>{{ student.department }} /{{ student.department === 'Journalisme' ? 'Journalism' : student.department }}</div>
-                <div><span class="font-medium">Année académique/Academic year: </span>{{ student.academicYear }}</div>
-                <div><span class="font-medium">Niveau/Level: </span>{{ student.level }}</div>
+                <div><span class="font-medium">A /at: </span>{{ student.generalInfo?.birthPlace }}</div>
+                <div><span class="font-medium">N° Matricule /Registration N°: </span>{{ student.generalInfo?.registrationNumber }}</div>
+                <div><span class="font-medium">Filière /Serie: </span>{{ student.academicInfo?.level_list[selectedLevelIndex(student)]?.department }} /{{ student.academicInfo?.level_list[selectedLevelIndex(student)]?.department === 'Journalisme' ? 'Journalism' : student.academicInfo?.level_list[selectedLevelIndex(student)]?.department }}</div>
+                <div><span class="font-medium">Année académique/Academic year: </span>{{ student.academicInfo?.level_list[selectedLevelIndex(student)]?.academicYears[0]?.year }}</div>
+                <div><span class="font-medium">Niveau/Level: </span>{{ student.academicInfo?.level_list[selectedLevelIndex(student)]?.level }}</div>
               </div>
             </div>
 
-            <!-- Course Performance Table with Gray Header - Styled like the image -->
             <table class="min-w-full border border-gray-300 dark:border-gray-600">
               <thead>
                 <tr class="bg-gray-500 text-white">
@@ -86,40 +94,27 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- Group courses by module code prefix (JF5, JF6, etc.) -->
                 <template v-for="(group, groupIndex) in groupedCourses(student)" :key="groupIndex">
-                  <!-- Module Header Row -->
-                  <!-- <tr class="bg-gray-200 dark:bg-gray-700 dark:text-white">
-                    <td colspan="7" class="py-1 px-3 border-b dark:border-gray-600 text-left font-bold text-sm">{{ group.header }}</td>
-                  </tr> -->
-                  <!-- Course Rows -->
-                  <tr 
-                    v-for="course in group.courses" 
-                    :key="`${student.id}-${course.code}-${course.semester}-${course.academicYear}`"
-                    class="hover:bg-gray-50 even:bg-gray-100 dark:hover:bg-gray-700 dark:even:bg-gray-750 dark:text-white"
-                  >
+                  <tr v-for="course in group.courses" :key="`${student.student.user.fullName}-${course.code}-${course.semester}-${student.academicInfo?.level_list[selectedLevelIndex(student)]?.academicYears[0]?.year}`" class="hover:bg-gray-50 even:bg-gray-100 dark:hover:bg-gray-700 dark:even:bg-gray-750 dark:text-white">
                     <td class="py-1 px-3 border-b border-r dark:border-gray-600 text-sm text-left">{{ course.code }}</td>
                     <td class="py-1 px-3 border-b border-r dark:border-gray-600 text-sm text-left">{{ course.title }}</td>
-                    <td class="py-1 px-3 border-b border-r dark:border-gray-600 text-sm text-center font-medium" 
-                        :class="getGradeColorClass(course.grade)">
+                    <td class="py-1 px-3 border-b border-r dark:border-gray-600 text-sm text-center font-medium" :class="getGradeColorClass(course.grade)">
                       {{ course.grade.toFixed(2) }}
                     </td>
                     <td class="py-1 px-3 border-b border-r dark:border-gray-600 text-sm text-center">{{ course.coefficient }}</td>
                     <td class="py-1 px-3 border-b border-r dark:border-gray-600 text-sm text-center">{{ course.mention }}</td>
                     <td class="py-1 px-3 border-b border-r dark:border-gray-600 text-sm text-center">{{ course.credits }}</td>
-                    <td class="py-1 px-3 border-b dark:border-gray-600 text-sm text-center">{{ course.academicYear }}</td>
+                    <td class="py-1 px-3 border-b dark:border-gray-600 text-sm text-center">{{ course.semester }}</td>
                   </tr>
                 </template>
               </tbody>
             </table>
 
-            <!-- Footer with date and time -->
             <div class="mt-6 text-right text-sm text-gray-600 dark:text-gray-300">
               <div>ACMA {{ getCurrentDate() }}</div>
               <div>{{ getCurrentTime() }}</div>
             </div>
           </div>
-          <!-- Summary - Only visible in the app, not in print view -->
           <div class="mt-6 print:hidden">
             <h3 class="text-lg font-semibold mb-4 text-left">Academic Summary</h3>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -156,145 +151,45 @@
 </template>
 
 <script>
+import studentData from '@/data/studentInfo2.json';
+
 export default {
   data() {
     return {
-      // Filter states
       selectedLevel: "",
-      selectedDepartment: "",
-      selectedAcademicYear: "",
-      selectedSemester: "",
-      searchName: "",
-      
-      // Filter options
-      levels: ["Licence 1", "Licence 2", "Licence 3", "Master 1", "Master 2"],
-      departments: ["Journalisme", "Communication", "Documentation", "Informatique"],
-      academicYears: ["2023-2024", "2022-2023", "2021-2022"],
-      semesters: ["Semestre 1", "Semestre 2", "Semestre 3", "Semestre 4", "Semestre 5", "Semestre 6"],
-      
-      // Students data
-      students: [
-        {
-          id: 1,
-          firstName: "Alice",
-          lastName: "Nguema",
-          registrationNumber: "ESSTIC2021001",
-          birthDate: "15/04/2000",
-          birthPlace: "Douala",
-          nationality: "Camerounaise",
-          status: "Etudiant",
-          department: "Journalisme",
-          level: "Licence 2",
-          academicYear: "2022-2023",
-          courses: [
-            { code: "JL3-101", title: "Introduction au journalisme", grade: 15.75, coefficient: 3, credits: 6, mention: "B", semester: "Semestre 3", academicYear: "2022-2023" },
-            { code: "JL3-102", title: "Techniques d'écriture journalistique", grade: 17.25, coefficient: 4, credits: 8, mention: "A", semester: "Semestre 3", academicYear: "2022-2023" },
-            { code: "JL3-103", title: "Éthique et déontologie", grade: 14.50, coefficient: 2, credits: 4, mention: "B", semester: "Semestre 3", academicYear: "2022-2023" },
-            { code: "JL3-104", title: "Presse écrite", grade: 16.00, coefficient: 3, credits: 6, mention: "B", semester: "Semestre 3", academicYear: "2022-2023" },
-            { code: "JL3-105", title: "Culture générale et actualité", grade: 13.50, coefficient: 2, credits: 4, mention: "B", semester: "Semestre 3", academicYear: "2022-2023" },
-            { code: "JL4-201", title: "Journalisme radio", grade: 14.75, coefficient: 3, credits: 6, mention: "B", semester: "Semestre 4", academicYear: "2022-2023" },
-            { code: "JL4-202", title: "Journalisme télévisé", grade: 16.50, coefficient: 3, credits: 6, mention: "A", semester: "Semestre 4", academicYear: "2022-2023" },
-            { code: "JL4-203", title: "Journalisme numérique", grade: 18.00, coefficient: 3, credits: 6, mention: "A", semester: "Semestre 4", academicYear: "2022-2023" },
-            { code: "JL4-204", title: "Photojournalisme", grade: 15.50, coefficient: 2, credits: 4, mention: "B", semester: "Semestre 4", academicYear: "2022-2023" },
-            { code: "JL4-205", title: "Recherche et vérification des faits", grade: 14.25, coefficient: 2, credits: 4, mention: "B", semester: "Semestre 4", academicYear: "2022-2023" }
-          ]
-        },
-        {
-          id: 1,
-          firstName: "Alice",
-          lastName: "Nguema",
-          registrationNumber: "ESSTIC2021001",
-          birthDate: "15/04/2000",
-          birthPlace: "Douala",
-          nationality: "Camerounaise",
-          status: "Etudiant",
-          department: "Journalisme",
-          level: "Licence 3",
-          academicYear: "2023-2024",
-          courses: [
-            { code: "CO5-101", title: "Stratégies de communication", grade: 13.75, coefficient: 3, credits: 6, mention: "B", semester: "Semestre 5", academicYear: "2022-2023" },
-            { code: "CO5-102", title: "Communication d'entreprise", grade: 11.25, coefficient: 3, credits: 6, mention: "C", semester: "Semestre 5", academicYear: "2022-2023" },
-            { code: "CO5-103", title: "Relations publiques", grade: 9.50, coefficient: 2, credits: 4, mention: "D", semester: "Semestre 5", academicYear: "2022-2023" },
-            { code: "CO5-104", title: "Marketing digital", grade: 16.25, coefficient: 3, credits: 6, mention: "A", semester: "Semestre 5", academicYear: "2022-2023" },
-            { code: "CO5-105", title: "Gestion de crise", grade: 14.50, coefficient: 2, credits: 4, mention: "B", semester: "Semestre 5", academicYear: "2022-2023" },
-            { code: "CO6-201", title: "Communication politique", grade: 12.75, coefficient: 3, credits: 6, mention: "C", semester: "Semestre 6", academicYear: "2022-2023" },
-            { code: "CO6-202", title: "Communication interculturelle", grade: 15.00, coefficient: 2, credits: 4, mention: "B", semester: "Semestre 6", academicYear: "2022-2023" },
-            { code: "CO6-203", title: "Création publicitaire", grade: 17.50, coefficient: 3, credits: 6, mention: "A", semester: "Semestre 6", academicYear: "2022-2023" },
-            { code: "CO6-204", title: "Mémoire de fin d'études", grade: 14.75, coefficient: 6, credits: 12, mention: "B", semester: "Semestre 6", academicYear: "2022-2023" },
-            { code: "CO6-205", title: "Stage professionnel", grade: 16.00, coefficient: 4, credits: 8, mention: "B", semester: "Semestre 6", academicYear: "2022-2023" }
-          ]
-        },
-        {
-          id: 1,
-          firstName: "Alice",
-          lastName: "Nguema",
-          registrationNumber: "ESSTIC2021001",
-          birthDate: "15/04/2000",
-          birthPlace: "Douala",
-          nationality: "Camerounaise",
-          status: "Etudiant",
-          department: "Journalisme",
-          level: "Licence 1",
-          academicYear: "2021-2022",
-          courses: [
-            { code: "DO1-101", title: "Introduction aux sciences de l'information", grade: 12.50, coefficient: 2, credits: 4, mention: "C", semester: "Semestre 1", academicYear: "2022-2023" },
-            { code: "DO1-102", title: "Gestion documentaire", grade: 14.25, coefficient: 3, credits: 6, mention: "B", semester: "Semestre 1", academicYear: "2022-2023" },
-            { code: "DO1-103", title: "Recherche d'information", grade: 16.75, coefficient: 3, credits: 6, mention: "A", semester: "Semestre 1", academicYear: "2022-2023" },
-            { code: "DO1-104", title: "Archivistique", grade: 11.00, coefficient: 2, credits: 4, mention: "C", semester: "Semestre 1", academicYear: "2022-2023" },
-            { code: "DO1-105", title: "Informatique documentaire", grade: 9.25, coefficient: 3, credits: 6, mention: "D", semester: "Semestre 1", academicYear: "2022-2023" },
-            { code: "DO2-201", title: "Bibliothéconomie", grade: 13.50, coefficient: 2, credits: 4, mention: "B", semester: "Semestre 2", academicYear: "2022-2023" },
-            { code: "DO2-202", title: "Catalogage et indexation", grade: 15.25, coefficient: 3, credits: 6, mention: "B", semester: "Semestre 2", academicYear: "2022-2023" },
-            { code: "DO2-203", title: "Veille informationnelle", grade: 14.00, coefficient: 3, credits: 6, mention: "B", semester: "Semestre 2", academicYear: "2022-2023" },
-            { code: "DO2-204", title: "Gestion de contenu numérique", grade: 12.75, coefficient: 2, credits: 4, mention: "C", semester: "Semestre 2", academicYear: "2022-2023" },
-            { code: "DO2-205", title: "Droit de l'information", grade: 10.50, coefficient: 2, credits: 4, mention: "D", semester: "Semestre 2", academicYear: "2022-2023" }
-          ]
-        }
-        
-      ],
-      
-      // UI state
-      filteredStudents: []
+      levels: ["1 LICENCE", "2 LICENCE", "3 LICENCE", "1 MASTER", "2 MASTER"],
+      students: studentData.students,
+      filteredStudents: [],
     };
   },
-  
+
   mounted() {
-    // Initialize the filtered students list
     this.updateFilteredStudents();
   },
-  
+
   methods: {
-    // Filter students based on selected criteria
     updateFilteredStudents() {
-      this.filteredStudents = this.students.filter(student => {
-        // Check if student matches all the filter criteria
-        const levelMatch = !this.selectedLevel || student.level === this.selectedLevel;
-        const departmentMatch = !this.selectedDepartment || student.department === this.selectedDepartment;
-        const academicYearMatch = !this.selectedAcademicYear || student.academicYear === this.selectedAcademicYear;
-        const semesterMatch = !this.selectedSemester || student.courses.some(course => course.semester === this.selectedSemester);
-        
-        // Check if student name matches the search query
-        const nameMatch = !this.searchName || 
-          `${student.firstName} ${student.lastName}`.toLowerCase().includes(this.searchName.toLowerCase());
-        
-        return levelMatch && departmentMatch && academicYearMatch && semesterMatch && nameMatch;
-      });
+      if (!this.selectedLevel) {
+        this.filteredStudents = this.students;
+      } else {
+        this.filteredStudents = this.students.filter(student => {
+          return student.student.academicInfo?.level_list?.some(level => level.level === this.selectedLevel);
+        });
+      }
     },
-    
-    // Filter courses for a specific student based on selected semester
+
     filteredStudentCourses(student) {
-      return student.courses.filter(course => {
-        const semesterMatch = !this.selectedSemester || course.semester === this.selectedSemester;
-        const yearMatch = !this.selectedAcademicYear || course.academicYear === this.selectedAcademicYear;
-        return semesterMatch && yearMatch;
-      });
+      if(!this.selectedLevel){
+          return student.student.academicInfo?.level_list?.flatMap(level => level.academicYears[0]?.courses) || [];
+      }
+      const levelData = student.student.academicInfo?.level_list?.find(level => level.level === this.selectedLevel);
+      return levelData?.academicYears[0]?.courses || [];
     },
-    
-    // Group courses by module code prefix for better organization
+
     groupedCourses(student) {
       const courses = this.filteredStudentCourses(student);
       const groups = {};
-      
-      // Group courses by their code prefix (e.g., "JL3", "JL4")
+
       courses.forEach(course => {
         const codePrefix = course.code.split('-')[0];
         if (!groups[codePrefix]) {
@@ -302,94 +197,13 @@ export default {
         }
         groups[codePrefix].push(course);
       });
-      
-      // Convert the groups object to an array for template rendering
-      return Object.keys(groups).map(key => {
-        let headerText = "";
-        
-        // Generate appropriate headers based on department and level
-        if (key.startsWith("JL")) {
-          headerText = "Module Journalisme";
-        } else if (key.startsWith("CO")) {
-          headerText = "Module Communication";
-        } else if (key.startsWith("DO")) {
-          headerText = "Module Documentation";
-        } else if (key.startsWith("IN")) {
-          headerText = "Module Informatique";
-        }
-        
-        // Add numerical identifier
-        const moduleNumber = key.substring(2);
-        headerText += ` Niveau ${moduleNumber}`;
-        
-        return {
-          header: headerText,
-          courses: groups[key].sort((a, b) => a.code.localeCompare(b.code))
-        };
-      });
+
+      return Object.keys(groups).map(key => ({
+        header: `Module ${key.startsWith("JL") ? "Journalisme" : key.startsWith("CO") ? "Communication" : key.startsWith("DO") ? "Documentation" : "Informatique"} Niveau ${key.substring(2)}`,
+        courses: groups[key].sort((a, b) => a.code.localeCompare(b.code))
+      }));
     },
-    
-    // Calculate the average grade for a student
-    calculateAverageGrade(student) {
-      const courses = this.filteredStudentCourses(student);
-      if (courses.length === 0) return 0;
-      
-      let totalWeightedGrade = 0;
-      let totalCoefficients = 0;
-      
-      courses.forEach(course => {
-        totalWeightedGrade += course.grade * course.coefficient;
-        totalCoefficients += course.coefficient;
-      });
-      
-      return totalWeightedGrade / totalCoefficients;
-    },
-    
-    // Calculate total credits earned by a student
-    calculateTotalCredits(student) {
-      const courses = this.filteredStudentCourses(student);
-      let earnedCredits = 0;
-      
-      courses.forEach(course => {
-        // Count credits only for passed courses (grade >= 10)
-        if (course.grade >= 10) {
-          earnedCredits += course.credits;
-        }
-      });
-      
-      return earnedCredits;
-    },
-    
-    // Count passed courses for a student
-    countPassedCourses(student) {
-      const courses = this.filteredStudentCourses(student);
-      return courses.filter(course => course.grade >= 10).length;
-    },
-    
-    // Determine overall status based on performance
-    getOverallStatus(student) {
-      const avgGrade = this.calculateAverageGrade(student);
-      const passRate = this.countPassedCourses(student) / this.filteredStudentCourses(student).length;
-      
-      if (avgGrade >= 16) return "Excellent";
-      if (avgGrade >= 14) return "Très Bien";
-      if (avgGrade >= 12) return "Bien";
-      if (avgGrade >= 10) return "Assez Bien";
-      if (passRate >= 0.75) return "Admis";
-      return "Non Admis";
-    },
-    
-    // Get CSS class for overall status display
-    getOverallStatusClass(student) {
-      const status = this.getOverallStatus(student);
-      
-      if (status === "Excellent" || status === "Très Bien") return "text-green-600 dark:text-green-400";
-      if (status === "Bien" || status === "Assez Bien") return "text-blue-600 dark:text-blue-400";
-      if (status === "Admis") return "text-yellow-600 dark:text-yellow-400";
-      return "text-red-600 dark:text-red-400";
-    },
-    
-    // Get CSS class for grade color coding
+
     getGradeColorClass(grade) {
       if (grade >= 16) return "text-green-700 font-bold";
       if (grade >= 14) return "text-green-600";
@@ -397,12 +211,11 @@ export default {
       if (grade >= 10) return "text-blue-500";
       return "text-red-500";
     },
-    
-    // Print student transcript
+
     printTranscript(student) {
-      const printContent = document.getElementById(`transcript-${student.id}`).innerHTML;
+      const printContent = document.getElementById(`transcript-${student.student.user.fullName}`).innerHTML;
       const originalContents = document.body.innerHTML;
-      
+
       document.body.innerHTML = `
         <div class="print-container">
           <style>
@@ -417,23 +230,55 @@ export default {
           ${printContent}
         </div>
       `;
-      
+
       window.print();
       document.body.innerHTML = originalContents;
-      this.updateFilteredStudents(); // Refresh the UI after printing
+      this.updateFilteredStudents();
     },
-    
-    // Get current date in DD/MM/YYYY format
+
     getCurrentDate() {
       const date = new Date();
       return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
     },
-    
-    // Get current time in HH:MM format
+
     getCurrentTime() {
       const date = new Date();
       return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-    }
+    },
+
+    selectedLevelIndex(student){
+        if(!this.selectedLevel){
+            return 0;
+        }
+        return student.student.academicInfo?.level_list?.findIndex(level => level.level === this.selectedLevel)
+    },
+
+    calculateAverageGrade(student) {
+      const courses = this.filteredStudentCourses(student);
+      if (courses.length === 0) return 0;
+      const totalGrade = courses.reduce((sum, course) => sum + course.grade, 0);
+      return totalGrade / courses.length;
+    },
+
+    calculateTotalCredits(student) {
+      const courses = this.filteredStudentCourses(student);
+      return courses.reduce((sum, course) => sum + course.credits, 0);
+    },
+
+    countPassedCourses(student) {
+      const courses = this.filteredStudentCourses(student);
+      return courses.filter(course => course.grade >= 10).length;
+    },
+
+    getOverallStatus(student) {
+      const average = this.calculateAverageGrade(student);
+      if (average >= 10) return "Passed";
+      return "Failed";
+    },
+
+    getOverallStatusClass(student) {
+      return this.getOverallStatus(student) === "Passed" ? "text-green-600" : "text-red-600";
+    },
   }
 };
 </script>
