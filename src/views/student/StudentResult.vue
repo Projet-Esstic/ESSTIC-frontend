@@ -3,17 +3,18 @@
       <h1 class="text-4xl font-bold text-primary-light dark:text-primary-dark mb-8">
         Mon Bulletin
       </h1>
-      <Bulletin></Bulletin>
+      <NewAcademicProgress></NewAcademicProgress>
     </div>
   </template>
   
 
   <script>
-  import Bulletin from '@/components/student/result/Bulletin.vue';
+  import NewAcademicProgress from '@/components/student/studentManagment/NewAcademicProgress.vue';
+
   export default {
     name: 'About',
     components: {
-      Bulletin,
+      NewAcademicProgress,
     },
   }
   </script>

@@ -459,13 +459,13 @@ export default {
           {
             label: 'Passed',
             data: departments.value.map(dept => departmentResults[dept._id]?.passed || 0),
-            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+          backgroundColor: 'rgba(75, 192, 192, 0.5)',
             borderColor: 'rgb(75, 192, 192)'
           }, 
           {
             label: 'Failed',
             data: departments.value.map(dept => departmentResults[dept._id]?.failed || 0),
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+          backgroundColor: 'rgba(255, 99, 132, 0.5)',
             borderColor: 'rgb(255, 99, 132)'
           }
         ]
