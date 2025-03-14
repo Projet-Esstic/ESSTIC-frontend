@@ -1,11 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
+
 import Unauthorized from '../views/error/Unauthorized.vue'
 import ExamResults from '@/views/entrance-exam/ExamResults.vue'
 import LoginView from '@/views/LoginView.vue';
 import {authService} from '@/api/services/index';
 import LandingPage from '../views/LandingPage.vue';
-
 const routes = [
   { 
     path: '/', 
@@ -53,6 +53,7 @@ const routes = [
         component: () => import('../views/entrance-exam/EntranceExam.vue')
       },
       {
+
         path: '/student-management',
         name: 'StudentManagement',
         component: () => import('../views/student/StudentManagement.vue')
@@ -172,6 +173,7 @@ const routes = [
         path: '/student-request',
         name: 'student-request',
         component: () => import('../views/student/StudentDashRequest.vue')
+
       }
     ]
   },
