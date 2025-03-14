@@ -58,6 +58,11 @@ const routes = [
         component: () => import('../views/student/StudentManagement.vue')
       },
       {
+        path: '/settings-management',
+        name: 'SettingsManagement',
+        component: () => import('../views/settings/SettingsManagement.vue')
+      },
+      {
         path: '/entrance-exam/results',
         name: 'exam-results',
         component: ExamResults,
