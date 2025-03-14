@@ -51,6 +51,10 @@
         v-if="currentTab === 'graduation'"
         :departments="departments"
       />
+      <StudentRequest
+        v-if="currentTab === 'studentRequest'"
+        :departments="departments"
+      />
     </div>
   </div>
 </template>
@@ -67,6 +71,7 @@ import AcademicProgress from './AcademicProgress.vue'
 import Graduation from './Graduation.vue'
 import { departmentService } from '@/api/services/index'
 import StudentCourses from './StudentCourses.vue'
+import StudentRequest from './StudentRequest.vue'
 
 export default {
   name: 'StudentManagement',
@@ -79,7 +84,8 @@ export default {
     GradeManagement,
     AcademicProgress,
     Graduation,
-    StudentCourses
+    StudentCourses,
+    StudentRequest
   },
 
   setup() {
@@ -96,7 +102,8 @@ export default {
       { id: 'attendance', name: 'Attendance' },
       { id: 'grades', name: 'Grades' },
       { id: 'progress', name: 'Academic Progress' },
-      { id: 'graduation', name: 'Graduation' }
+      { id: 'graduation', name: 'Graduation' },
+      { id: 'studentRequest', name: 'StudentRequest' },
     ]
 
     const loadDepartments = async () => {
