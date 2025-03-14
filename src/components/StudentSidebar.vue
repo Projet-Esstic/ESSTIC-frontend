@@ -108,7 +108,8 @@ export default {
     const menuItems = [
       { path: '/courses', name: 'Courses', meta: { title: 'Courses', icon: 'school' } },
       { path: '/results', name: 'Results', meta: { title: 'Results', icon: 'school' } },
-      { path: '/settings', name: 'Settings', meta: { title: 'Settings', icon: 'school' } }
+      { path: '/settings', name: 'Settings', meta: { title: 'Settings', icon: 'school' } },
+      { path: '/request', name: 'Request', meta: { title: 'Request', icon: 'school' } }
     ]
 
     const toggleSidebar = () => {

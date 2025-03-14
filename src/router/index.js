@@ -143,7 +143,11 @@ const routes = [
         name: 'settings',
         component: () => import('../views/student/StudentSettings.vue')
       },
-     
+      {
+        path: '/request',
+        name: 'request',
+        component: () => import('../views/student/StudentRequest.vue')
+      }
     ]
   },
   // Public routes

@@ -9,7 +9,7 @@
 
     <!-- Filters and Controls -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
           <select 
@@ -24,6 +24,29 @@
             >
               {{ dept.name }}
             </option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Region</label>
+          <select 
+            v-model="selectedRegion"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          >
+            <option value="">All Regions</option>
+            <option v-for="region in regions" :key="region" :value="region">
+              {{ region }}
+            </option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gender</label>
+          <select 
+            v-model="selectedGender"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          >
+            <option value="">All Genders</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
           </select>
         </div>
         <div>
@@ -192,11 +215,15 @@ export default {
     const candidates = ref([])
     const courses = ref([])
     const selectedDepartment = ref('')
+    const selectedRegion = ref('')
+    const selectedGender = ref('')
     const passingAverage = ref(10)
     const distributionChart = ref(null)
     const fieldChart = ref(null)
     const distributionChartInstance = ref(null)
     const fieldChartInstance = ref(null)
+
+    const regions = ['Centre', 'Littoral', 'North West', 'South West', 'West', 'Adamawa', 'East', 'Far North', 'North', 'South']
 
     // Computed properties
     const filteredCandidates = computed(() => {
@@ -208,8 +235,16 @@ export default {
         const matchesDepartment = selectedDepartment.value 
           ? candidate.fieldOfStudy === selectedDepartment.value 
           : true;
+
+        // Apply region filter
+        const matchesRegion = selectedRegion.value
+          ? candidate.user?.region === selectedRegion.value
+          : true;
         
-        return matchesDepartment;
+        // Apply gender filter
+        const matchesGender = selectedGender.value === '' || candidate.user?.gender === selectedGender.value
+        
+        return matchesDepartment && matchesRegion && matchesGender;
       });
     })
 
@@ -344,6 +379,8 @@ export default {
 
     // Watchers for reactive updates
     watch(() => selectedDepartment.value, debouncedUpdateCharts)
+    watch(() => selectedRegion.value, debouncedUpdateCharts)
+    watch(() => selectedGender.value, debouncedUpdateCharts)
     watch(() => passingAverage.value, debouncedUpdateCharts)
     watch(() => candidates.value, debouncedUpdateCharts, { deep: true })
 
@@ -422,13 +459,13 @@ export default {
           {
             label: 'Passed',
             data: departments.value.map(dept => departmentResults[dept._id]?.passed || 0),
-            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+          backgroundColor: 'rgba(75, 192, 192, 0.5)',
             borderColor: 'rgb(75, 192, 192)'
           }, 
           {
             label: 'Failed',
             data: departments.value.map(dept => departmentResults[dept._id]?.failed || 0),
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+          backgroundColor: 'rgba(255, 99, 132, 0.5)',
             borderColor: 'rgb(255, 99, 132)'
           }
         ]
@@ -504,6 +541,8 @@ export default {
       candidates,
       courses,
       selectedDepartment,
+      selectedRegion,
+      selectedGender,
       passingAverage,
       filteredCandidates,
       totalCandidates,
@@ -517,7 +556,8 @@ export default {
       getFieldName,
       exportResults,
       handlePassingAverageInput,
-      generateRegistrationNumber
+      generateRegistrationNumber,
+      regions
     }
   }
 }
