@@ -3,6 +3,8 @@ export const API_URL = 'http://localhost:5000/api'
 // process.env.VUE_APP_API_URL ||
 // API endpoints
 export const ENDPOINTS = {
+  // Absence Requests
+  ABSENCE_REQUESTS: `${API_URL}/absence-requests`,
   // Candidates
   CANDIDATES: `${API_URL}/candidates`,
   CANDIDATE_BY_ID: (id) => `${API_URL}/candidates/${id}`,
