@@ -1,6 +1,6 @@
 <template>
   <div class="text-center p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-    <h1 class="text-2xl text-left font-bold text-primary-light dark:text-white mb-8">
+    <h1 class="text-2xl text-left font-bold text-black dark:text-white mb-8">
       ESSTIC Academic Progress Tracker
     </h1>
 

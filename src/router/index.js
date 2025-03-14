@@ -78,7 +78,12 @@ const routes = [
         meta: {
           title: 'Navigation'
         }
-      }
+      },
+      {
+        path: '/request',
+        name: 'request',
+        component: () => import('../views/student/StudentRequest.vue')
+      },
     ]
   },
   {
@@ -148,10 +153,11 @@ const routes = [
         name: 'settings',
         component: () => import('../views/student/StudentSettings.vue')
       },
+     
       {
-        path: '/request',
-        name: 'request',
-        component: () => import('../views/student/StudentRequest.vue')
+        path: '/student-request',
+        name: 'student-request',
+        component: () => import('../views/student/StudentDashRequest.vue')
       }
     ]
   },
