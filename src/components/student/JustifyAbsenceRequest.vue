@@ -66,7 +66,7 @@
             class="hidden"
             ref="fileInput"
           />
-          <button type="button" @click="triggerFileInput" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition duration-150 ease-in-out">
+          <button type="button" @click="triggerFileInput" class="px-4 py-2 hover:text-white bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition duration-150 ease-in-out">
             Choose File
           </button>
           <span class="ml-2 text-sm text-gray-600 dark:text-gray-300">{{ uploadedFileName || 'No file chosen' }}</span>
@@ -77,8 +77,14 @@
           <canvas v-else ref="pdfCanvas" class="w-full h-auto border rounded-md shadow-md"></canvas>
         </div>
       </div>
-     
-      <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-150 ease-in-out">Submit Absence Request</button>
+      <div class="flex justify-between">
+        <button type="button" @click="resetForm" class="px-4 py-2 bg-gray-300 text-black hover:text-white rounded-md">
+          Reset Form
+        </button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+          Submit Leave Request
+        </button>
+      </div>
     </form>
   </div>
 </template>
@@ -114,6 +120,19 @@ export default {
 
     const triggerFileInput = () => {
       fileInput.value.click();
+    };
+
+      // Reset form function
+      const resetForm = () => {
+        absenceDate.value = '';
+        isExamination.value = '';
+        courses.value = '';
+        selectedCourse.value = '';
+        uploadedFile.value = null;
+        uploadedFileName.value = '';
+        filePreview.value = null;
+        showErrors.value = false;
+        reason.value = '';
     };
 
     const handleFileUpload = (event) => {
@@ -217,7 +236,8 @@ export default {
       triggerFileInput,
       handleFileUpload,
       fetchCourses,
-      submitAbsenceRequest
+      submitAbsenceRequest,
+      resetForm
     };
   }
 };
