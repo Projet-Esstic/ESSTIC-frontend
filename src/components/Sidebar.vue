@@ -38,13 +38,24 @@
         <div class="mt-4">
           <div v-if="!collapsed" class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase">Modules</div>
           <div class="space-y-1 px-2">
-            <router-link v-for="route in menuItems" :key="route.path" :to="route.path"
-              class="relative flex items-center py-2 px-2 rounded-lg transition-colors text-sm group"
-              :class="[route.name === currentRoute.name ? 'bg-blue-600' : 'hover:bg-gray-700']">
-              <span class="material-icons text-lg">{{ route.meta.icon }}</span>
-              <span v-if="!collapsed" class="ml-3">{{ route.meta.title }}</span>
-              <span v-if="collapsed" class="tooltip">{{ route.meta.title }}</span>
-            </router-link>
+            <!-- Loading Spinner when permissions are not yet fetched -->
+            <template v-if="loading">
+              <div class="flex justify-center items-center py-2">
+                <span class="material-icons animate-spin">refresh</span>
+                <span class="ml-2 text-gray-400">Loading permissions...</span>
+              </div>
+            </template>
+
+            <!-- Menu Items -->
+            <template v-else>
+              <router-link v-for="route in menuItems" :key="route.path" :to="route.path"
+                class="relative flex items-center py-2 px-2 rounded-lg transition-colors text-sm group"
+                :class="[route.name === currentRoute.name ? 'bg-blue-600' : 'hover:bg-gray-700']">
+                <span class="material-icons text-lg">{{ route.meta.icon }}</span>
+                <span v-if="!collapsed" class="ml-3">{{ route.meta.title }}</span>
+                <span v-if="collapsed" class="tooltip">{{ route.meta.title }}</span>
+              </router-link>
+            </template>
           </div>
         </div>
 
@@ -60,15 +71,14 @@
     </div>
 
     <!-- Overlay for mobile -->
-    <div v-if="isMobileOpen" class="fixed inset-0 bg-black bg-opacity-50 md:hidden z-20" @click="closeMobileSidebar">
-    </div>
+    <div v-if="isMobileOpen" class="fixed inset-0 bg-black bg-opacity-50 md:hidden z-20" @click="closeMobileSidebar"></div>
   </div>
 </template>
 
 <script>
-import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { authService } from '@/api/services/index'
+import { authService } from '@/api/services/index';
+import axios from '../api/client.js';
+import { ENDPOINTS } from '../api/config.js';
 
 export default {
   name: 'Sidebar',
@@ -78,64 +88,62 @@ export default {
       default: false
     }
   },
-  setup(props, { emit }) {
-    const route = useRoute()
-    const isMobileOpen = ref(false)
-
-    const currentRoute = computed(() => route)
-    const menuItems = [
-
-      { path: '/entrance-exam', name: 'EntranceExam', meta: { title: 'Entrance Exam', icon: 'assignment' } },
-      { path: '/student-management', name: 'StudentManagement', meta: { title: 'Student Management', icon: 'people' } },
-      { path: '/personnel', name: 'PersonnelManagement', meta: { title: 'Gestion du Personnel', icon: 'people' } },
-      { path: '/settings-management', name: 'SettingsManagement', meta: { title: 'Settings', icon: 'people' } },
-    ]
-
-    const toggleSidebar = () => {
-      emit('toggle')
-      if (isMobileOpen.value) isMobileOpen.value = false
-    }
-
-    const closeMobileSidebar = () => {
-      isMobileOpen.value = false
-    }
-
+  setup() {
     return {
-      toggleSidebar,
-      isMobileOpen,
-      menuItems,
-      currentRoute,
-      closeMobileSidebar
+      userPermission: [],  // For storing user permissions
+      menuItems: [],       // For storing filtered menu items based on permissions
+      isMobileOpen: false, // For controlling the mobile sidebar
+      allMenuItems: [
+        { path: '/entrance-exam', name: 'ExamenEntree', meta: { title: 'Examen d\'Entrée', icon: 'assignment' } },
+        { path: '/student-management', name: 'GestionEtudiants', meta: { title: 'Gestion des Étudiants', icon: 'people' } },
+        { path: '/personnel', name: 'GestionPersonnel', meta: { title: 'Gestion du Personnel', icon: 'people' } },
+        { path: '/settings-management', name: 'GestionParametres', meta: { title: 'Paramètres', icon: 'settings' } }
+      ],
+      loading: true,       // Loading state to show when permissions are being fetched
+    };
+  },
+  computed: {
+    currentRoute() {
+      return this.$route;
     }
   },
+  created() {
+    this.fetchPermissions();
+  },
   methods: {
+    async fetchPermissions() {
+      try {
+        const user = await authService.getUserRole();
+        console.log(user);
+        const response = await axios(ENDPOINTS.ROLES_PERMISSION);
+        const data = response.data;
+        console.log("response.data", response.data);
+
+        if (data && data.permissions) {
+          this.userPermission = data.permissions;
+
+          // Filter the menu items based on the user's permissions
+          this.menuItems = this.allMenuItems.filter(item =>
+            this.userPermission?.read?.includes(item.name)
+          );
+        }
+      } catch (error) {
+        console.error('Failed to fetch user roles:', error);
+      } finally {
+        this.loading = false; // Set loading to false once data is fetched
+      }
+    },
+    toggleSidebar() {
+      this.$emit('toggle');
+      if (this.isMobileOpen) this.isMobileOpen = false;
+    },
+    closeMobileSidebar() {
+      this.isMobileOpen = false;
+    },
     async logOut() {
-      await authService.logout()
-      this.$router.push('/login')
+      await authService.logout();
+      this.$router.push('/login');
     }
   }
-}
+};
 </script>
-
-<style scoped>
-.tooltip {
-  position: absolute;
-  left: 3.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 6px 10px;
-  border-radius: 4px;
-  white-space: nowrap;
-  font-size: 0.875rem;
-  opacity: 0;
-  transition: opacity 0.2s ease-in-out;
-  pointer-events: none;
-  z-index: 50;
-}
-
-.group:hover .tooltip {
-  opacity: 1;
-}
-</style>
