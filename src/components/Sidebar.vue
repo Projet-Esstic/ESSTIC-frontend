@@ -66,9 +66,9 @@
 </template>
 
 <script>
-import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { authService } from '@/api/services/index'
+import { authService } from '@/api/services/index';
+import axios from '../api/client.js';
+import { ENDPOINTS } from '../api/config.js';
 
 export default {
   name: 'Sidebar',
@@ -78,43 +78,63 @@ export default {
       default: false
     }
   },
-  setup(props, { emit }) {
-    const route = useRoute()
-    const isMobileOpen = ref(false)
-
-    const currentRoute = computed(() => route)
-    const menuItems = [
-      { path: '/entrance-exam', name: 'EntranceExam', meta: { title: 'Entrance Exam', icon: 'assignment' } },
-      { path: '/student-management', name: 'StudentManagement', meta: { title: 'Student Management', icon: 'people' } },
-      { path: '/personnel', name: 'PersonnelManagement', meta: { title: 'Gestion du Personnel', icon: 'people' } },
-      { path: '/settings-management', name: 'SettingsManagement', meta: { title: 'Settings', icon: 'people' } },
-    ]
-
-    const toggleSidebar = () => {
-      emit('toggle')
-      if (isMobileOpen.value) isMobileOpen.value = false
-    }
-
-    const closeMobileSidebar = () => {
-      isMobileOpen.value = false
-    }
-
+  data() {
     return {
-      toggleSidebar,
-      isMobileOpen,
-      menuItems,
-      currentRoute,
-      closeMobileSidebar
+      userPermission: [],  // For storing user permissions
+      menuItems: [],       // For storing filtered menu items based on permissions
+      isMobileOpen: false, // For controlling the mobile sidebar
+      allMenuItems: [
+        { path: '/entrance-exam', name: 'ExamenEntree', meta: { title: 'Examen d\'Entrée', icon: 'assignment' } },
+        { path: '/student-management', name: 'GestionEtudiants', meta: { title: 'Gestion des Étudiants', icon: 'people' } },
+        { path: '/personnel', name: 'GestionPersonnel', meta: { title: 'Gestion du Personnel', icon: 'people' } },
+        { path: '/settings-management', name: 'GestionParametres', meta: { title: 'Paramètres', icon: 'settings' } }
+      ],
+    };
+  },
+  computed: {
+    currentRoute() {
+      return this.$route;
     }
   },
+  created() {
+    this.fetchPermissions();
+  },
   methods: {
+    async fetchPermissions() {
+      try {
+        const user = await authService.getUserRole();
+        console.log(user);
+        const response = await axios(ENDPOINTS.ROLES_PERMISSION);
+        const data = response.data;
+        console.log("response.data", response.data);
+
+        if (data && data.permissions) {
+          this.userPermission = data.permissions;
+
+          // Filter the menu items based on the user's permissions
+          this.menuItems = this.allMenuItems.filter(item =>
+            this.userPermission?.read?.includes(item.name)
+          );
+        }
+      } catch (error) {
+        console.error('Failed to fetch user roles:', error);
+      }
+    },
+    toggleSidebar() {
+      this.$emit('toggle');
+      if (this.isMobileOpen) this.isMobileOpen = false;
+    },
+    closeMobileSidebar() {
+      this.isMobileOpen = false;
+    },
     async logOut() {
-      await authService.logout()
-      this.$router.push('/login')
+      await authService.logout();
+      this.$router.push('/login');
     }
   }
-}
+};
 </script>
+
 
 <style scoped>
 .tooltip {

@@ -72,12 +72,13 @@
 import { ref, onMounted } from 'vue';
 import axios from '../../api/client.js';
 import { ENDPOINTS } from '../../api/config.js';
+import { PagesList } from '../../api/pages.js';
 
 export default {
     setup() {
         const roles = ref([]);
         const permissions = ref([]);
-        const pages = ref(['Student', 'Mark', 'dashboard', 'settings']);
+        const pages = ref(PagesList);
         const isModalOpen = ref(false);
         const editingRole = ref(null);
         const form = ref({ name: '', permissions: {}, status: true });
