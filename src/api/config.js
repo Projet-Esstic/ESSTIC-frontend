@@ -8,6 +8,9 @@ export const ENDPOINTS = {
   CANDIDATE_BY_ID: (id) => `${API_URL}/candidates/${id}`,
   CANDIDATES_BY_FIELD: (fieldId) => `${API_URL}/candidates/field/${fieldId}`,
   
+  STUDENTS: `${API_URL}/students`,
+
+
   // Courses
   COURSES: `${API_URL}/courses`,
   COURSE_BY_ID: (id) => `${API_URL}/courses/${id}`,

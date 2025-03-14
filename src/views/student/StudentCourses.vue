@@ -18,18 +18,7 @@
         </select>
       </div>
 
-      <!-- Student Selection (filtered by department) -->
-      <div>
-        <label for="student-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select
-          Student</label>
-        <select id="student-select" v-model="selectedStudentId"
-          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark bg-white dark:bg-gray-800 text-text-light dark:text-text-dark">
-          <option value="all">All Students</option>
-          <option v-for="student in filteredStudents" :key="student.id" :value="student.id">
-            {{ student.name }} ({{ student.id }})
-          </option>
-        </select>
-      </div>
+
     </div>
 
     <!-- Search and Semester Filter -->
@@ -196,7 +185,7 @@
     <div v-if="filteredRegistrations.length > 0" class="mt-6 flex justify-between items-center">
       <div class="text-sm text-gray-700 dark:text-gray-300">
         Showing <span class="font-medium">{{ paginationStart }}</span> to <span class="font-medium">{{ paginationEnd
-          }}</span> of <span class="font-medium">{{ filteredRegistrations.length }}</span> registrations
+        }}</span> of <span class="font-medium">{{ filteredRegistrations.length }}</span> registrations
       </div>
       <div class="flex space-x-2">
         <button @click="currentPage = Math.max(1, currentPage - 1)" :disabled="currentPage === 1"
@@ -269,7 +258,7 @@
 
                 <div class="text-sm text-gray-500 dark:text-gray-400">Department</div>
                 <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ selectedRegistration.departmentName
-                  }}</div>
+                }}</div>
               </div>
             </div>
 
@@ -381,7 +370,7 @@
               required @change="updateCourseDetails">
               <option disabled value="">Select a course</option>
               <option v-for="course in availableCourses" :key="course.id" :value="course.id">
-                {{ course.name }} ({{ course.code }}) - {{ course.credits }} credits
+                {{ course?.name }} ({{ course?.code }}) - {{ course?.credits }} credits
               </option>
             </select>
           </div>
@@ -422,7 +411,17 @@
   </div>
 </template>
 <script>
+import axios from '../../api/client.js';
+import { ENDPOINTS } from '../../api/config.js';
+
 export default {
+  props: {
+    departments: {
+      type: Array,
+      required: true,
+      default: () => []
+    }
+  },
   data() {
     return {
       // Filter and search states
@@ -454,13 +453,6 @@ export default {
       },
 
       // Data
-      departments: [
-        { id: 'CS', name: 'Computer Science' },
-        { id: 'ENG', name: 'Engineering' },
-        { id: 'BUS', name: 'Business' },
-        { id: 'MED', name: 'Medical' },
-        { id: 'ART', name: 'Arts & Humanities' }
-      ],
 
       students: [
         { id: 'STU001', name: 'John Smith', departmentId: 'CS' },
@@ -475,20 +467,7 @@ export default {
         { id: 'STU010', name: 'Amanda Garcia', departmentId: 'ART' }
       ],
 
-      courses: [
-        { id: 'CS101', code: 'CS101', name: 'Introduction to Programming', credits: 3, departmentId: 'CS' },
-        { id: 'CS201', code: 'CS201', name: 'Data Structures', credits: 4, departmentId: 'CS' },
-        { id: 'CS301', code: 'CS301', name: 'Algorithms', credits: 4, departmentId: 'CS' },
-        { id: 'ENG101', code: 'ENG101', name: 'Engineering Fundamentals', credits: 3, departmentId: 'ENG' },
-        { id: 'ENG201', code: 'ENG201', name: 'Circuit Analysis', credits: 4, departmentId: 'ENG' },
-        { id: 'ENG301', code: 'ENG301', name: 'Thermodynamics', credits: 4, departmentId: 'ENG' },
-        { id: 'BUS101', code: 'BUS101', name: 'Business Administration', credits: 3, departmentId: 'BUS' },
-        { id: 'BUS201', code: 'BUS201', name: 'Financial Accounting', credits: 3, departmentId: 'BUS' },
-        { id: 'MED101', code: 'MED101', name: 'Human Anatomy', credits: 4, departmentId: 'MED' },
-        { id: 'MED201', code: 'MED201', name: 'Physiology', credits: 4, departmentId: 'MED' },
-        { id: 'ART101', code: 'ART101', name: 'Art History', credits: 3, departmentId: 'ART' },
-        { id: 'ART201', code: 'ART201', name: 'Creative Writing', credits: 3, departmentId: 'ART' }
-      ],
+      courses: [],
 
       registrations: [
         {
@@ -592,14 +571,6 @@ export default {
   },
 
   computed: {
-    // Students filtered by selected department
-    filteredStudents() {
-      if (this.selectedDepartmentId === 'all') {
-        return this.students;
-      }
-      return this.students.filter(student => student.departmentId === this.selectedDepartmentId);
-    },
-
     // Courses available for registration (exclude already registered courses by selected student)
     availableCourses() {
       if (!this.registrationForm.studentId) {
@@ -618,16 +589,16 @@ export default {
       return this.registrations.map(reg => {
         const student = this.students.find(s => s.id === reg.studentId);
         const course = this.courses.find(c => c.id === reg.courseId);
-        const department = this.departments.find(d => d.id === student.departmentId);
+        // const department = this.departments.find(d => d.id === student.departmentId);
 
         return {
           ...reg,
-          studentName: student.name,
-          courseCode: course.code,
-          courseName: course.name,
-          credits: course.credits,
-          departmentId: student.departmentId,
-          departmentName: department.name
+          studentName: student?.name,
+          courseCode: course?.code,
+          courseName: course?.name,
+          credits: course?.credits,
+          departmentId: student?.departmentId,
+          departmentName: ""
         };
       });
     },
@@ -853,7 +824,17 @@ export default {
 
       // Close the modal
       this.showAddModal = false;
-    }
+    },
+    async fetchCourse() {
+      try {
+        const response = await axios.get(ENDPOINTS.COURSES);
+        this.courses = response.data;
+
+      } catch (error) {
+        console.error('Erreur lors de la récupération des départements :', error);
+      }
+    },
+
   }
 };
 
