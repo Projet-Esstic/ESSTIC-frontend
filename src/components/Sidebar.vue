@@ -38,13 +38,24 @@
         <div class="mt-4">
           <div v-if="!collapsed" class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase">Modules</div>
           <div class="space-y-1 px-2">
-            <router-link v-for="route in menuItems" :key="route.path" :to="route.path"
-              class="relative flex items-center py-2 px-2 rounded-lg transition-colors text-sm group"
-              :class="[route.name === currentRoute.name ? 'bg-blue-600' : 'hover:bg-gray-700']">
-              <span class="material-icons text-lg">{{ route.meta.icon }}</span>
-              <span v-if="!collapsed" class="ml-3">{{ route.meta.title }}</span>
-              <span v-if="collapsed" class="tooltip">{{ route.meta.title }}</span>
-            </router-link>
+            <!-- Loading Spinner when permissions are not yet fetched -->
+            <template v-if="loading">
+              <div class="flex justify-center items-center py-2">
+                <span class="material-icons animate-spin">refresh</span>
+                <span class="ml-2 text-gray-400">Loading permissions...</span>
+              </div>
+            </template>
+
+            <!-- Menu Items -->
+            <template v-else>
+              <router-link v-for="route in menuItems" :key="route.path" :to="route.path"
+                class="relative flex items-center py-2 px-2 rounded-lg transition-colors text-sm group"
+                :class="[route.name === currentRoute.name ? 'bg-blue-600' : 'hover:bg-gray-700']">
+                <span class="material-icons text-lg">{{ route.meta.icon }}</span>
+                <span v-if="!collapsed" class="ml-3">{{ route.meta.title }}</span>
+                <span v-if="collapsed" class="tooltip">{{ route.meta.title }}</span>
+              </router-link>
+            </template>
           </div>
         </div>
 
@@ -60,8 +71,7 @@
     </div>
 
     <!-- Overlay for mobile -->
-    <div v-if="isMobileOpen" class="fixed inset-0 bg-black bg-opacity-50 md:hidden z-20" @click="closeMobileSidebar">
-    </div>
+    <div v-if="isMobileOpen" class="fixed inset-0 bg-black bg-opacity-50 md:hidden z-20" @click="closeMobileSidebar"></div>
   </div>
 </template>
 
@@ -89,6 +99,7 @@ export default {
         { path: '/personnel', name: 'GestionPersonnel', meta: { title: 'Gestion du Personnel', icon: 'people' } },
         { path: '/settings-management', name: 'GestionParametres', meta: { title: 'Paramètres', icon: 'settings' } }
       ],
+      loading: true,       // Loading state to show when permissions are being fetched
     };
   },
   computed: {
@@ -118,6 +129,8 @@ export default {
         }
       } catch (error) {
         console.error('Failed to fetch user roles:', error);
+      } finally {
+        this.loading = false; // Set loading to false once data is fetched
       }
     },
     toggleSidebar() {
@@ -134,27 +147,3 @@ export default {
   }
 };
 </script>
-
-
-<style scoped>
-.tooltip {
-  position: absolute;
-  left: 3.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 6px 10px;
-  border-radius: 4px;
-  white-space: nowrap;
-  font-size: 0.875rem;
-  opacity: 0;
-  transition: opacity 0.2s ease-in-out;
-  pointer-events: none;
-  z-index: 50;
-}
-
-.group:hover .tooltip {
-  opacity: 1;
-}
-</style>
