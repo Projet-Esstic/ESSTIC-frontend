@@ -1,9 +1,6 @@
 <template>
     <div class="text-center">
-      <h1 class="text-4xl font-bold text-primary-light dark:text-primary-dark mb-8">
-        Informations personnelles
-      </h1>
-      <StudentInformation></StudentInformation>
+      <StudentInformation/>
     </div>
   </template>
   
