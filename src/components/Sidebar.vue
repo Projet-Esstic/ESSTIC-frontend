@@ -41,14 +41,14 @@
             <!-- Loading Spinner when permissions are not yet fetched -->
             <template v-if="loading">
               <div class="flex justify-center items-center py-2">
-                <span class="material-icons animate-spin">refresh</span>
-                <span class="ml-2 text-gray-400">Loading permissions...</span>
+                <div class="animate-spin h-5 w-5 border-2 border-blue-500 rounded-full border-t-transparent"></div>
+                <span v-if="!collapsed" class="ml-2 text-gray-400">Loading permissions...</span>
               </div>
             </template>
 
             <!-- Menu Items -->
             <template v-else>
-              <router-link v-for="route in menuItems" :key="route.path" :to="route.path"
+              <router-link v-for="route in allMenuItems" :key="route.path" :to="route.path"
                 class="relative flex items-center py-2 px-2 rounded-lg transition-colors text-sm group"
                 :class="[route.name === currentRoute.name ? 'bg-blue-600' : 'hover:bg-gray-700']">
                 <span class="material-icons text-lg">{{ route.meta.icon }}</span>
@@ -88,7 +88,7 @@ export default {
       default: false
     }
   },
-  setup() {
+  data() {
     return {
       userPermission: [],  // For storing user permissions
       menuItems: [],       // For storing filtered menu items based on permissions
@@ -121,11 +121,6 @@ export default {
 
         if (data && data.permissions) {
           this.userPermission = data.permissions;
-
-          // Filter the menu items based on the user's permissions
-          this.menuItems = this.allMenuItems.filter(item =>
-            this.userPermission?.read?.includes(item.name)
-          );
         }
       } catch (error) {
         console.error('Failed to fetch user roles:', error);
